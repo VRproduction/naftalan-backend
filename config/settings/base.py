@@ -28,8 +28,10 @@ DJANGO_APPS = [
 CUSTOM_APPS = [
     'apps.pages.home.apps.HomeConfig',
     'apps.pages.about.apps.AboutConfig',
+    'apps.pages.blogs.apps.BlogsConfig',
     'apps.pages.how_to_come.apps.HowToComeConfig',
     'apps.sanatoriums.apps.SanatoriumsConfig',
+
 
 ]
 
@@ -38,6 +40,7 @@ THIRD_PARTY_APPS = [
     'file_validator',
     "corsheaders",
     'drf_yasg',
+    'nested_admin',
 
     'rest_framework',
     'rest_framework.authtoken',

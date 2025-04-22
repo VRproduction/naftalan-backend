@@ -3,7 +3,6 @@ from django.contrib.auth.models import User
 from django.utils.text import slugify
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils.translation import gettext_lazy as _
-import nested_admin
 
 from ckeditor_uploader.fields import RichTextUploadingField
 
@@ -36,6 +35,7 @@ class Sanatorium(models.Model):
     address = models.CharField(_("Ünvan"), max_length=255)
     map_iframe = models.TextField(_("Xəritə iframe"))
     is_active = models.BooleanField(_("Aktivdir"), default=True)
+    in_home = models.BooleanField(_("Ana səhifədə görünsün?"), default = False)
     created_at = models.DateTimeField(_("Yaradılma tarixi"), auto_now_add=True)
     updated_at = models.DateTimeField(_("Yenilənmə tarixi"), auto_now=True)
     
@@ -77,7 +77,7 @@ class SanatoriumImage(models.Model):
 
 class Facility(models.Model):
     name = models.CharField(_("Ad"), max_length=100)
-    icon = models.CharField(_("İkon"), max_length=50, blank=True, help_text=_("İkon adı (İnterfeys üçün)"))
+    icon = models.FileField(_("İkon"), upload_to="facility", blank=True, null = True, help_text=_("İkon adı (İnterfeys üçün)"))
     
     def __str__(self):
         return self.name
@@ -137,14 +137,14 @@ class RoomImage(models.Model):
 
 class Review(models.Model):
     sanatorium = models.ForeignKey(Sanatorium, on_delete=models.CASCADE, related_name='reviews', verbose_name=_("Sanatorium"))
-    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name=_("İstifadəçi"))
+    full_name = models.CharField(max_length=256)
     rating = models.PositiveSmallIntegerField(_("Reytinq"), validators=[MinValueValidator(1), MaxValueValidator(5)])
     content = models.TextField(_("Məzmun"))
     date = models.DateField(_("Tarix"), auto_now_add=True)
     is_published = models.BooleanField(_("Dərc olunub"), default=True)
     
     def __str__(self):
-        return f"Review by {self.user.username} for {self.sanatorium.name}"
+        return f"Review by {self.full_name} for {self.sanatorium.name}"
     
     class Meta:
         ordering = ['-date']

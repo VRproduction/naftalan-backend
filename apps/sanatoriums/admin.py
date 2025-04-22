@@ -6,6 +6,8 @@ from .models import (
     RoomType, RoomImage, Review
 )
 
+import nested_admin
+
 # Common Media class for all TranslationAdmin
 class TranslationMedia:
     class Media:
@@ -18,34 +20,44 @@ class TranslationMedia:
             'screen': ('modeltranslation/css/tabbed_translation_fields.css',),
         }
 
+        
+
 
 # Inline admin classes
-class SanatoriumImageInline(admin.TabularInline):
+class SanatoriumImageInline(nested_admin.NestedTabularInline):
     model = SanatoriumImage
     extra = 1
     fields = ('image', 'is_main', 'priority')
     verbose_name = "Şəkil"
     verbose_name_plural = "Şəkillər"
 
-class SanatoriumFacilityInline(admin.TabularInline):
+class SanatoriumFacilityInline(nested_admin.NestedTabularInline):
     model = SanatoriumFacility
     extra = 1
     verbose_name = "Xidmət"
     verbose_name_plural = "Xidmətlər"
 
-class RoomTypeInline(TranslationStackedInline, TranslationMedia):
-    model = RoomType
-    extra = 0
-    verbose_name = "Otaq növü"
-    verbose_name_plural = "Otaq növləri"
+class ReviewInline(nested_admin.NestedStackedInline,  TranslationStackedInline,  TranslationMedia):
+    model = Review
+    extra = 1
+    verbose_name = "Rəy"
+    verbose_name_plural = "Müştəri rəyləri"
 
-class RoomImageInline(admin.TabularInline):
+
+class RoomImageInline(nested_admin.NestedTabularInline):
     model = RoomImage
     extra = 1
     fields = ('image', 'priority')
     verbose_name = "Otaq şəkli"
     verbose_name_plural = "Otaq şəkilləri"
 
+
+class RoomTypeInline(nested_admin.NestedStackedInline, TranslationStackedInline,  TranslationMedia):
+    model = RoomType
+    extra = 0
+    inlines = [RoomImageInline]
+    verbose_name = "Otaq növü"
+    verbose_name_plural = "Otaq növləri"
 
 # Admin classes with translation
 @admin.register(Location)
@@ -61,7 +73,7 @@ class LocationAdmin(TranslationAdmin, TranslationMedia):
     )
 
 @admin.register(Sanatorium)
-class SanatoriumAdmin(TranslationAdmin, TranslationMedia):
+class SanatoriumAdmin(nested_admin.NestedModelAdmin, TranslationAdmin, TranslationMedia):
     list_display = ('name', 'location', 'rating', 'price', 'is_active')
     list_filter = ('is_active', 'location', 'rating')
     search_fields = ('name', 'description', 'address')
@@ -70,11 +82,12 @@ class SanatoriumAdmin(TranslationAdmin, TranslationMedia):
         SanatoriumImageInline, 
         SanatoriumFacilityInline,
         RoomTypeInline,
+        ReviewInline
     ]
     
     fieldsets = (
         ('Əsas məlumatlar', {
-            'fields': ('name', 'slug', 'location', 'location_type', 'short_description', 'is_active'),
+            'fields': ('name', 'slug', 'location', 'location_type', 'short_description', 'is_active', 'in_home'),
         }),
         ('Təsvir', {
             'fields': ('description', 'treatments'),
@@ -98,55 +111,3 @@ class FacilityAdmin(TranslationAdmin, TranslationMedia):
         }),
     )
 
-@admin.register(RoomType)
-class RoomTypeAdmin(TranslationAdmin, TranslationMedia):
-    list_display = ('name', 'sanatorium')
-    list_filter = ('sanatorium',)
-    search_fields = ('name', 'sanatorium__name')
-    inlines = [RoomImageInline]
-    
-    fieldsets = (
-        (None, {
-            'fields': ('sanatorium', 'name'),
-        }),
-    )
-
-@admin.register(Review)
-class ReviewAdmin(TranslationAdmin, TranslationMedia):
-    list_display = ('sanatorium', 'user', 'rating', 'date', 'is_published')
-    list_filter = ('rating', 'is_published', 'date')
-    search_fields = ('sanatorium__name', 'user__username', 'content')
-    
-    fieldsets = (
-        ('Rəy məlumatları', {
-            'fields': ('sanatorium', 'user', 'rating', 'content', 'is_published'),
-        }),
-    )
-
-# Regular admin classes
-@admin.register(SanatoriumImage)
-class SanatoriumImageAdmin(admin.ModelAdmin):
-    list_display = ('sanatorium', 'is_main', 'priority')
-    list_filter = ('is_main', 'sanatorium')
-    search_fields = ('sanatorium__name',)
-    
-    fieldsets = (
-        (None, {
-            'fields': ('sanatorium', 'image', 'is_main', 'priority'),
-        }),
-    )
-
-@admin.register(RoomImage)
-class RoomImageAdmin(admin.ModelAdmin):
-    list_display = ('room_type', 'priority')
-    list_filter = ('room_type__sanatorium',)
-    search_fields = ('room_type__name',)
-    
-    fieldsets = (
-        (None, {
-            'fields': ('room_type', 'image', 'priority'),
-        }),
-    )
-
-# Register the remaining models
-admin.site.register(SanatoriumFacility)

@@ -14,7 +14,7 @@ class RoomTypeTranslationOptions(TranslationOptions):
     fields = ('name',)
 
 class ReviewTranslationOptions(TranslationOptions):
-    fields = ('content',)
+    fields = ('full_name', 'content',)
 
 # Register models for translation
 translator.register(Location, LocationTranslationOptions)
