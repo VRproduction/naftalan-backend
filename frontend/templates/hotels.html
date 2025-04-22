@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Otellər | Naftalan Kurortu</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.css" />
+</head>
+<body>
+    <!-- Header Section -->
+    <header class="header">
+        <div class="top-bar">
+            <div class="container">
+                <div class="contact-info">
+                    <span><i class="fas fa-phone"></i> +994 50 123 45 67</span>
+                    <span><i class="fas fa-envelope"></i> info@naftalankurortu.az</span>
+                </div>
+                <div class="top-right">
+                    <div class="language-selector">
+                        <select>
+                            <option value="az">AZ</option>
+                            <option value="en">EN</option>
+                            <option value="ru">RU</option>
+                        </select>
+                    </div>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <nav class="navbar">
+            <div class="container">
+                <div class="logo">
+                    <a href="index.html">
+                        <img src="../images/logo.png" alt="Naftalan Kurortu Logo">
+                        <h1>Naftalan Kurortu</h1>
+                    </a>
+                </div>
+                <div class="nav-links">
+                    <a href="index.html">Ana Səhifə</a>
+                    <a href="hotels.html" class="active">Otellər</a>
+                    <a href="treatments.html">Müalicələr</a>
+                    <a href="gallery.html">Qalereya</a>
+                    <a href="blog.html">Blog</a>
+                    <a href="about.html">Haqqımızda</a>
+                    <a href="contact.html">Əlaqə</a>
+                </div>
+                <div class="mobile-menu-btn">
+                    <i class="fas fa-bars"></i>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Page Header -->
+    <section class="page-header">
+        <div class="container">
+            <h1>Otellər</h1>
+            <div class="breadcrumb">
+                <a href="index.html">Ana Səhifə</a> / <span>Otellər</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Hotels Section -->
+    <section class="featured-hotels">
+        <div class="container">
+            <div class="section-header">
+                <h2>Naftalanın Otelləri</h2>
+                <p>Naftalanın ən yaxşı otellərində rahat və sağlamlıq üçün ideal mühit</p>
+            </div>
+            
+            <div class="filter-options">
+                <button class="filter-btn active" data-filter="all">Hamısı</button>
+                <button class="filter-btn" data-filter="5star">5 Ulduzlu</button>
+                <button class="filter-btn" data-filter="4star">4 Ulduzlu</button>
+                <button class="filter-btn" data-filter="3star">3 Ulduzlu</button>
+            </div>
+            
+            <div class="hotel-grid">
+                <!-- Hotel Card 1 -->
+                <div class="hotel-card" data-category="5star">
+                    <img src="../images/hotels/chinar-hotel.jpg" alt="Chinar Hotel & Spa">
+                    <div class="hotel-info">
+                        <h3>Chinar Hotel & Spa</h3>
+                        <div class="rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div class="price">₼ 350 <span>/ gecə</span></div>
+                        <ul class="amenities">
+                            <li><i class="fas fa-wifi"></i> Pulsuz Wi-Fi</li>
+                            <li><i class="fas fa-swimming-pool"></i> Hovuz</li>
+                            <li><i class="fas fa-spa"></i> Spa və Sauna</li>
+                            <li><i class="fas fa-utensils"></i> Restoran</li>
+                        </ul>
+                        <a href="hotel-details.html" class="book-now">Rezervasiya Et</a>
+                    </div>
+                </div>
+                
+                <!-- Hotel Card 2 -->
+                <div class="hotel-card" data-category="5star">
+                    <img src="../images/hotels/gashalti-hotel.jpg" alt="Gashalti Health Hotel">
+                    <div class="hotel-info">
+                        <h3>Gashalti Health Hotel</h3>
+                        <div class="rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div class="price">₼ 300 <span>/ gecə</span></div>
+                        <ul class="amenities">
+                            <li><i class="fas fa-wifi"></i> Pulsuz Wi-Fi</li>
+                            <li><i class="fas fa-swimming-pool"></i> Hovuz</li>
+                            <li><i class="fas fa-spa"></i> Spa və Sauna</li>
+                            <li><i class="fas fa-utensils"></i> Restoran</li>
+                        </ul>
+                        <a href="hotel-details.html" class="book-now">Rezervasiya Et</a>
+                    </div>
+                </div>
+                
+                <!-- Hotel Card 3 -->
+                <div class="hotel-card" data-category="4star">
+                    <img src="../images/hotels/naftalan-sanatorium.jpg" alt="Naftalan Sanatorium">
+                    <div class="hotel-info">
+                        <h3>Naftalan Sanatorium</h3>
+                        <div class="rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="far fa-star"></i>
+                        </div>
+                        <div class="price">₼ 250 <span>/ gecə</span></div>
+                        <ul class="amenities">
+                            <li><i class="fas fa-wifi"></i> Pulsuz Wi-Fi</li>
+                            <li><i class="fas fa-swimming-pool"></i> Hovuz</li>
+                            <li><i class="fas fa-spa"></i> Spa və Sauna</li>
+                            <li><i class="fas fa-utensils"></i> Restoran</li>
+                        </ul>
+                        <a href="hotel-details.html" class="book-now">Rezervasiya Et</a>
+                    </div>
+                </div>
+                
+                <!-- Hotel Card 4 -->
+                <div class="hotel-card" data-category="4star">
+                    <img src="../images/hotels/sehrli-naftalan.jpg" alt="Sehrli Naftalan">
+                    <div class="hotel-info">
+                        <h3>Sehrli Naftalan</h3>
+                        <div class="rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="far fa-star"></i>
+                        </div>
+                        <div class="price">₼ 220 <span>/ gecə</span></div>
+                        <ul class="amenities">
+                            <li><i class="fas fa-wifi"></i> Pulsuz Wi-Fi</li>
+                            <li><i class="fas fa-swimming-pool"></i> Hovuz</li>
+                            <li><i class="fas fa-spa"></i> Spa və Sauna</li>
+                            <li><i class="fas fa-utensils"></i> Restoran</li>
+                        </ul>
+                        <a href="hotel-details.html" class="book-now">Rezervasiya Et</a>
+                    </div>
+                </div>
+                
+                <!-- Hotel Card 5 -->
+                <div class="hotel-card" data-category="3star">
+                    <img src="../images/hotels/mocuzeli-naftalan.jpg" alt="Möcüzəli Naftalan">
+                    <div class="hotel-info">
+                        <h3>Möcüzəli Naftalan</h3>
+                        <div class="rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="far fa-star"></i>
+                            <i class="far fa-star"></i>
+                        </div>
+                        <div class="price">₼ 180 <span>/ gecə</span></div>
+                        <ul class="amenities">
+                            <li><i class="fas fa-wifi"></i> Pulsuz Wi-Fi</li>
+                            <li><i class="fas fa-swimming-pool"></i> Hovuz</li>
+                            <li><i class="fas fa-spa"></i> Spa və Sauna</li>
+                            <li><i class="fas fa-utensils"></i> Restoran</li>
+                        </ul>
+                        <a href="hotel-details.html" class="book-now">Rezervasiya Et</a>
+                    </div>
+                </div>
+                
+                <!-- Hotel Card 6 -->
+                <div class="hotel-card" data-category="3star">
+                    <img src="../images/hotels/safa-sanatorium.jpg" alt="Şəfa Sanatoriyası">
+                    <div class="hotel-info">
+                        <h3>Şəfa Sanatoriyası</h3>
+                        <div class="rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="far fa-star"></i>
+                            <i class="far fa-star"></i>
+                        </div>
+                        <div class="price">₼ 150 <span>/ gecə</span></div>
+                        <ul class="amenities">
+                            <li><i class="fas fa-wifi"></i> Pulsuz Wi-Fi</li>
+                            <li><i class="fas fa-swimming-pool"></i> Hovuz</li>
+                            <li><i class="fas fa-spa"></i> Spa və Sauna</li>
+                            <li><i class="fas fa-utensils"></i> Restoran</li>
+                        </ul>
+                        <a href="hotel-details.html" class="book-now">Rezervasiya Et</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Booking Section -->
+    <section class="booking-section">
+        <div class="container">
+            <div class="booking-content">
+                <h2>Rezervasiya Et</h2>
+                <p>Naftalanın ən yaxşı otellərində rahat və sağlamlıq üçün ideal mühit</p>
+                <a href="contact.html" class="btn btn-primary">İndi Rezervasiya Et</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section about">
+                    <h3>Naftalan Kurortu</h3>
+                    <p>Azərbaycanın ən yaxşı müalicə kurortu. 70-dən çox xəstəliyin effektiv müalicəsi.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section links">
+                    <h3>Sürətli Keçidlər</h3>
+                    <ul>
+                        <li><a href="index.html">Ana Səhifə</a></li>
+                        <li><a href="hotels.html">Otellər</a></li>
+                        <li><a href="treatments.html">Müalicələr</a></li>
+                        <li><a href="gallery.html">Qalereya</a></li>
+                        <li><a href="blog.html">Blog</a></li>
+                        <li><a href="about.html">Haqqımızda</a></li>
+                        <li><a href="contact.html">Əlaqə</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section links">
+                    <h3>Otellər</h3>
+                    <ul>
+                        <li><a href="hotel-details.html">Chinar Hotel & Spa</a></li>
+                        <li><a href="hotel-details.html">Gashalti Health Hotel</a></li>
+                        <li><a href="hotel-details.html">Naftalan Sanatorium</a></li>
+                        <li><a href="hotel-details.html">Sehrli Naftalan</a></li>
+                        <li><a href="hotel-details.html">Möcüzəli Naftalan</a></li>
+                        <li><a href="hotel-details.html">Şəfa Sanatoriyası</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section newsletter">
+                    <h3>Yeniliklərə Abunə Olun</h3>
+                    <p>Ən son xəbərlər və təkliflər haqqında məlumat almaq üçün abunə olun.</p>
+                    <form class="newsletter-form">
+                        <input type="email" placeholder="E-poçt ünvanınız">
+                        <button type="submit"><i class="fas fa-paper-plane"></i></button>
+                    </form>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Naftalan Kurortu. Bütün hüquqlar qorunur.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Back to Top Button -->
+    <a href="#" class="back-to-top">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.js"></script>
+    <script src="../js/main.js"></script>
+</body>
+</html> 

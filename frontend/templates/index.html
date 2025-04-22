@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Naftalan Kurortu | Azərbaycan</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.css" />
+</head>
+<body>
+    <!-- Header Section -->
+    <header class="header">
+        <div class="top-bar">
+            <div class="container">
+                <div class="contact-info">
+                    <span><i class="fas fa-phone"></i> +994 50 123 45 67</span>
+                    <span><i class="fas fa-envelope"></i> info@naftalankurortu.az</span>
+                </div>
+                <div class="top-right">
+                    <div class="language-selector">
+                        <select>
+                            <option value="az">AZ</option>
+                            <option value="en">EN</option>
+                            <option value="ru">RU</option>
+                        </select>
+                    </div>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <nav class="navbar">
+            <div class="container">
+                <div class="logo">
+                    <a href="index.html">
+                        <img src="../images/logo.png" alt="Naftalan Kurortu Logo">
+                        <h1>Naftalan Kurortu</h1>
+                    </a>
+                </div>
+                <div class="nav-links">
+                    <a href="#home" class="active">Ana Səhifə</a>
+                    <a href="#hotels">Otellər</a>
+                    <a href="#treatments">Müalicələr</a>
+                    <a href="#gallery">Qalereya</a>
+                    <a href="#blog">Blog</a>
+                    <a href="#about">Haqqımızda</a>
+                    <a href="#contact">Əlaqə</a>
+                </div>
+                <div class="mobile-menu-btn">
+                    <i class="fas fa-bars"></i>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-slider swiper">
+            <div class="swiper-wrapper">
+                <!-- Slide 1 -->
+                <div class="swiper-slide" style="background-image: url('../images/slider/slide1.jpg');">
+                    <div class="slide-content">
+                        <h1>Naftalan Kurortu</h1>
+                        <p>Azərbaycanın ən yaxşı müalicə kurortu</p>
+                        <a href="about.html" class="btn btn-primary">Ətraflı</a>
+                    </div>
+                </div>
+                <!-- Slide 2 -->
+                <div class="swiper-slide" style="background-image: url('../images/slider/slide2.jpg');">
+                    <div class="slide-content">
+                        <h1>70-dən çox xəstəliyin effektiv müalicəsi</h1>
+                        <p>Naftalan nefti ilə müalicə</p>
+                        <a href="treatments.html" class="btn btn-primary">Müalicələr</a>
+                    </div>
+                </div>
+                <!-- Slide 3 -->
+                <div class="swiper-slide" style="background-image: url('../images/slider/slide3.jpg');">
+                    <div class="slide-content">
+                        <h1>Rahat və sağlamlıq üçün ideal mühit</h1>
+                        <p>5 ulduzlu otellər və müasir müalicə mərkəzləri</p>
+                        <a href="hotels.html" class="btn btn-primary">Otellər</a>
+                    </div>
+                </div>
+            </div>
+            <div class="swiper-pagination"></div>
+            <div class="swiper-button-next"></div>
+            <div class="swiper-button-prev"></div>
+        </div>
+        
+        <!-- Modern Search Section -->
+        <div class="search-section">
+            <div class="container">
+                <div class="search-box">
+                    <div class="search-header">
+                        <h2>Müalicə və Otel Axtarışı</h2>
+                        <p>Naftalanın ən yaxşı otellərində rahat və sağlamlıq üçün ideal mühit</p>
+                    </div>
+                    <form class="search-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="treatment-type">Müalicə Növü</label>
+                                <select id="treatment-type" class="form-control">
+                                    <option value="">Bütün müalicələr</option>
+                                    <option value="dermatology">Dermatologiya</option>
+                                    <option value="orthopedics">Ortopediya</option>
+                                    <option value="neurology">Nevrologiya</option>
+                                    <option value="gynecology">Ginekologiya</option>
+                                    <option value="respiratory">Respirator</option>
+                                    <option value="rehabilitation">Reabilitasiya</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="hotel-type">Otel Kateqoriyası</label>
+                                <select id="hotel-type" class="form-control">
+                                    <option value="">Bütün otellər</option>
+                                    <option value="5star">5 Ulduzlu</option>
+                                    <option value="4star">4 Ulduzlu</option>
+                                    <option value="3star">3 Ulduzlu</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="check-in">Giriş Tarixi</label>
+                                <input type="date" id="check-in" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="check-out">Çıxış Tarixi</label>
+                                <input type="date" id="check-out" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="guests">Qonaq Sayı</label>
+                                <select id="guests" class="form-control">
+                                    <option value="1">1 qonaq</option>
+                                    <option value="2">2 qonaq</option>
+                                    <option value="3">3 qonaq</option>
+                                    <option value="4">4 qonaq</option>
+                                    <option value="5">5+ qonaq</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary btn-search">
+                                <i class="fas fa-search"></i> Axtar
+                            </button>
+                            <a href="contact.html" class="btn btn-outline">
+                                <i class="fas fa-phone"></i> Əlaqə
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Hotels Section -->
+    <section id="hotels" class="featured-hotels">
+        <div class="container">
+            <div class="section-header">
+                <h2>Populyar Otellər</h2>
+                <p>Naftalanın ən yaxşı otellərində rahat və sağlamlıq üçün ideal mühit</p>
+            </div>
+            
+            <div class="filter-options">
+                <button class="filter-btn active" data-filter="all">Hamısı</button>
+                <button class="filter-btn" data-filter="5star">5 Ulduzlu</button>
+                <button class="filter-btn" data-filter="4star">4 Ulduzlu</button>
+                <button class="filter-btn" data-filter="3star">3 Ulduzlu</button>
+            </div>
+            
+            <div class="hotel-grid">
+                <!-- Hotel cards will be added dynamically -->
+            </div>
+            
+            <div class="view-more">
+                <a href="hotels.html" class="btn btn-outline">Bütün Otelləri Göstər</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Treatments Section -->
+    <section id="treatments" class="treatments">
+        <div class="container">
+            <div class="section-header">
+                <h2>Müalicə Növləri</h2>
+                <p>Naftalan nefti ilə müxtəlif xəstəliklərin effektiv müalicəsi</p>
+            </div>
+            
+            <div class="treatment-grid">
+                <div class="treatment-card">
+                    <div class="treatment-icon">
+                        <i class="fas fa-spa"></i>
+                    </div>
+                    <h3>Naftalan Vannası</h3>
+                    <p>Dərinin müxtəlif xəstəliklərinin müalicəsi</p>
+                    <ul class="treatment-details">
+                        <li>Psoriaz</li>
+                        <li>Ekzema</li>
+                        <li>Dermatit</li>
+                    </ul>
+                    <a href="treatment-details.html" class="btn btn-text">Ətraflı <i class="fas fa-arrow-right"></i></a>
+                </div>
+                <div class="treatment-card">
+                    <div class="treatment-icon">
+                        <i class="fas fa-heartbeat"></i>
+                    </div>
+                    <h3>Fizioterapiya</h3>
+                    <p>Hərəkət sistemi xəstəliklərinin müalicəsi</p>
+                    <ul class="treatment-details">
+                        <li>Osteoartrit</li>
+                        <li>Revmatoid artrit</li>
+                        <li>Osteoxondroz</li>
+                    </ul>
+                    <a href="treatment-details.html" class="btn btn-text">Ətraflı <i class="fas fa-arrow-right"></i></a>
+                </div>
+                <div class="treatment-card">
+                    <div class="treatment-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h3>Nevroloji Müalicə</h3>
+                    <p>Nevroloji xəstəliklərin müalicəsi</p>
+                    <ul class="treatment-details">
+                        <li>Poliomielit</li>
+                        <li>Nevrit</li>
+                        <li>Radikulit</li>
+                    </ul>
+                    <a href="treatment-details.html" class="btn btn-text">Ətraflı <i class="fas fa-arrow-right"></i></a>
+                </div>
+                <div class="treatment-card">
+                    <div class="treatment-icon">
+                        <i class="fas fa-lungs"></i>
+                    </div>
+                    <h3>Respirator Müalicə</h3>
+                    <p>Tənəffüs sistemi xəstəliklərinin müalicəsi</p>
+                    <ul class="treatment-details">
+                        <li>Bronxial astma</li>
+                        <li>Bronxit</li>
+                        <li>Pnevmoniya</li>
+                    </ul>
+                    <a href="treatment-details.html" class="btn btn-text">Ətraflı <i class="fas fa-arrow-right"></i></a>
+                </div>
+                <div class="treatment-card">
+                    <div class="treatment-icon">
+                        <i class="fas fa-female"></i>
+                    </div>
+                    <h3>Qinekoloji Müalicə</h3>
+                    <p>Qadın xəstəliklərinin müalicəsi</p>
+                    <ul class="treatment-details">
+                        <li>Qadın cinsiyyət üzvlərinin xəstəlikləri</li>
+                        <li>Qısırlıq</li>
+                        <li>Menopauza</li>
+                    </ul>
+                    <a href="treatment-details.html" class="btn btn-text">Ətraflı <i class="fas fa-arrow-right"></i></a>
+                </div>
+                <div class="treatment-card">
+                    <div class="treatment-icon">
+                        <i class="fas fa-procedures"></i>
+                    </div>
+                    <h3>Reabilitasiya</h3>
+                    <p>Əməliyyatdan sonra bərpa müalicəsi</p>
+                    <ul class="treatment-details">
+                        <li>Ortopedik əməliyyatlardan sonra</li>
+                        <li>Nevroloji xəstəliklərdən sonra</li>
+                        <li>Traumatik zədələrdən sonra</li>
+                    </ul>
+                    <a href="treatment-details.html" class="btn btn-text">Ətraflı <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+            
+            <div class="view-more">
+                <a href="treatments.html" class="btn btn-outline">Bütün Müalicələri Göstər</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials">
+        <div class="container">
+            <div class="section-header">
+                <h2>Müştəri Rəyləri</h2>
+                <p>Naftalan Kurortunda müalicə olanların təəssüratları</p>
+            </div>
+            
+            <div class="swiper testimonial-slider">
+                <div class="swiper-wrapper">
+                    <div class="swiper-slide">
+                        <div class="testimonial-card">
+                            <div class="testimonial-content">
+                                <p>"Naftalan müalicəsi mənə normal həyat qaytardı. 10 ildən çox psoriaz xəstəliyindən əziyyət çəkirdim, amma Naftalan Kurortunda 21 günlük müalicədən sonra tamamilə sağalmağa başladım."</p>
+                            </div>
+                            <div class="testimonial-author">
+                                <img src="../images/testimonials/user1.jpg" alt="Alexander Gukov">
+                                <div class="author-info">
+                                    <h4>Alexander Gukov</h4>
+                                    <p>Rusiya, Şebekino</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="swiper-slide">
+                        <div class="testimonial-card">
+                            <div class="testimonial-content">
+                                <p>"Naftalan nefti ilə müalicə sayəsində psoriaz xəstəliyindən qurtuldum. Həkimlərim mənə bu müalicəni məsləhət gördülər və nəticə inanılmaz oldu. İndi dərinim tamamilə təmizdir."</p>
+                            </div>
+                            <div class="testimonial-author">
+                                <img src="../images/testimonials/user2.jpg" alt="Olga Kartisheva">
+                                <div class="author-info">
+                                    <h4>Olga Kartisheva</h4>
+                                    <p>Krasnoyarsk, Rusiya</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="swiper-slide">
+                        <div class="testimonial-card">
+                            <div class="testimonial-content">
+                                <p>"Osteoartrit xəstəliyindən əziyyət çəkirdim və hərəkət etməkdə çətinlik çəkirəm. Naftalan müalicəsindən sonra ağrılarım azaldı və hərəkət etmək asanlaşdı. Çox təşəkkür edirəm!"</p>
+                            </div>
+                            <div class="testimonial-author">
+                                <img src="../images/testimonials/user3.jpg" alt="Mehmet Yılmaz">
+                                <div class="author-info">
+                                    <h4>Mehmet Yılmaz</h4>
+                                    <p>İstanbul, Türkiyə</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="swiper-pagination"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gallery Section -->
+    <section id="gallery" class="gallery">
+        <div class="container">
+            <div class="section-header">
+                <h2>Qalereya</h2>
+                <p>Naftalan Kurortunun gözəl mənzərələri və müalicə otaqları</p>
+            </div>
+            
+            <div class="gallery-filter">
+                <button class="filter-btn active" data-filter="all">Hamısı</button>
+                <button class="filter-btn" data-filter="hotels">Otellər</button>
+                <button class="filter-btn" data-filter="treatments">Müalicələr</button>
+                <button class="filter-btn" data-filter="nature">Təbiət</button>
+            </div>
+            
+            <div class="gallery-grid">
+                <div class="gallery-item" data-category="hotels">
+                    <img src="../images/gallery/hotel1.jpg" alt="Chinar Hotel">
+                    <div class="gallery-overlay">
+                        <h3>Chinar Hotel & Spa</h3>
+                        <p>5 Ulduzlu Lüks Otel</p>
+                        <a href="gallery-item.html" class="gallery-link"><i class="fas fa-search-plus"></i></a>
+                    </div>
+                </div>
+                <div class="gallery-item" data-category="treatments">
+                    <img src="../images/gallery/treatment1.jpg" alt="Naftalan Vannası">
+                    <div class="gallery-overlay">
+                        <h3>Naftalan Vannası</h3>
+                        <p>Dəri xəstəliklərinin müalicəsi</p>
+                        <a href="gallery-item.html" class="gallery-link"><i class="fas fa-search-plus"></i></a>
+                    </div>
+                </div>
+                <div class="gallery-item" data-category="nature">
+                    <img src="../images/gallery/nature1.jpg" alt="Naftalan Təbiəti">
+                    <div class="gallery-overlay">
+                        <h3>Naftalan Təbiəti</h3>
+                        <p>Gözəl mənzərələr</p>
+                        <a href="gallery-item.html" class="gallery-link"><i class="fas fa-search-plus"></i></a>
+                    </div>
+                </div>
+                <div class="gallery-item" data-category="hotels">
+                    <img src="../images/gallery/hotel2.jpg" alt="Gashalti Health Hotel">
+                    <div class="gallery-overlay">
+                        <h3>Gashalti Health Hotel</h3>
+                        <p>5 Ulduzlu Sağlamlıq Oteli</p>
+                        <a href="gallery-item.html" class="gallery-link"><i class="fas fa-search-plus"></i></a>
+                    </div>
+                </div>
+                <div class="gallery-item" data-category="treatments">
+                    <img src="../images/gallery/treatment2.jpg" alt="Fizioterapiya">
+                    <div class="gallery-overlay">
+                        <h3>Fizioterapiya</h3>
+                        <p>Hərəkət sistemi xəstəliklərinin müalicəsi</p>
+                        <a href="gallery-item.html" class="gallery-link"><i class="fas fa-search-plus"></i></a>
+                    </div>
+                </div>
+                <div class="gallery-item" data-category="nature">
+                    <img src="../images/gallery/nature2.jpg" alt="Naftalan Parkı">
+                    <div class="gallery-overlay">
+                        <h3>Naftalan Parkı</h3>
+                        <p>İstirahət və gəzinti üçün ideal yer</p>
+                        <a href="gallery-item.html" class="gallery-link"><i class="fas fa-search-plus"></i></a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="view-more">
+                <a href="gallery.html" class="btn btn-outline">Bütün Şəkilləri Göstər</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Blog Section -->
+    <section id="blog" class="blog">
+        <div class="container">
+            <div class="section-header">
+                <h2>Blog və Xəbərlər</h2>
+                <p>Naftalan haqqında ən son məlumatlar və sağlamlıq məsləhətləri</p>
+            </div>
+            
+            <div class="blog-grid">
+                <div class="blog-card">
+                    <div class="blog-image">
+                        <img src="../images/blog/blog1.jpg" alt="Naftalan Nefti">
+                        <div class="blog-date">
+                            <span class="day">15</span>
+                            <span class="month">May</span>
+                        </div>
+                    </div>
+                    <div class="blog-content">
+                        <div class="blog-category">Sağlamlıq</div>
+                        <h3>Naftalan Neftinin Sağlamlığa Faydaları</h3>
+                        <p>Naftalan nefti dərinin müxtəlif xəstəliklərinin müalicəsində istifadə olunur. Bu məqalədə naftalan neftinin sağlamlığa faydaları haqqında məlumat verəcəyik.</p>
+                        <a href="blog-details.html" class="btn btn-text">Ətraflı <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+                <div class="blog-card">
+                    <div class="blog-image">
+                        <img src="../images/blog/blog2.jpg" alt="Psoriaz Müalicəsi">
+                        <div class="blog-date">
+                            <span class="day">10</span>
+                            <span class="month">May</span>
+                        </div>
+                    </div>
+                    <div class="blog-content">
+                        <div class="blog-category">Müalicə</div>
+                        <h3>Psoriaz Xəstəliyinin Naftalan ilə Müalicəsi</h3>
+                        <p>Psoriaz xəstəliyi dərinin ən çətin xəstəliklərindən biridir. Naftalan nefti ilə psoriazın müalicəsi haqqında məlumat verəcəyik.</p>
+                        <a href="blog-details.html" class="btn btn-text">Ətraflı <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+                <div class="blog-card">
+                    <div class="blog-image">
+                        <img src="../images/blog/blog3.jpg" alt="Naftalan Kurortu">
+                        <div class="blog-date">
+                            <span class="day">05</span>
+                            <span class="month">May</span>
+                        </div>
+                    </div>
+                    <div class="blog-content">
+                        <div class="blog-category">Kurort</div>
+                        <h3>Naftalan Kurortunda İstirahət: Tam Bələdçi</h3>
+                        <p>Naftalan Kurortunda istirahət etmək istəyirsiniz? Bu məqalədə Naftalan Kurortunda istirahət haqqında tam məlumat verəcəyik.</p>
+                        <a href="blog-details.html" class="btn btn-text">Ətraflı <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="view-more">
+                <a href="blog.html" class="btn btn-outline">Bütün Məqalələri Göstər</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about">
+        <div class="container">
+            <div class="about-content">
+                <div class="about-text">
+                    <div class="section-header">
+                        <h2>Naftalan Haqqında</h2>
+                        <p>Azərbaycanın məşhur kurort şəhəri</p>
+                    </div>
+                    <p>Naftalan - Azərbaycanın məşhur kurort şəhəri. Burada unikal neft müalicəsi tətbiq olunur. Şəhərin əsas xüsusiyyəti onun təbii neft ehtiyatlarıdır.</p>
+                    <p>Naftalan nefti dünyada yalnız Azərbaycanın Naftalan şəhərində tapılır və 70-dən çox xəstəliyin müalicəsində istifadə olunur. Naftalan nefti dərinin müxtəlif xəstəliklərinin, hərəkət sistemi xəstəliklərinin, nevroloji xəstəliklərin və digər bir çox xəstəliyin müalicəsində effektivdir.</p>
+                    <div class="about-stats">
+                        <div class="stat-item">
+                            <span class="stat-number">70+</span>
+                            <span class="stat-text">Xəstəlik</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">10+</span>
+                            <span class="stat-text">Sanatoriya</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">50+</span>
+                            <span class="stat-text">İl Təcrübə</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="about-image">
+                    <img src="../images/about.jpg" alt="Naftalan Şəhəri">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact">
+        <div class="container">
+            <div class="section-header">
+                <h2>Bizimlə Əlaqə</h2>
+                <p>Sual və təklifləriniz üçün bizimlə əlaqə saxlayın</p>
+            </div>
+            
+            <div class="contact-container">
+                <div class="contact-info">
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <div class="info-content">
+                            <h3>Telefon</h3>
+                            <p>+994 50 123 45 67</p>
+                            <p>+994 50 765 43 21</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div class="info-content">
+                            <h3>E-poçt</h3>
+                            <p>info@naftalankurortu.az</p>
+                            <p>reservation@naftalankurortu.az</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div class="info-content">
+                            <h3>Ünvan</h3>
+                            <p>Naftalan şəhəri, Azərbaycan</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="info-content">
+                            <h3>İş Saatları</h3>
+                            <p>Bazar ertəsi - Şənbə: 09:00 - 18:00</p>
+                            <p>Bazar: 10:00 - 16:00</p>
+                        </div>
+                    </div>
+                </div>
+                <form class="contact-form">
+                    <div class="form-row">
+                        <div class="form-control">
+                            <label for="name">Adınız</label>
+                            <input type="text" id="name" name="name" required>
+                        </div>
+                        <div class="form-control">
+                            <label for="email">E-poçt</label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                    </div>
+                    <div class="form-control">
+                        <label for="subject">Mövzu</label>
+                        <input type="text" id="subject" name="subject" required>
+                    </div>
+                    <div class="form-control">
+                        <label for="message">Mesajınız</label>
+                        <textarea id="message" name="message" rows="5" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Göndər</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Map Section -->
+    <section class="map">
+        <div class="map-container">
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3045.8274754757!2d46.8197!3d40.5067!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x403a5c5c5c5c5c5c%3A0x5c5c5c5c5c5c5c5c!2sNaftalan%2C%20Azerbaijan!5e0!3m2!1sen!2s!4v1620000000000!5m2!1sen!2s" width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section about">
+                    <h3>Naftalan Kurortu</h3>
+                    <p>Azərbaycanın ən yaxşı müalicə kurortu. 70-dən çox xəstəliyin effektiv müalicəsi.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section links">
+                    <h3>Sürətli Keçidlər</h3>
+                    <ul>
+                        <li><a href="#home">Ana Səhifə</a></li>
+                        <li><a href="#hotels">Otellər</a></li>
+                        <li><a href="#treatments">Müalicələr</a></li>
+                        <li><a href="#gallery">Qalereya</a></li>
+                        <li><a href="#blog">Blog</a></li>
+                        <li><a href="#about">Haqqımızda</a></li>
+                        <li><a href="#contact">Əlaqə</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section links">
+                    <h3>Otellər</h3>
+                    <ul>
+                        <li><a href="hotel-details.html">Chinar Hotel & Spa</a></li>
+                        <li><a href="hotel-details.html">Gashalti Health Hotel</a></li>
+                        <li><a href="hotel-details.html">Naftalan Sanatorium</a></li>
+                        <li><a href="hotel-details.html">Sehrli Naftalan</a></li>
+                        <li><a href="hotel-details.html">Möcüzəli Naftalan</a></li>
+                        <li><a href="hotel-details.html">Şəfa Sanatoriyası</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section newsletter">
+                    <h3>Yeniliklərə Abunə Olun</h3>
+                    <p>Ən son xəbərlər və təkliflər haqqında məlumat almaq üçün abunə olun.</p>
+                    <form class="newsletter-form">
+                        <input type="email" placeholder="E-poçt ünvanınız">
+                        <button type="submit"><i class="fas fa-paper-plane"></i></button>
+                    </form>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Naftalan Kurortu. Bütün hüquqlar qorunur.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Back to Top Button -->
+    <a href="#" class="back-to-top">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.js"></script>
+    <script src="../js/main.js"></script>
+</body>
+</html>

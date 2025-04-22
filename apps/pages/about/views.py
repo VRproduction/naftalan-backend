@@ -1,0 +1,40 @@
+from rest_framework.generics import RetrieveAPIView, ListAPIView
+from .models import About, History, TreatmentPage, TreatmentCategory, Treatment, TreatmentProcess
+from .serializers import AboutSerializer, HistorySerializer, TreatmentPageSerializer, TreatmentCategorySerializer, TreatmentSerializer, TreatmentProcessSerializer
+
+
+class AboutView(RetrieveAPIView):
+    serializer_class = AboutSerializer
+
+    def get_object(self):
+        return About.objects.first()
+
+
+class HistoryView(RetrieveAPIView):
+    serializer_class = HistorySerializer
+
+    def get_object(self):
+        return History.objects.first()
+
+
+class TreatmentPageView(RetrieveAPIView):
+    serializer_class = TreatmentPageSerializer
+
+    def get_object(self):
+        return TreatmentPage.objects.first()
+
+
+class TreatmentCategoryView(ListAPIView):
+    serializer_class = TreatmentCategorySerializer
+    queryset = TreatmentCategory.objects.all()
+
+
+class TreatmentListView(ListAPIView):
+    serializer_class = TreatmentSerializer
+    queryset = Treatment.objects.all()
+
+
+class TreatmentProcessListView(ListAPIView):
+    serializer_class = TreatmentProcessSerializer
+    queryset = TreatmentProcess.objects.all()
+

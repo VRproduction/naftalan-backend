@@ -1,0 +1,48 @@
+<!-- Packages Section -->
+<section id="packages" class="packages">
+    <div class="container">
+        <div class="section-header">
+            <h2>Hazır Paketlər</h2>
+            <p>Naftalan sanatoriyalarında sizin üçün hazırlanmış xüsusi müalicə paketləri</p>
+        </div>
+        
+        <div class="packages-grid">
+            {% for package in featured_packages %}
+            <div class="package-card">
+                <div class="package-header">
+                    <h3>{{ package.name }}</h3>
+                    <span class="duration">{{ package.duration }} gün</span>
+                </div>
+                <div class="package-content">
+                    <div class="package-price">
+                        <span class="price">{{ package.price }} AZN</span>
+                        <span class="per-person">/ şəxs</span>
+                    </div>
+                    <ul class="package-features">
+                        {% for feature in package.features.all %}
+                        <li><i class="fas fa-check"></i> {{ feature.name }}</li>
+                        {% endfor %}
+                    </ul>
+                    <div class="package-includes">
+                        <h4>Paketə daxildir:</h4>
+                        <ul>
+                            <li><i class="fas fa-hotel"></i> {{ package.hotel_name }}</li>
+                            <li><i class="fas fa-utensils"></i> {{ package.meals_per_day }} öğün yemək</li>
+                            <li><i class="fas fa-spa"></i> {{ package.treatment_sessions }} müalicə seansı</li>
+                            <li><i class="fas fa-user-md"></i> Həkim müayinəsi</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="package-footer">
+                    <a href="" class="btn btn-primary">Ətraflı</a>
+                    <a href="" class="btn btn-outline">Rezerv Et</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="view-more">
+            <a href="" class="btn btn-outline">Bütün Paketləri Göstər</a>
+        </div>
+    </div>
+</section> 

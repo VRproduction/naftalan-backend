@@ -1,0 +1,45 @@
+{% extends "layout/base.html" %}
+{% load static %}
+
+{% block css %}
+<link rel="stylesheet" href="/static/css/home.css">
+{% endblock css %}
+
+{% block content %}
+
+ <!-- Hero Section -->
+{% include 'pages/home/includes/sections/hero.html' %}
+
+<!-- About Section -->
+{% include 'pages/home/includes/sections/about.html' %}
+
+<!-- Featured Hotels Section -->
+{% include 'pages/home/includes/sections/featured-hotels.html' %}
+
+<!-- Treatments Section -->
+{% include 'pages/home/includes/sections/treatments.html' %}
+
+<!-- Testimonials Section -->
+{% include 'pages/home/includes/sections/testimonials.html' %}
+
+<!-- Gallery Section -->
+{% include 'pages/home/includes/sections/gallery.html' %}
+
+<!-- Blog Section -->
+{% include 'pages/home/includes/sections/blogs.html' %}
+
+
+<!-- Contact Section -->
+{% include 'pages/home/includes/sections/contact.html' %}
+
+<!-- Map Section -->
+{% include 'pages/home/includes/sections/map.html' %}
+
+<!-- Packages Section -->
+{% include 'pages/home/includes/sections/packages.html' %}
+
+{% endblock %}
+
+{% block js %}
+<script src="/static/js/home.js"></script>
+{% endblock %}

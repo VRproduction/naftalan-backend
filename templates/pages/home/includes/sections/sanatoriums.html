@@ -1,0 +1,79 @@
+<!-- Sanatoriums Section -->
+<section id="sanatoriums" class="sanatoriums">
+    <div class="container">
+        <div class="section-header">
+            <h2>Naftalan Sanatoriyaları</h2>
+            <p>Naftalanın ən yaxşı sanatoriyalarında rahat və sağlamlıq üçün ideal mühit</p>
+        </div>
+        
+        <div class="filter-options">
+            <button class="filter-btn active" data-filter="all">Hamısı</button>
+            <button class="filter-btn" data-filter="5star">5 Ulduzlu</button>
+            <button class="filter-btn" data-filter="4star">4 Ulduzlu</button>
+            <button class="filter-btn" data-filter="3star">3 Ulduzlu</button>
+        </div>
+        
+        <div class="sanatorium-grid">
+            {% for sanatorium in featured_sanatoriums %}
+            <div class="sanatorium-card" data-category="{{ sanatorium.rating }}star">
+                <img src="{{ sanatorium.image.url }}" alt="{{ sanatorium.name }}">
+                <div class="sanatorium-info">
+                    <h3>{{ sanatorium.name }}</h3>
+                    <div class="rating">
+                        {% for i in "12345"|make_list %}
+                            {% if forloop.counter <= sanatorium.rating %}
+                                <i class="fas fa-star"></i>
+                            {% else %}
+                                <i class="far fa-star"></i>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <p>{{ sanatorium.short_description }}</p>
+                    <ul class="sanatorium-details">
+                        <li><i class="fas fa-bed"></i> {{ sanatorium.room_count }}+ otaq</li>
+                        <li><i class="fas fa-spa"></i> {{ sanatorium.treatment_center }}</li>
+                        <li><i class="fas fa-utensils"></i> Restoran</li>
+                    </ul>
+                    <div class="sanatorium-price">
+                        <span class="price">Başlanğıc {{ sanatorium.starting_price }} AZN</span>
+                        <a href="" class="btn btn-primary">Ətraflı</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="view-more">
+            <a href="" class="btn btn-outline">Bütün Sanatoriyaları Göstər</a>
+        </div>
+    </div>
+</section>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Filter functionality
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    const sanatoriumCards = document.querySelectorAll('.sanatorium-card');
+    
+    filterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Remove active class from all buttons
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            // Add active class to clicked button
+            this.classList.add('active');
+            
+            const filter = this.getAttribute('data-filter');
+            
+            sanatoriumCards.forEach(card => {
+                if (filter === 'all' || card.getAttribute('data-category') === filter) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    });
+});
+</script>
+{% endblock %} 
