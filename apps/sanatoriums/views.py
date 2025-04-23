@@ -1,22 +1,16 @@
 from django.shortcuts import render
 from rest_framework import generics, filters, status, viewsets
-from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Q
 from .models import (
-    Location, Sanatorium, SanatoriumImage, 
-    Facility, SanatoriumFacility,
-    RoomType, RoomImage, Review
-)
+    Location, Sanatorium, NaftalanSanatoriumsPage, OtherCitiesSanatoriumsPage
+    )
 from .serializers import (
     LocationSerializer, SanatoriumSerializer, 
-    SanatoriumListSerializer, ReviewCreateSerializer,
-    FacilitySerializer, RoomTypeSerializer,
-    ReviewSerializer
+    SanatoriumListSerializer, NaftalanSanatoriumsPageSerializer, OtherCitiesSanatoriumsPageSerializer
 )
 from utils.api.pagination.page_number_pagination import CustomPageNumberPagination
 
-from .filters import SanatoriumFilter, RoomTypeFilter
 
 # Create your views here.
 
@@ -46,3 +40,26 @@ class SanatoriumDetailView(generics.RetrieveAPIView):
     queryset = Sanatorium.objects.filter(is_active=True)
     serializer_class = SanatoriumSerializer
     lookup_field = 'slug'
+
+
+class NaftalanSanatoriumsPageView(generics.RetrieveAPIView):
+    serializer_class = NaftalanSanatoriumsPageSerializer
+
+    def get_object(self):
+        return NaftalanSanatoriumsPage.objects.first()
+
+class OtherCitiesSanatoriumsPageView(generics.RetrieveAPIView):
+    serializer_class = OtherCitiesSanatoriumsPageSerializer
+
+    def get_object(self):
+        return OtherCitiesSanatoriumsPage.objects.first()
+
+
+class NaftalanSanatoriums(generics.ListAPIView):
+    queryset = Sanatorium.objects.filter(is_active=True, location_type='naftalan')
+    serializer_class = SanatoriumListSerializer
+
+
+class OtherCitiesSanatoriums(generics.ListAPIView):
+    queryset = Sanatorium.objects.filter(is_active=True, location_type='other_cities')
+    serializer_class = SanatoriumListSerializer

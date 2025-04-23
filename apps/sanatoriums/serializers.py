@@ -4,7 +4,7 @@ from drf_spectacular.utils import extend_schema_field
 from .models import (
     Location, Sanatorium, SanatoriumImage, 
     Facility, SanatoriumFacility,
-    RoomType, RoomImage, Review
+    RoomType, RoomImage, Review, NaftalanSanatoriumsPage, OtherCitiesSanatoriumsPage
 )
 from utils.api.mixins.translation import TranslationMixin
 
@@ -52,13 +52,14 @@ class SanatoriumListSerializer(TranslationMixin, serializers.ModelSerializer):
     location = LocationSerializer(read_only=True)
     main_image = serializers.SerializerMethodField()
     facilities = SanatoriumFacilitySerializer(many=True, read_only=True, source='sanatoiruim')
+    images = SanatoriumImageSerializer(many=True, read_only=True)
 
     class Meta:
         model = Sanatorium
         fields = [
             'id', 'name', 'slug', 'location', 'location_type',
             'short_description', 'rating', 'price',
-            'is_active', 'in_home', 'main_image', 'facilities'
+            'is_active', 'in_home', 'main_image', 'facilities', 'images'
         ]
     
     def get_main_image(self, obj):
@@ -82,6 +83,7 @@ class SanatoriumSerializer(TranslationMixin, serializers.ModelSerializer):
         model = Sanatorium
         fields = [
             'id', 'name', 'slug', 'description', 'treatments', 'location', 'location_type',
+            'map_iframe', 'address',
             'price', 'rating', 'facilities', 'room_types', 'reviews',
             'in_home', 'created_at', 'updated_at', 'images', 'similar_sanatoriums'
         ]
@@ -104,3 +106,21 @@ class ReviewCreateSerializer(TranslationMixin, serializers.ModelSerializer):
         extra_kwargs = {
             'sanatorium': {'write_only': True}
         }
+
+
+class NaftalanSanatoriumsPageSerializer(TranslationMixin, serializers.ModelSerializer):
+    class Meta:
+        model = NaftalanSanatoriumsPage
+        fields = ['id', 'hero_section_title', 'hero_section_description',
+                  'main_section_title', 'main_section_description', 'main_section_image',
+                  'sanatoriums_section_title', 'sanatoriums_section_description',
+                  'contact_section_title', 'contact_section_description']
+
+
+class OtherCitiesSanatoriumsPageSerializer(TranslationMixin, serializers.ModelSerializer):
+    class Meta:
+        model = OtherCitiesSanatoriumsPage
+        fields = ['id', 'hero_section_title', 'hero_section_description',
+                  'main_section_title', 'main_section_description', 'main_section_image',
+                  'sanatoriums_section_title', 'sanatoriums_section_description',
+                  'contact_section_title', 'contact_section_description']

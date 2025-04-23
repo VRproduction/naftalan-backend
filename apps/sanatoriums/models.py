@@ -151,3 +151,48 @@ class Review(models.Model):
         verbose_name = _("Rəy")
         verbose_name_plural = _("Rəylər")
 
+
+class NaftalanSanatoriumsPage(models.Model):
+    hero_section_title = models.CharField(_("Başlıq"), max_length=255)
+    hero_section_description = models.TextField(_("Haqqında"))
+
+    main_section_title = models.CharField(_("Başlıq"), max_length=255)
+    main_section_description = RichTextUploadingField(_("Haqqında"))
+    main_section_image = models.ImageField(_("Şəkil"), upload_to='sanatoriums/')
+
+    sanatoriums_section_title = models.CharField(_("Başlıq"), max_length=255)
+    sanatoriums_section_description = models.TextField(_("Haqqında"))
+
+    contact_section_title = models.CharField(_("Başlıq"), max_length=255)
+    contact_section_description = models.TextField(_("Haqqında"))
+
+    def __str__(self):
+        return "Naftalan Sanatoriyaları"
+
+
+    class Meta:
+        verbose_name = _("Naftalan Sanatoriyaları")
+        verbose_name_plural = _("Naftalan Sanatoriyaları səhifəsi")
+
+
+class OtherCitiesSanatoriumsPage(models.Model):
+    hero_section_title = models.CharField(_("Başlıq"), max_length=255)
+    hero_section_description = models.TextField(_("Haqqında"))
+
+    main_section_title = models.CharField(_("Başlıq"), max_length=255)
+    main_section_description = RichTextUploadingField(_("Haqqında"))
+    main_section_image = models.ImageField(_("Şəkil"), upload_to='sanatoriums/')
+
+    sanatoriums_section_title = models.CharField(_("Başlıq"), max_length=255)
+    sanatoriums_section_description = models.TextField(_("Haqqında"))
+
+    contact_section_title = models.CharField(_("Başlıq"), max_length=255)
+    contact_section_description = models.TextField(_("Haqqında"))
+
+    def __str__(self):
+        return "Digər şəhərlərdəki sanatoriyalar"
+
+
+    class Meta:
+        verbose_name = _("Digər şəhərlərdəki sanatoriyalar")
+        verbose_name_plural = _("Digər şəhərlərdəki sanatoriyalar səhifəsi")

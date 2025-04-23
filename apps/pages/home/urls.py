@@ -7,6 +7,7 @@ urlpatterns = [
     path('about-section/', views.AboutSectionView.as_view(), name='about-section'),
     path('sanatories-section/', views.SanatoriesSectionView.as_view(),
          name='sanatories-section'),
+    path('sanatoriums/', views.SanatoriumsView.as_view(), name='sanatoriums'),
     path('treatments-section/', views.TreatmentsSectionView.as_view(),
          name='treatments-section'),
     path('packages-section/', views.PackagesSectionView.as_view(),

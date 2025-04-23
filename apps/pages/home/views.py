@@ -1,4 +1,10 @@
 from rest_framework.generics import ListAPIView, RetrieveAPIView
+
+from apps.sanatoriums.serializers import SanatoriumListSerializer
+from apps.sanatoriums.models import Sanatorium
+
+
+
 from .models import (
     HeroSlider,
     AboutSection,
@@ -44,6 +50,11 @@ class SanatoriesSectionView(RetrieveAPIView):
 
     def get_object(self):
         return SanatoriesSection.objects.first()
+
+
+class SanatoriumsView(ListAPIView):
+    queryset = Sanatorium.objects.filter(is_active=True, location_type='naftalan', in_home = True)
+    serializer_class = SanatoriumListSerializer
 
 
 class TreatmentsSectionView(RetrieveAPIView):

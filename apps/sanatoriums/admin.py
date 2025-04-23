@@ -1,9 +1,9 @@
 from django.contrib import admin
-from modeltranslation.admin import TranslationAdmin, TranslationTabularInline, TranslationStackedInline
+from modeltranslation.admin import TranslationAdmin, TranslationStackedInline
 from .models import (
     Location, Sanatorium, SanatoriumImage, 
     Facility, SanatoriumFacility,
-    RoomType, RoomImage, Review
+    RoomType, RoomImage, Review, NaftalanSanatoriumsPage, OtherCitiesSanatoriumsPage
 )
 
 import nested_admin
@@ -19,8 +19,6 @@ class TranslationMedia:
         css = {
             'screen': ('modeltranslation/css/tabbed_translation_fields.css',),
         }
-
-        
 
 
 # Inline admin classes
@@ -111,3 +109,43 @@ class FacilityAdmin(TranslationAdmin, TranslationMedia):
         }),
     )
 
+@admin.register(NaftalanSanatoriumsPage)
+class NaftalanSanatoriumsPageAdmin(TranslationAdmin, TranslationMedia):
+    fieldsets = (
+        ('Giriş', {
+            'fields': ('hero_section_title', 'hero_section_description'),
+        }),
+        ('Əsas məlumatlar', {
+            'fields': ('main_section_title', 'main_section_description', 'main_section_image'),
+        }),
+        ('Sanatoriumlar', {
+            'fields': ('sanatoriums_section_title', 'sanatoriums_section_description'),
+        }),
+        ('Əlaqə', {
+            'fields': ('contact_section_title', 'contact_section_description'),
+        }),
+    )
+
+    def has_add_permission(self, request):
+        return not NaftalanSanatoriumsPage.objects.exists()
+
+
+@admin.register(OtherCitiesSanatoriumsPage)
+class OtherCitiesSanatoriumsPageAdmin(TranslationAdmin, TranslationMedia):
+    fieldsets = (
+        ('Giriş', {
+            'fields': ('hero_section_title', 'hero_section_description'),
+        }),
+        ('Əsas məlumatlar', {
+            'fields': ('main_section_title', 'main_section_description', 'main_section_image'),
+        }),
+        ('Sanatoriumlar', {
+            'fields': ('sanatoriums_section_title', 'sanatoriums_section_description'),
+        }),
+        ('Əlaqə', {
+            'fields': ('contact_section_title', 'contact_section_description'),
+        }),
+    )
+
+    def has_add_permission(self, request):
+        return not OtherCitiesSanatoriumsPage.objects.exists()
