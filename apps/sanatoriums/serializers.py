@@ -67,7 +67,14 @@ class SanatoriumListSerializer(TranslationMixin, serializers.ModelSerializer):
         main_image = obj.images.filter(is_main=True).first()
         if main_image:
             return SanatoriumImageSerializer(main_image, context={'request': request}).data
+        
+        # If no main image, return the first image from the list
+        first_image = obj.images.first()
+        if first_image:
+            return SanatoriumImageSerializer(first_image, context={'request': request}).data
+        
         return None
+
     
 
 class SanatoriumSerializer(TranslationMixin, serializers.ModelSerializer):
