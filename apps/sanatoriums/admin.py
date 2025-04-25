@@ -1,9 +1,10 @@
 from django.contrib import admin
-from modeltranslation.admin import TranslationAdmin, TranslationStackedInline
+from modeltranslation.admin import TranslationAdmin, TranslationStackedInline, TranslationTabularInline
 from .models import (
     Location, Sanatorium, SanatoriumImage, 
     Facility, SanatoriumFacility,
-    RoomType, RoomImage, Review, NaftalanSanatoriumsPage, OtherCitiesSanatoriumsPage
+    RoomType, RoomImage, Review, NaftalanSanatoriumsPage, OtherCitiesSanatoriumsPage,
+    Currency, Season, RoomPrice, AgeGroup, ExtraBedPrice, TreatmentOption
 )
 
 import nested_admin
@@ -50,10 +51,24 @@ class RoomImageInline(nested_admin.NestedTabularInline):
     verbose_name_plural = "Otaq şəkilləri"
 
 
-class RoomTypeInline(nested_admin.NestedStackedInline, TranslationStackedInline,  TranslationMedia):
+class RoomPriceInline(nested_admin.NestedTabularInline):
+    model = RoomPrice
+    extra = 1
+    verbose_name = "Qiymət"
+    verbose_name_plural = "Qiymətlər"
+
+
+class ExtraBedPriceInline(nested_admin.NestedTabularInline):
+    model = ExtraBedPrice
+    extra = 1
+    verbose_name = "Əlavə çarpayı qiyməti"
+    verbose_name_plural = "Əlavə çarpayı qiymətləri"
+
+
+class RoomTypeInline(nested_admin.NestedStackedInline, TranslationStackedInline, TranslationMedia):
     model = RoomType
     extra = 0
-    inlines = [RoomImageInline]
+    inlines = [RoomImageInline, RoomPriceInline, ExtraBedPriceInline]
     verbose_name = "Otaq növü"
     verbose_name_plural = "Otaq növləri"
 
@@ -70,10 +85,61 @@ class LocationAdmin(TranslationAdmin, TranslationMedia):
         }),
     )
 
+
+@admin.register(Currency)
+class CurrencyAdmin(TranslationAdmin, TranslationMedia):
+    list_display = ('code', 'name', 'symbol')
+    search_fields = ('code', 'name')
+    
+    fieldsets = (
+        (None, {
+            'fields': ('code', 'name', 'symbol'),
+        }),
+    )
+
+
+@admin.register(Season)
+class SeasonAdmin(TranslationAdmin, TranslationMedia):
+    list_display = ('name', 'start_date', 'end_date', 'is_current')
+    search_fields = ('name',)
+    list_filter = ('start_date', 'end_date')
+    
+    fieldsets = (
+        (None, {
+            'fields': ('name', 'start_date', 'end_date'),
+        }),
+    )
+
+
+@admin.register(TreatmentOption)
+class TreatmentOptionAdmin(TranslationAdmin, TranslationMedia):
+    list_display = ('name',)
+    search_fields = ('name', 'description')
+    
+    fieldsets = (
+        (None, {
+            'fields': ('name', 'description'),
+        }),
+    )
+
+
+@admin.register(AgeGroup)
+class AgeGroupAdmin(TranslationAdmin, TranslationMedia):
+    list_display = ('name', 'min_age', 'max_age')
+    search_fields = ('name',)
+    list_filter = ('min_age', 'max_age')
+    
+    fieldsets = (
+        (None, {
+            'fields': ('name', 'min_age', 'max_age'),
+        }),
+    )
+
+
 @admin.register(Sanatorium)
 class SanatoriumAdmin(nested_admin.NestedModelAdmin, TranslationAdmin, TranslationMedia):
-    list_display = ('name', 'location', 'rating', 'price', 'is_active')
-    list_filter = ('is_active', 'location', 'rating')
+    list_display = ('name', 'location', 'rating', 'is_active')
+    list_filter = ('is_active', 'location', 'rating', 'location_type')
     search_fields = ('name', 'description', 'address')
     prepopulated_fields = {'slug': ('name',)}
     inlines = [
@@ -90,13 +156,45 @@ class SanatoriumAdmin(nested_admin.NestedModelAdmin, TranslationAdmin, Translati
         ('Təsvir', {
             'fields': ('description', 'treatments'),
         }),
-        ('Qiymət və Reytinq', {
-            'fields': ('price', 'rating'),
+        ('Reytinq', {
+            'fields': ('rating',),
         }),
         ('Ünvan məlumatları', {
             'fields': ('address', 'map_iframe'),
         }),
     )
+
+
+@admin.register(RoomType)
+class RoomTypeAdmin(nested_admin.NestedModelAdmin, TranslationAdmin, TranslationMedia):
+    list_display = ('name', 'sanatorium', 'min_capacity', 'max_capacity')
+    list_filter = ('sanatorium', 'min_capacity', 'max_capacity')
+    search_fields = ('name', 'description')
+    inlines = [RoomImageInline, RoomPriceInline, ExtraBedPriceInline]
+    
+    fieldsets = (
+        ('Əsas məlumatlar', {
+            'fields': ('sanatorium', 'name', 'description'),
+        }),
+        ('Tutum məlumatları', {
+            'fields': ('min_capacity', 'max_capacity', 'max_extra_beds', 'size'),
+        }),
+    )
+
+
+@admin.register(RoomPrice)
+class RoomPriceAdmin(admin.ModelAdmin):
+    list_display = ('room_type', 'season', 'occupancy', 'with_treatment', 'price', 'currency')
+    list_filter = ('room_type__sanatorium', 'season', 'occupancy', 'with_treatment', 'currency')
+    search_fields = ('room_type__name', 'room_type__sanatorium__name')
+
+
+@admin.register(ExtraBedPrice)
+class ExtraBedPriceAdmin(admin.ModelAdmin):
+    list_display = ('room_type', 'season', 'age_group', 'with_treatment', 'price', 'currency')
+    list_filter = ('room_type__sanatorium', 'season', 'age_group', 'with_treatment', 'currency')
+    search_fields = ('room_type__name', 'room_type__sanatorium__name', 'age_group__name')
+
 
 @admin.register(Facility)
 class FacilityAdmin(TranslationAdmin, TranslationMedia):

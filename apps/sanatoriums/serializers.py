@@ -4,7 +4,8 @@ from drf_spectacular.utils import extend_schema_field
 from .models import (
     Location, Sanatorium, SanatoriumImage, 
     Facility, SanatoriumFacility,
-    RoomType, RoomImage, Review, NaftalanSanatoriumsPage, OtherCitiesSanatoriumsPage
+    RoomType, RoomImage, Review, NaftalanSanatoriumsPage, OtherCitiesSanatoriumsPage,
+    Currency, Season, RoomPrice, AgeGroup, ExtraBedPrice, TreatmentOption
 )
 from utils.api.mixins.translation import TranslationMixin
 
@@ -12,6 +13,33 @@ class LocationSerializer(TranslationMixin, serializers.ModelSerializer):
     class Meta:
         model = Location
         fields = ['id', 'region', 'country']
+
+
+class CurrencySerializer(TranslationMixin, serializers.ModelSerializer):
+    class Meta:
+        model = Currency
+        fields = ['id', 'code', 'name', 'symbol']
+
+
+class SeasonSerializer(TranslationMixin, serializers.ModelSerializer):
+    is_current = serializers.BooleanField(read_only=True)
+    
+    class Meta:
+        model = Season
+        fields = ['id', 'name', 'start_date', 'end_date', 'is_current']
+
+
+class TreatmentOptionSerializer(TranslationMixin, serializers.ModelSerializer):
+    class Meta:
+        model = TreatmentOption
+        fields = ['id', 'name', 'description']
+
+
+class AgeGroupSerializer(TranslationMixin, serializers.ModelSerializer):
+    class Meta:
+        model = AgeGroup
+        fields = ['id', 'name', 'min_age', 'max_age']
+
 
 class FacilitySerializer(TranslationMixin, serializers.ModelSerializer):
     class Meta:
@@ -28,12 +56,36 @@ class RoomImageSerializer(TranslationMixin, serializers.ModelSerializer):
         model = RoomImage
         fields = ['id', 'image', 'priority']
 
+
+class RoomPriceSerializer(TranslationMixin, serializers.ModelSerializer):
+    season = SeasonSerializer(read_only=True)
+    currency = CurrencySerializer(read_only=True)
+    treatment_option = TreatmentOptionSerializer(read_only=True)
+    
+    class Meta:
+        model = RoomPrice
+        fields = ['id', 'season', 'occupancy', 'with_treatment', 'treatment_option', 'price', 'currency']
+
+
+class ExtraBedPriceSerializer(TranslationMixin, serializers.ModelSerializer):
+    season = SeasonSerializer(read_only=True)
+    currency = CurrencySerializer(read_only=True)
+    age_group = AgeGroupSerializer(read_only=True)
+    treatment_option = TreatmentOptionSerializer(read_only=True)
+    
+    class Meta:
+        model = ExtraBedPrice
+        fields = ['id', 'season', 'age_group', 'with_treatment', 'treatment_option', 'price', 'currency']
+
+
 class RoomTypeSerializer(TranslationMixin, serializers.ModelSerializer):
     images = RoomImageSerializer(many=True, read_only=True)
+    prices = RoomPriceSerializer(many=True, read_only=True)
+    extra_bed_prices = ExtraBedPriceSerializer(many=True, read_only=True)
     
     class Meta:
         model = RoomType
-        fields = ['id', 'name', 'images']
+        fields = ['id', 'name', 'description', 'min_capacity', 'max_capacity', 'max_extra_beds', 'size', 'images', 'prices', 'extra_bed_prices']
 
 class ReviewSerializer(TranslationMixin, serializers.ModelSerializer):
     class Meta:
@@ -53,12 +105,14 @@ class SanatoriumListSerializer(TranslationMixin, serializers.ModelSerializer):
     main_image = serializers.SerializerMethodField()
     facilities = SanatoriumFacilitySerializer(many=True, read_only=True, source='sanatoiruim')
     images = SanatoriumImageSerializer(many=True, read_only=True)
+    min_price = serializers.SerializerMethodField()
+    min_price_currency = serializers.SerializerMethodField()
 
     class Meta:
         model = Sanatorium
         fields = [
             'id', 'name', 'slug', 'location', 'location_type',
-            'short_description', 'rating', 'price',
+            'short_description', 'rating', 'min_price', 'min_price_currency',
             'is_active', 'in_home', 'main_image', 'facilities', 'images'
         ]
     
@@ -75,7 +129,40 @@ class SanatoriumListSerializer(TranslationMixin, serializers.ModelSerializer):
         
         return None
 
-    
+    def get_min_price(self, obj):
+        # Get the current season prices for rooms
+        from datetime import date
+        today = date.today()
+        current_season = Season.objects.filter(start_date__lte=today, end_date__gte=today).first()
+        
+        min_price = None
+        
+        # If we have a current season, get minimum price from that season
+        if current_season:
+            for room_type in obj.room_types.all():
+                room_prices = room_type.prices.filter(season=current_season)
+                if room_prices.exists():
+                    for price in room_prices:
+                        if min_price is None or price.price < min_price:
+                            min_price = price.price
+                            self._min_price_currency = price.currency
+        
+        # If no current season or no prices found, get minimum price from all seasons
+        if min_price is None:
+            for room_type in obj.room_types.all():
+                room_prices = room_type.prices.all()
+                if room_prices.exists():
+                    for price in room_prices:
+                        if min_price is None or price.price < min_price:
+                            min_price = price.price
+                            self._min_price_currency = price.currency
+        
+        return min_price
+
+    def get_min_price_currency(self, obj):
+        if hasattr(self, '_min_price_currency') and self._min_price_currency:
+            return CurrencySerializer(self._min_price_currency).data
+        return None
 
 class SanatoriumSerializer(TranslationMixin, serializers.ModelSerializer):
     location = LocationSerializer(read_only=True)
@@ -91,7 +178,7 @@ class SanatoriumSerializer(TranslationMixin, serializers.ModelSerializer):
         fields = [
             'id', 'name', 'slug', 'description', 'treatments', 'location', 'location_type',
             'map_iframe', 'address',
-            'price', 'rating', 'facilities', 'room_types', 'reviews',
+            'rating', 'facilities', 'room_types', 'reviews',
             'in_home', 'created_at', 'updated_at', 'images', 'similar_sanatoriums'
         ]
         read_only_fields = ['slug', 'created_at', 'updated_at']
