@@ -6,7 +6,7 @@ class HeroSlider(models.Model):
     sanatorium = models.OneToOneField(Sanatorium, on_delete = models.CASCADE, null=True)
 
     def __str__(self):
-        return self.sanatorium.name
+        return self.sanatorium.name if self.sanatorium else ''
 
     def save(self, *args, **kwargs):
         if not self.pk:
