@@ -174,7 +174,8 @@ class SanatoriumSerializer(TranslationMixin, serializers.ModelSerializer):
     room_types = RoomTypeSerializer(many=True, read_only=True)
     reviews = ReviewSerializer(many=True, read_only=True)
     similar_sanatoriums = serializers.SerializerMethodField()
-
+    min_price = serializers.SerializerMethodField()
+    min_price_currency = serializers.SerializerMethodField()
     
     class Meta:
         model = Sanatorium
@@ -182,9 +183,9 @@ class SanatoriumSerializer(TranslationMixin, serializers.ModelSerializer):
             'id', 'name', 'slug', 'description', 'treatments', 'location', 'location_type',
             'map_iframe', 'address',
             'rating', 'facilities', 'room_types', 'reviews',
-            'in_home', 'created_at', 'updated_at', 'images', 'similar_sanatoriums'
+            'in_home', 'created_at', 'updated_at', 'images', 'similar_sanatoriums', 'min_price', 'min_price_currency'
         ]
-        read_only_fields = ['slug', 'created_at', 'updated_at']
+        read_only_fields = ['slug', 'created_at', 'updated_at', 'min_price', 'min_price_currency']
 
 
     @extend_schema_field(SanatoriumListSerializer(many=True))
@@ -194,7 +195,40 @@ class SanatoriumSerializer(TranslationMixin, serializers.ModelSerializer):
         ).exclude(id=obj.id)[:3]
         return SanatoriumListSerializer(queryset, many=True, context=self.context).data
 
+    def get_min_price(self, obj):
+        # Get the current season prices for rooms
+        from datetime import date
+        today = date.today()
+        current_season = Season.objects.filter(start_date__lte=today, end_date__gte=today).first()
+        
+        min_price = None
+        
+        # If we have a current season, get minimum price from that season
+        if current_season:
+            for room_type in obj.room_types.all():
+                room_prices = room_type.prices.filter(season=current_season)
+                if room_prices.exists():
+                    for price in room_prices:
+                        if min_price is None or price.price < min_price:
+                            min_price = price.price
+                            self._min_price_currency = price.currency
+        
+        # If no current season or no prices found, get minimum price from all seasons
+        if min_price is None:
+            for room_type in obj.room_types.all():
+                room_prices = room_type.prices.all()
+                if room_prices.exists():
+                    for price in room_prices:
+                        if min_price is None or price.price < min_price:
+                            min_price = price.price
+                            self._min_price_currency = price.currency
+        
+        return min_price
 
+    def get_min_price_currency(self, obj):
+        if hasattr(self, '_min_price_currency') and self._min_price_currency:
+            return CurrencySerializer(self._min_price_currency).data
+        return None
 
 class ReviewCreateSerializer(TranslationMixin, serializers.ModelSerializer):
     class Meta:
