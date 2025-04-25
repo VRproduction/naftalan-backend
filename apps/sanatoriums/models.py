@@ -21,19 +21,6 @@ class Location(models.Model):
         verbose_name_plural = _("Şəhərlər")
 
 
-# class Currency(models.Model):
-#     code = models.CharField(_("Valyuta kodu"), max_length=3, unique=True)  # AZN, USD, EUR, etc.
-#     name = models.CharField(_("Valyuta adı"), max_length=50)
-#     symbol = models.CharField(_("Simvol"), max_length=5)
-    
-#     def __str__(self):
-#         return f"{self.code} ({self.symbol})"
-    
-#     class Meta:
-#         verbose_name = _("Valyuta")
-#         verbose_name_plural = _("Valyutalar")
-
-
 class Season(models.Model):
     name = models.CharField(_("Mövsüm adı"), max_length=100)
     start_date = models.DateField(_("Başlanğıc tarixi"))
@@ -165,17 +152,19 @@ class RoomType(models.Model):
 
 class RoomPrice(models.Model):
     room_type = models.ForeignKey(RoomType, on_delete=models.CASCADE, related_name='prices', verbose_name=_("Otaq növü"))
-    season = models.ForeignKey(Season, on_delete=models.CASCADE, verbose_name=_("Mövsüm"))
+    season = models.ForeignKey(Season, on_delete=models.CASCADE, verbose_name=_("Mövsüm"), null=True, blank=True)
     occupancy = models.PositiveSmallIntegerField(_("Nəfər sayı"), default=1)
     with_treatment = models.BooleanField(_("Müalicə ilə"), default=True)
     treatment_option = models.ForeignKey(TreatmentOption, on_delete=models.SET_NULL, null=True, blank=True, 
                                        verbose_name=_("Müalicə növü"))
     price = models.DecimalField(_("Qiymət"), max_digits=10, decimal_places=2)
     currency = models.ForeignKey(Currency, on_delete=models.PROTECT, verbose_name=_("Valyuta"), null=True)
+    is_standard = models.BooleanField(_("Standart qiymət"), default=False, help_text=_("Seçildiyi təqdirdə, mövsüm olmadığı hallarda bu qiymət istifadə olunacaq"))
     
     def __str__(self):
         treatment_status = _("müalicə ilə") if self.with_treatment else _("müalicəsiz")
-        return f"{self.room_type.name} - {self.occupancy} nəfər ({treatment_status}) - {self.season.name}"
+        season_text = self.season.name if self.season else _("Standart")
+        return f"{self.room_type.name} - {self.occupancy} nəfər ({treatment_status}) - {season_text}"
     
     class Meta:
         verbose_name = _("Otaq qiyməti")
@@ -200,17 +189,19 @@ class AgeGroup(models.Model):
 class ExtraBedPrice(models.Model):
     room_type = models.ForeignKey(RoomType, on_delete=models.CASCADE, related_name='extra_bed_prices', 
                                 verbose_name=_("Otaq növü"))
-    season = models.ForeignKey(Season, on_delete=models.CASCADE, verbose_name=_("Mövsüm"))
+    season = models.ForeignKey(Season, on_delete=models.CASCADE, verbose_name=_("Mövsüm"), null=True, blank=True)
     age_group = models.ForeignKey(AgeGroup, on_delete=models.CASCADE, verbose_name=_("Yaş qrupu"))
     with_treatment = models.BooleanField(_("Müalicə ilə"), default=False)
     treatment_option = models.ForeignKey(TreatmentOption, on_delete=models.SET_NULL, null=True, blank=True, 
                                        verbose_name=_("Müalicə növü"))
     price = models.DecimalField(_("Qiymət"), max_digits=10, decimal_places=2)
     currency = models.ForeignKey(Currency, on_delete=models.PROTECT, verbose_name=_("Valyuta"), null=True)
+    is_standard = models.BooleanField(_("Standart qiymət"), default=False, help_text=_("Seçildiyi təqdirdə, mövsüm olmadığı hallarda bu qiymət istifadə olunacaq"))
     
     def __str__(self):
         treatment_status = _("müalicə ilə") if self.with_treatment else _("müalicəsiz")
-        return f"{self.room_type.name} - {self.age_group.name} ({treatment_status}) - {self.season.name}"
+        season_text = self.season.name if self.season else _("Standart")
+        return f"{self.room_type.name} - {self.age_group.name} ({treatment_status}) - {season_text}"
     
     class Meta:
         verbose_name = _("Əlavə çarpayı qiyməti")
