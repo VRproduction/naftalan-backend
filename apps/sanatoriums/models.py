@@ -189,14 +189,15 @@ class AgeGroup(models.Model):
 class ExtraBedPrice(models.Model):
     room_type = models.ForeignKey(RoomType, on_delete=models.CASCADE, related_name='extra_bed_prices', 
                                 verbose_name=_("Otaq növü"))
-    season = models.ForeignKey(Season, on_delete=models.CASCADE, verbose_name=_("Mövsüm"), null=True, blank=True)
     age_group = models.ForeignKey(AgeGroup, on_delete=models.CASCADE, verbose_name=_("Yaş qrupu"))
+    season = models.ForeignKey(Season, on_delete=models.CASCADE, verbose_name=_("Mövsüm"), null=True, blank=True)
+    is_standard = models.BooleanField(_("Standart qiymət"), default=True, help_text=_("Seçildiyi təqdirdə, mövsüm olmadığı hallarda bu qiymət istifadə olunacaq"))
+
     with_treatment = models.BooleanField(_("Müalicə ilə"), default=False)
     treatment_option = models.ForeignKey(TreatmentOption, on_delete=models.SET_NULL, null=True, blank=True, 
                                        verbose_name=_("Müalicə növü"))
     price = models.DecimalField(_("Qiymət"), max_digits=10, decimal_places=2)
     currency = models.ForeignKey(Currency, on_delete=models.PROTECT, verbose_name=_("Valyuta"), null=True)
-    is_standard = models.BooleanField(_("Standart qiymət"), default=False, help_text=_("Seçildiyi təqdirdə, mövsüm olmadığı hallarda bu qiymət istifadə olunacaq"))
     
     def __str__(self):
         treatment_status = _("müalicə ilə") if self.with_treatment else _("müalicəsiz")

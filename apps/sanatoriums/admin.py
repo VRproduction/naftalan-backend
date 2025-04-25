@@ -64,6 +64,12 @@ class ExtraBedPriceInline(nested_admin.NestedTabularInline):
     verbose_name = "Əlavə çarpayı qiyməti"
     verbose_name_plural = "Əlavə çarpayı qiymətləri"
 
+    def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
+        if db_field.name == "age_group":
+            first_age_group = AgeGroup.objects.order_by("min_age").first()
+            if first_age_group:
+                kwargs["initial"] = first_age_group.pk
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 class RoomTypeInline(nested_admin.NestedStackedInline, TranslationStackedInline, TranslationMedia):
     model = RoomType
