@@ -1,12 +1,12 @@
 from django.db import models
-
+from apps.sanatoriums.models import Sanatorium
 
 class HeroSlider(models.Model):
-    image = models.ImageField(upload_to='hero-slider')
     priority = models.IntegerField(default=1)
+    sanatorium = models.OneToOneField(Sanatorium, on_delete = models.CASCADE, null=True)
 
     def __str__(self):
-        return f'Image {self.id}'
+        return self.sanatorium.name
 
     def save(self, *args, **kwargs):
         if not self.pk:
