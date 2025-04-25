@@ -7,6 +7,7 @@ from datetime import date
 
 from ckeditor_uploader.fields import RichTextUploadingField
 
+from apps.core.models import Currency
 
 class Location(models.Model):
     region = models.CharField(_("Ad"), max_length=256)
@@ -20,17 +21,17 @@ class Location(models.Model):
         verbose_name_plural = _("Şəhərlər")
 
 
-class Currency(models.Model):
-    code = models.CharField(_("Valyuta kodu"), max_length=3, unique=True)  # AZN, USD, EUR, etc.
-    name = models.CharField(_("Valyuta adı"), max_length=50)
-    symbol = models.CharField(_("Simvol"), max_length=5)
+# class Currency(models.Model):
+#     code = models.CharField(_("Valyuta kodu"), max_length=3, unique=True)  # AZN, USD, EUR, etc.
+#     name = models.CharField(_("Valyuta adı"), max_length=50)
+#     symbol = models.CharField(_("Simvol"), max_length=5)
     
-    def __str__(self):
-        return f"{self.code} ({self.symbol})"
+#     def __str__(self):
+#         return f"{self.code} ({self.symbol})"
     
-    class Meta:
-        verbose_name = _("Valyuta")
-        verbose_name_plural = _("Valyutalar")
+#     class Meta:
+#         verbose_name = _("Valyuta")
+#         verbose_name_plural = _("Valyutalar")
 
 
 class Season(models.Model):
@@ -170,7 +171,7 @@ class RoomPrice(models.Model):
     treatment_option = models.ForeignKey(TreatmentOption, on_delete=models.SET_NULL, null=True, blank=True, 
                                        verbose_name=_("Müalicə növü"))
     price = models.DecimalField(_("Qiymət"), max_digits=10, decimal_places=2)
-    currency = models.ForeignKey(Currency, on_delete=models.PROTECT, verbose_name=_("Valyuta"))
+    currency = models.ForeignKey(Currency, on_delete=models.PROTECT, verbose_name=_("Valyuta"), null=True)
     
     def __str__(self):
         treatment_status = _("müalicə ilə") if self.with_treatment else _("müalicəsiz")
@@ -205,7 +206,7 @@ class ExtraBedPrice(models.Model):
     treatment_option = models.ForeignKey(TreatmentOption, on_delete=models.SET_NULL, null=True, blank=True, 
                                        verbose_name=_("Müalicə növü"))
     price = models.DecimalField(_("Qiymət"), max_digits=10, decimal_places=2)
-    currency = models.ForeignKey(Currency, on_delete=models.PROTECT, verbose_name=_("Valyuta"))
+    currency = models.ForeignKey(Currency, on_delete=models.PROTECT, verbose_name=_("Valyuta"), null=True)
     
     def __str__(self):
         treatment_status = _("müalicə ilə") if self.with_treatment else _("müalicəsiz")

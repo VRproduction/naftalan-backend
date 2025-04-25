@@ -4,7 +4,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Q
 from .models import (
     Location, Sanatorium, NaftalanSanatoriumsPage, OtherCitiesSanatoriumsPage,
-    Currency, Season, RoomType, RoomPrice, AgeGroup, ExtraBedPrice, TreatmentOption
+    Season, RoomType, RoomPrice, AgeGroup, ExtraBedPrice, TreatmentOption
     )
 from .serializers import (
     LocationSerializer, SanatoriumSerializer, SanatoriumListSerializer, 
@@ -13,6 +13,7 @@ from .serializers import (
     AgeGroupSerializer, ExtraBedPriceSerializer, TreatmentOptionSerializer
 )
 from utils.api.pagination.page_number_pagination import CustomPageNumberPagination
+from apps.core.models import Currency
 
 
 # Create your views here.

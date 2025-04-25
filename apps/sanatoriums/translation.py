@@ -2,7 +2,7 @@ from modeltranslation.translator import translator, TranslationOptions
 from .models import (
     Location, Sanatorium, Facility, RoomType, Review, 
     NaftalanSanatoriumsPage, OtherCitiesSanatoriumsPage,
-    Currency, Season, TreatmentOption, AgeGroup
+    Season, TreatmentOption, AgeGroup
 )
 
 class LocationTranslationOptions(TranslationOptions):
@@ -26,8 +26,6 @@ class NaftalanSanatoriumsPageTranslationOptions(TranslationOptions):
 class OtherCitiesSanatoriumsPageTranslationOptions(TranslationOptions):
     fields = ('hero_section_title', 'hero_section_description', 'main_section_title', 'main_section_description', 'sanatoriums_section_title', 'sanatoriums_section_description', 'contact_section_title', 'contact_section_description',)
 
-class CurrencyTranslationOptions(TranslationOptions):
-    fields = ('name',)
 
 class SeasonTranslationOptions(TranslationOptions):
     fields = ('name',)
@@ -46,7 +44,13 @@ translator.register(RoomType, RoomTypeTranslationOptions)
 translator.register(Review, ReviewTranslationOptions)
 translator.register(NaftalanSanatoriumsPage, NaftalanSanatoriumsPageTranslationOptions)
 translator.register(OtherCitiesSanatoriumsPage, OtherCitiesSanatoriumsPageTranslationOptions)
-translator.register(Currency, CurrencyTranslationOptions)
 translator.register(Season, SeasonTranslationOptions)
 translator.register(TreatmentOption, TreatmentOptionTranslationOptions)
 translator.register(AgeGroup, AgeGroupTranslationOptions)
+# from modeltranslation.translator import register, TranslationOptions
+# from .models import (Currency
+# )
+
+# @register(Currency)
+# class CurrencyTranslationOptions(TranslationOptions):
+#     fields = ('name',)

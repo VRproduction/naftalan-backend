@@ -31,7 +31,8 @@ CUSTOM_APPS = [
     'apps.pages.blogs.apps.BlogsConfig',
     'apps.pages.how_to_come.apps.HowToComeConfig',
     'apps.sanatoriums.apps.SanatoriumsConfig',
-
+    'apps.booking.apps.BookingConfig',
+    'apps.core.apps.CoreConfig'
 
 ]
 

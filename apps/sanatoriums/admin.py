@@ -4,7 +4,7 @@ from .models import (
     Location, Sanatorium, SanatoriumImage, 
     Facility, SanatoriumFacility,
     RoomType, RoomImage, Review, NaftalanSanatoriumsPage, OtherCitiesSanatoriumsPage,
-    Currency, Season, RoomPrice, AgeGroup, ExtraBedPrice, TreatmentOption
+    Season, RoomPrice, AgeGroup, ExtraBedPrice, TreatmentOption
 )
 
 import nested_admin
@@ -82,18 +82,6 @@ class LocationAdmin(TranslationAdmin, TranslationMedia):
     fieldsets = (
         (None, {
             'fields': ('region', 'country'),
-        }),
-    )
-
-
-@admin.register(Currency)
-class CurrencyAdmin(TranslationAdmin, TranslationMedia):
-    list_display = ('code', 'name', 'symbol')
-    search_fields = ('code', 'name')
-    
-    fieldsets = (
-        (None, {
-            'fields': ('code', 'name', 'symbol'),
         }),
     )
 

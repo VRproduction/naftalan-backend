@@ -5,9 +5,12 @@ from .models import (
     Location, Sanatorium, SanatoriumImage, 
     Facility, SanatoriumFacility,
     RoomType, RoomImage, Review, NaftalanSanatoriumsPage, OtherCitiesSanatoriumsPage,
-    Currency, Season, RoomPrice, AgeGroup, ExtraBedPrice, TreatmentOption
+    Season, RoomPrice, AgeGroup, ExtraBedPrice, TreatmentOption
 )
 from utils.api.mixins.translation import TranslationMixin
+
+from apps.core.models import Currency
+
 
 class LocationSerializer(TranslationMixin, serializers.ModelSerializer):
     class Meta:
