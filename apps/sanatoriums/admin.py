@@ -25,27 +25,27 @@ class TranslationMedia:
 # Inline admin classes
 class SanatoriumImageInline(nested_admin.NestedTabularInline):
     model = SanatoriumImage
-    extra = 1
+    extra = 0
     fields = ('image', 'is_main', 'priority')
     verbose_name = "Şəkil"
     verbose_name_plural = "Şəkillər"
 
 class SanatoriumFacilityInline(nested_admin.NestedTabularInline):
     model = SanatoriumFacility
-    extra = 1
+    extra = 0
     verbose_name = "Xidmət"
     verbose_name_plural = "Xidmətlər"
 
 class ReviewInline(nested_admin.NestedStackedInline,  TranslationStackedInline,  TranslationMedia):
     model = Review
-    extra = 1
+    extra = 0
     verbose_name = "Rəy"
     verbose_name_plural = "Müştəri rəyləri"
 
 
 class RoomImageInline(nested_admin.NestedTabularInline):
     model = RoomImage
-    extra = 1
+    extra = 0
     fields = ('image', 'priority')
     verbose_name = "Otaq şəkli"
     verbose_name_plural = "Otaq şəkilləri"
@@ -53,14 +53,14 @@ class RoomImageInline(nested_admin.NestedTabularInline):
 
 class RoomPriceInline(nested_admin.NestedTabularInline):
     model = RoomPrice
-    extra = 1
+    extra = 0
     verbose_name = "Qiymət"
     verbose_name_plural = "Qiymətlər"
 
 
 class ExtraBedPriceInline(nested_admin.NestedTabularInline):
     model = ExtraBedPrice
-    extra = 1
+    extra = 0
     verbose_name = "Əlavə çarpayı qiyməti"
     verbose_name_plural = "Əlavə çarpayı qiymətləri"
 
