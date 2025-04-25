@@ -51,7 +51,7 @@ class Sanatorium(models.Model):
     description = RichTextUploadingField(verbose_name=_('Haqqında'))
     short_description = models.TextField(_("Qısa təsvir"), blank=True)
     treatments = RichTextUploadingField(verbose_name=_('Müalicə imkanları'))
-    rating = models.DecimalField(_("Reytinq"), max_digits=3, decimal_places=1, validators=[MinValueValidator(0), MaxValueValidator(5)])
+    rating = models.FloatField(_("Reytinq"))
     address = models.CharField(_("Ünvan"), max_length=255)
     map_iframe = models.TextField(_("Xəritə iframe"))
     is_active = models.BooleanField(_("Aktivdir"), default=True)
