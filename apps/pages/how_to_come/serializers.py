@@ -15,7 +15,7 @@ class HeroSerializer(TranslationMixin, serializers.ModelSerializer):
         fields = ['title', 'description']
 
 
-class LocationSerializer(TranslationMixin, serializers.ModelSerializer):
+class LocationSectionSerializer(TranslationMixin, serializers.ModelSerializer):
     class Meta:
         model = Location
         fields = ['title', 'description', 'map_iframe']

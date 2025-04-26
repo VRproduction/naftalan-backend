@@ -8,7 +8,7 @@ from .models import (
 )
 from .serializers import (
     HeroSerializer,
-    LocationSerializer,
+    LocationSectionSerializer,
     TransportOptionSectionSerializer,
     VisaSectionSerializer
 )
@@ -21,7 +21,7 @@ class HeroView(RetrieveAPIView):
         return Hero.objects.first()
 
 class LocationView(RetrieveAPIView):
-    serializer_class = LocationSerializer
+    serializer_class = LocationSectionSerializer
 
     def get_object(self):
         return Location.objects.first()
