@@ -1,8 +1,10 @@
 from rest_framework.generics import ListAPIView, RetrieveAPIView
 
 from apps.sanatoriums.serializers import SanatoriumListSerializer
-from apps.sanatoriums.models import Sanatorium
+from apps.pages.blogs.serializers import BlogSerializer
 
+from apps.sanatoriums.models import Sanatorium
+from apps.pages.blogs.models import Blog
 
 
 from .models import (
@@ -95,6 +97,11 @@ class BlogSectionView(RetrieveAPIView):
 
     def get_object(self):
         return BlogSection.objects.first()
+
+
+class BlogsView(ListAPIView):
+    queryset = Blog.objects.filter(in_home = True)[:3]
+    serializer_class = BlogSerializer
 
 
 class FAQSectionView(RetrieveAPIView):

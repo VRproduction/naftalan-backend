@@ -20,6 +20,7 @@ urlpatterns = [
     path('contact-section/', views.ContactSectionView.as_view(),
          name='contact-section'),
     path('blog-section/', views.BlogSectionView.as_view(), name='blog-section'),
+    path('blogs/', views.BlogsView.as_view(), name='blogs'),
     path('faq-section/', views.FAQSectionView.as_view(), name='faq-section'),
     path('faq/', views.FAQView.as_view(), name='faq'),
 ]
