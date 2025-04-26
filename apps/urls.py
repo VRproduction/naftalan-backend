@@ -6,5 +6,6 @@ urlpatterns = [
     path('sanatoriums/', include('apps.sanatoriums.urls')),   
     path('blogs/', include('apps.pages.blogs.urls')),
     path('booking/', include('apps.booking.urls')),
+    path('how-to-come/', include('apps.pages.how_to_come.urls')),
     # path('packages/', include('apps.packages.urls')),
 ]

@@ -103,20 +103,3 @@ class BookingAdmin(nested_admin.NestedModelAdmin):
                 
         super().save_model(request, obj, form, change)
 
-@admin.register(GuestDetail)
-class GuestDetailAdmin(admin.ModelAdmin):
-    list_display = ('booking', 'first_name', 'last_name', 'gender', 'date_of_birth', 'age_category', 'is_main_guest')
-    list_filter = ('gender', 'age_category', 'is_main_guest')
-    search_fields = ('first_name', 'last_name', 'booking__booking_reference')
-    
-@admin.register(ExtraBedBooking)
-class ExtraBedBookingAdmin(admin.ModelAdmin):
-    list_display = ('booking', 'quantity', 'for_adult', 'with_treatment', 'price_per_night')
-    list_filter = ('for_adult', 'with_treatment')
-    search_fields = ('booking__booking_reference',)
-
-@admin.register(BookingNote)
-class BookingNoteAdmin(admin.ModelAdmin):
-    list_display = ('booking', 'note', 'created_at')
-    list_filter = ('created_at',)
-    search_fields = ('booking__booking_reference', 'note')
