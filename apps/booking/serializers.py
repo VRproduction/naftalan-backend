@@ -113,7 +113,7 @@ class BookingCreateSerializer(TranslationMixin, serializers.ModelSerializer):
         extra_beds_data = validated_data.pop('extra_beds', [])
         
         # Set default status to pending
-        validated_data['status'] = 'pending'
+        validated_data['status'] = 'new'
         
         # Generate booking reference
         import random
