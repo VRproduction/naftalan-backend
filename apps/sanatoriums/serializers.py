@@ -128,20 +128,14 @@ class SanatoriumListSerializer(TranslationMixin, serializers.ModelSerializer):
     images = SanatoriumImageSerializer(many=True, read_only=True)
     min_price = serializers.SerializerMethodField()
     min_price_currency = serializers.SerializerMethodField()
-    seo = serializers.SerializerMethodField()
 
     class Meta:
         model = Sanatorium
         fields = [
             'id', 'name', 'slug', 'location', 'location_type',
             'short_description', 'rating', 'min_price', 'min_price_currency',
-            'is_active', 'in_home', 'main_image', 'facilities', 'images', 'seo'
+            'is_active', 'in_home', 'main_image', 'facilities', 'images'
         ]
-    @extend_schema_field(SEOSerializer)
-    def get_seo(self, obj):
-        """SEO məlumatlarını ayrı bir obyekt kimi qaytarır"""
-        serializer = SEOSerializer(obj, context=self.context)
-        return serializer.data
     
     def get_main_image(self, obj):
         request = self.context.get('request')
@@ -200,18 +194,25 @@ class SanatoriumSerializer(TranslationMixin, serializers.ModelSerializer):
     similar_sanatoriums = serializers.SerializerMethodField()
     min_price = serializers.SerializerMethodField()
     min_price_currency = serializers.SerializerMethodField()
-    
+    seo = serializers.SerializerMethodField()
+
     class Meta:
         model = Sanatorium
         fields = [
             'id', 'name', 'slug', 'description', 'treatments', 'location', 'location_type',
             'map_iframe', 'address',
             'rating', 'facilities', 'room_types', 'reviews',
-            'in_home', 'created_at', 'updated_at', 'images', 'similar_sanatoriums', 'min_price', 'min_price_currency'
+            'in_home', 'created_at', 'updated_at', 'images', 'similar_sanatoriums', 'min_price', 'min_price_currency', 'seo'
         ]
         read_only_fields = ['slug', 'created_at', 'updated_at', 'min_price', 'min_price_currency']
 
 
+    @extend_schema_field(SEOSerializer)
+    def get_seo(self, obj):
+        """SEO məlumatlarını ayrı bir obyekt kimi qaytarır"""
+        serializer = SEOSerializer(obj, context=self.context)
+        return serializer.data
+    
     @extend_schema_field(SanatoriumListSerializer(many=True))
     def get_similar_sanatoriums(self, obj):
         queryset = Sanatorium.objects.filter(
