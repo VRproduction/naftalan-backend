@@ -7,6 +7,10 @@ from datetime import date
 
 from ckeditor_uploader.fields import RichTextUploadingField
 
+
+from utils.models.seo_model import SEOModel
+
+
 from apps.core.models import Currency
 
 class Location(models.Model):
@@ -39,7 +43,7 @@ class Season(models.Model):
         return self.start_date <= today <= self.end_date
 
 
-class Sanatorium(models.Model):
+class Sanatorium(SEOModel):
     LOCATION_TYPE_CHOICES = (
         ('naftalan', _('Naftalan')),
         ('other_cities', _('Digər şəhərlər')),
@@ -65,6 +69,16 @@ class Sanatorium(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.name)
+        if not self.meta_title:
+            self.meta_title = self.name
+        if not self.meta_description:
+            self.meta_description = self.short_description[:160]
+        if not self.og_title:
+            self.og_title = self.name
+        if not self.og_description:
+            self.og_description = self.short_description[:200]
+   
+            
         super().save(*args, **kwargs)
     
     class Meta:

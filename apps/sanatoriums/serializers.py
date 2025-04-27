@@ -12,6 +12,24 @@ from utils.api.mixins.translation import TranslationMixin
 from apps.core.models import Currency
 
 
+class SEOSerializer(serializers.ModelSerializer):
+    """SEO məlumatları üçün ayrı serializer"""
+    og_image = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Sanatorium
+        fields = ('meta_title', 'meta_description', 'meta_keywords', 'og_title', 'og_description', 'og_image',
+                 'canonical_url', 'no_index', 'no_follow')
+    
+    def get_og_image(self, obj):
+        """OG Image üçün tam URL qaytarır"""
+        request = self.context.get('request')
+        if obj.og_image and hasattr(obj.og_image, 'url'):
+            if request is not None:
+                return request.build_absolute_uri(obj.og_image.url)
+            return obj.og_image.url
+        return None
+
 class LocationSerializer(TranslationMixin, serializers.ModelSerializer):
     class Meta:
         model = Location
@@ -110,14 +128,20 @@ class SanatoriumListSerializer(TranslationMixin, serializers.ModelSerializer):
     images = SanatoriumImageSerializer(many=True, read_only=True)
     min_price = serializers.SerializerMethodField()
     min_price_currency = serializers.SerializerMethodField()
+    seo = serializers.SerializerMethodField()
 
     class Meta:
         model = Sanatorium
         fields = [
             'id', 'name', 'slug', 'location', 'location_type',
             'short_description', 'rating', 'min_price', 'min_price_currency',
-            'is_active', 'in_home', 'main_image', 'facilities', 'images'
+            'is_active', 'in_home', 'main_image', 'facilities', 'images', 'seo'
         ]
+    @extend_schema_field(SEOSerializer)
+    def get_seo(self, obj):
+        """SEO məlumatlarını ayrı bir obyekt kimi qaytarır"""
+        serializer = SEOSerializer(obj, context=self.context)
+        return serializer.data
     
     def get_main_image(self, obj):
         request = self.context.get('request')

@@ -9,7 +9,7 @@ class LocationTranslationOptions(TranslationOptions):
     fields = ('region', 'country')
 
 class SanatoriumTranslationOptions(TranslationOptions):
-    fields = ('name', 'description', 'short_description', 'treatments', 'address')
+    fields = ('name', 'description', 'short_description', 'treatments', 'address', 'meta_title', 'meta_description', 'meta_keywords')
 
 class FacilityTranslationOptions(TranslationOptions):
     fields = ('name',)

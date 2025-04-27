@@ -156,6 +156,18 @@ class SanatoriumAdmin(nested_admin.NestedModelAdmin, TranslationAdmin, Translati
         ('Ünvan məlumatları', {
             'fields': ('address', 'map_iframe'),
         }),
+        ('SEO Məlumatları', {
+            'fields': ('meta_title', 'meta_description', 'meta_keywords'),
+            'classes': ('collapse',)
+        }),
+        ('Open Graph', {
+            'fields': ('og_title', 'og_description', 'og_image'),
+            'classes': ('collapse',)
+        }),
+        ('Əlavə SEO Parametrləri', {
+            'fields': ('canonical_url', 'no_index', 'no_follow'),
+            'classes': ('collapse',)
+        }),
     )
 
 
