@@ -1,6 +1,10 @@
 from django.contrib import admin
-from modeltranslation.admin import TranslationAdmin, TranslationStackedInline
-from .models import Booking, GuestDetail, ExtraBedBooking, BookingNote
+from django.utils.html import format_html
+from django.contrib.auth import get_user_model
+from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
+
+from .models import Booking, GuestDetail, ExtraBedBooking, BookingNote, BookingStatus
 import nested_admin
 
 # Common Media class for admin panels
@@ -18,7 +22,7 @@ class TranslationMedia:
 # Inline admin classes
 class GuestDetailInline(nested_admin.NestedTabularInline):
     model = GuestDetail
-    extra = 1
+    extra = 0
     fields = ('first_name', 'last_name', 'gender', 'date_of_birth', 'age_category', 'is_main_guest')
     verbose_name = "Qonaq məlumatları"
     verbose_name_plural = "Qonaqlar"
@@ -26,24 +30,30 @@ class GuestDetailInline(nested_admin.NestedTabularInline):
 class ExtraBedBookingInline(nested_admin.NestedTabularInline):
     model = ExtraBedBooking
     extra = 0
-    fields = ('quantity', 'for_adult', 'with_treatment', 'treatment_option', 'price_per_night')
+    fields = ('extra_bed_price', 'quantity', 'for_adult', 'with_treatment', 'treatment_option', 'price_per_night',)
     verbose_name = "Əlavə çarpayı"
     verbose_name_plural = "Əlavə çarpayılar"
 
 class BookingNoteInline(nested_admin.NestedStackedInline):
     model = BookingNote
     extra = 1
-    fields = ('note',)
+    fields = ('note', 'created_by')
+    readonly_fields = ('created_at', 'created_by')
     verbose_name = "Qeyd"
     verbose_name_plural = "Qeydlər"
+    
+    def save_model(self, request, obj, form, change):
+        if not obj.created_by:
+            obj.created_by = request.user
+        super().save_model(request, obj, form, change)
 
 @admin.register(Booking)
 class BookingAdmin(nested_admin.NestedModelAdmin):
-    list_display = ('booking_reference', 'first_name', 'last_name', 'sanatorium', 'room_type', 
-                   'check_in_date', 'check_out_date', 'status', 'total_price', 'currency')
+    list_display = ('booking_reference','display_status', 'first_name', 'last_name', 'sanatorium', 'room_type', 
+                   'check_in_date', 'check_out_date', 'total_price', 'currency', 'status_changed_at')
     list_filter = ('status', 'sanatorium', 'room_type', 'check_in_date', 'with_treatment', 'season')
     search_fields = ('booking_reference', 'first_name', 'last_name', 'email', 'phone')
-    readonly_fields = ('booking_reference', 'created_at', 'updated_at')
+    readonly_fields = ('booking_reference', 'created_at', 'updated_at', 'status_changed_at')
     date_hierarchy = 'check_in_date'
     
     inlines = [
@@ -52,7 +62,98 @@ class BookingAdmin(nested_admin.NestedModelAdmin):
         BookingNoteInline
     ]
     
+    actions = ['mark_as_confirmed', 'mark_as_cancelled', 'mark_as_waiting_payment', 'mark_as_completed']
+    
+    @admin.display(description='Status', ordering='status')
+    def display_status(self, obj):
+        color = {
+            'new': '#4285F4',  # blue
+            'confirmed': '#34A853',  # green
+            'cancelled': '#EA4335',  # red
+            'completed': '#9C27B0',  # purple
+            'waiting_payment': '#FBBC05',  # yellow
+        }.get(obj.status, '#9E9E9E')  # gray default
+        
+        text_color = '#FFFFFF'  # white for most
+        if obj.status == 'waiting_payment':
+            text_color = '#000000'  # black for yellow background
+            
+        return format_html(
+            '<span style="padding:4px 8px; background-color:{}; color:{}; border-radius:5px;">{}</span>',
+            color,
+            text_color,
+            obj.get_status_display() if hasattr(obj, 'get_status_display') else obj.status
+        )
+    
+    def save_formset(self, request, form, formset, change):
+        instances = formset.save(commit=False)
+        
+        for instance in instances:
+            if isinstance(instance, BookingNote) and not instance.created_by:
+                instance.created_by = request.user
+            instance.save()
+            
+        formset.save_m2m()
+    
+    def add_status_note(self, request, queryset, new_status, note_template):
+        User = get_user_model()
+        current_user = request.user if isinstance(request.user, User) else None
+        
+        for booking in queryset:
+            booking.status = new_status
+            booking.status_changed_at = timezone.now()
+            booking.save()
+            
+            # Add a note
+            BookingNote.objects.create(
+                booking=booking,
+                note=note_template.format(
+                    status=dict(BookingStatus.choices)[new_status],
+                    user=current_user.get_full_name() if current_user else "Admin"
+                ),
+                created_by=current_user
+            )
+    
+    @admin.action(description=_("Təsdiqlənmiş kimi qeyd edin"))
+    def mark_as_confirmed(self, request, queryset):
+        self.add_status_note(
+            request, queryset, 
+            BookingStatus.CONFIRMED, 
+            _("Rezervasiya statusu '{status}' olaraq dəyişdirildi. ({user} tərəfindən)")
+        )
+        self.message_user(request, _("Seçilmiş rezervasiyalar təsdiqləndi"))
+    
+    @admin.action(description=_("Ödəniş gözləyir kimi qeyd edin"))
+    def mark_as_waiting_payment(self, request, queryset):
+        self.add_status_note(
+            request, queryset, 
+            BookingStatus.WAITING_PAYMENT, 
+            _("Rezervasiya statusu '{status}' olaraq dəyişdirildi. ({user} tərəfindən)")
+        )
+        self.message_user(request, _("Seçilmiş rezervasiyalar 'Ödəniş gözlənilir' kimi işarələndi"))
+    
+    @admin.action(description=_("Ləğv edilmiş kimi qeyd edin"))
+    def mark_as_cancelled(self, request, queryset):
+        self.add_status_note(
+            request, queryset, 
+            BookingStatus.CANCELLED, 
+            _("Rezervasiya statusu '{status}' olaraq dəyişdirildi. ({user} tərəfindən)")
+        )
+        self.message_user(request, _("Seçilmiş rezervasiyalar ləğv edildi"))
+        
+    @admin.action(description=_("Tamamlanmış kimi qeyd edin"))
+    def mark_as_completed(self, request, queryset):
+        self.add_status_note(
+            request, queryset, 
+            BookingStatus.COMPLETED, 
+            _("Rezervasiya statusu '{status}' olaraq dəyişdirildi. ({user} tərəfindən)")
+        )
+        self.message_user(request, _("Seçilmiş rezervasiyalar 'Tamamlandı' kimi işarələndi"))
+    
     fieldsets = (
+        ('Qiymət və Status', {
+            'fields': ('total_price', 'currency', 'status', 'status_note', 'status_changed_at')
+        }),
         ('Şəxsi məlumatlar', {
             'fields': ('first_name', 'last_name', 'email', 'phone')
         }),
@@ -63,12 +164,9 @@ class BookingAdmin(nested_admin.NestedModelAdmin):
         ('Müalicə məlumatları', {
             'fields': ('with_treatment', 'treatment_option')
         }),
-        ('Qiymət və Status', {
-            'fields': ('total_price', 'currency', 'status')
-        }),
+        
         ('Xüsusi istəklər', {
             'fields': ('special_requests',),
-            'classes': ('collapse',)
         }),
         ('Meta məlumatlar', {
             'fields': ('created_at', 'updated_at'),

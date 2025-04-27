@@ -1,14 +1,16 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import MinValueValidator, MaxValueValidator
-from apps.sanatoriums.models import Sanatorium, RoomType, Season, TreatmentOption, Currency
+from apps.sanatoriums.models import Sanatorium, RoomType, Season, TreatmentOption, Currency, ExtraBedPrice
+from django.conf import settings
 
-# Status choices for bookings
+# Status choices for bookings - simplified for better admin understanding
 class BookingStatus(models.TextChoices):
-    PENDING = 'pending', _('Gözləmədə')
-    CONFIRMED = 'confirmed', _('Təsdiqlənib')
-    CANCELLED = 'cancelled', _('Ləğv edilib')
-    COMPLETED = 'completed', _('Tamamlanıb')
+    NEW = 'new', _('Yeni')  # New bookings that just came in
+    CONFIRMED = 'confirmed', _('Təsdiqlənib')  # Booking is confirmed
+    CANCELLED = 'cancelled', _('Ləğv edilib')  # Booking is cancelled
+    COMPLETED = 'completed', _('Tamamlanıb')  # Guest stay completed
+    WAITING_PAYMENT = 'waiting_payment', _('Ödəniş gözlənilir')  # Waiting for customer payment
 
 class Booking(models.Model):
     # Personal Information
@@ -28,14 +30,16 @@ class Booking(models.Model):
     children = models.PositiveSmallIntegerField(_("Uşaq sayı"), default=0)
     
     # Special requests
-    special_requests = models.TextField(_("Xüsusi istəklər"), blank=True)
+    special_requests = models.TextField(_("Xüsusi istəklər"), null=True, blank=True)
     
     # Treatment options
     with_treatment = models.BooleanField(_("Müalicə ilə"), default=True)
     treatment_option = models.ForeignKey(TreatmentOption, on_delete=models.SET_NULL, null=True, blank=True, related_name='bookings', verbose_name=_("Müalicə növü"))
 
     # Booking status
-    status = models.CharField(_("Status"), max_length=20, choices=BookingStatus.choices, default=BookingStatus.PENDING)
+    status = models.CharField(_("Status"), max_length=30, choices=BookingStatus.choices, default=BookingStatus.NEW)
+    status_note = models.TextField(_("Status haqqında qeyd"), null=True, blank=True)
+    status_changed_at = models.DateTimeField(_("Status dəyişiklik tarixi"), auto_now=True)
     
     # Price information 
     total_price = models.DecimalField(_("Ümumi məbləğ"), max_digits=10, decimal_places=2)
@@ -50,6 +54,29 @@ class Booking(models.Model):
     
     def days_of_stay(self):
         return (self.check_out_date - self.check_in_date).days
+    
+    def save(self, *args, **kwargs):
+        # Track status changes for email notifications
+        if self.pk:
+            old_instance = Booking.objects.get(pk=self.pk)
+            if old_instance.status != self.status:
+                # Status changed, we'll send notification after save
+                status_changed = True
+                old_status = old_instance.status
+            else:
+                status_changed = False
+        else:
+            # New booking
+            status_changed = True
+            old_status = None
+            
+        # Call the original save method
+        super().save(*args, **kwargs)
+        
+        # If status changed, send notifications
+        if status_changed:
+            from .tasks import send_booking_status_email
+            send_booking_status_email.delay(self.pk, old_status)
     
     class Meta:
         verbose_name = _("Rezervasiya")
@@ -71,8 +98,8 @@ class GuestDetail(models.Model):
     booking = models.ForeignKey(Booking, on_delete=models.CASCADE, related_name='guests', verbose_name=_("Rezervasiya"))
     first_name = models.CharField(_("Ad"), max_length=100)
     last_name = models.CharField(_("Soyad"), max_length=100)
-    gender = models.CharField(_("Cinsiyyət"), max_length=10, choices=GENDER_CHOICES)
-    date_of_birth = models.DateField(_("Doğum tarixi"))
+    gender = models.CharField(_("Cinsiyyət"), max_length=10, choices=GENDER_CHOICES, null = True, blank = True)
+    date_of_birth = models.DateField(_("Doğum tarixi"), null = True, blank = True)
     age_category = models.CharField(_("Yaş kateqoriyası"), max_length=10, choices=AGE_CATEGORY_CHOICES)
     is_main_guest = models.BooleanField(_("Əsas qonaq"), default=False)
     
@@ -86,6 +113,7 @@ class GuestDetail(models.Model):
 
 class ExtraBedBooking(models.Model):
     booking = models.ForeignKey(Booking, on_delete=models.CASCADE, related_name='extra_beds', verbose_name=_("Rezervasiya"))
+    extra_bed_price = models.ForeignKey(ExtraBedPrice, on_delete=models.CASCADE, verbose_name=_("Əlavə çarpayı qiyməti"), null = True)
     quantity = models.PositiveSmallIntegerField(_("Miqdar"), default=1)
     for_adult = models.BooleanField(_("Böyük üçün"), default=False)
     with_treatment = models.BooleanField(_("Müalicə ilə"), default=False)
@@ -104,6 +132,7 @@ class BookingNote(models.Model):
     booking = models.ForeignKey(Booking, on_delete=models.CASCADE, related_name='notes', verbose_name=_("Rezervasiya"))
     note = models.TextField(_("Qeyd"))
     created_at = models.DateTimeField(_("Yaradılma tarixi"), auto_now_add=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_("Yaradan"))
     
     def __str__(self):
         return f"Note for {self.booking.booking_reference}"

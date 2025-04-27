@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ödəniş tələb olunur</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background-color: #FFEB3B;
+            color: #333;
+            padding: 20px;
+            text-align: center;
+        }
+        .content {
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        .booking-details {
+            background-color: white;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 20px;
+            border: 1px solid #ddd;
+        }
+        .booking-detail-item {
+            margin-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        .booking-detail-item:last-child {
+            border-bottom: none;
+        }
+        .footer {
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+        }
+        .important-notice {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .payment-info {
+            background-color: #e9f7ef;
+            border-left: 4px solid #27ae60;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .button {
+            display: inline-block;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Ödəniş tələb olunur</h1>
+        </div>
+        
+        <div class="content">
+            <p>Hörmətli {{ booking.first_name }} {{ booking.last_name }},</p>
+            
+            <p>{{ booking.sanatorium.name }} sanatoriyasında olan rezervasiyanız üçün ödəniş tələb olunur.</p>
+            
+            <div class="important-notice">
+                <h3>Vacib bildiriş</h3>
+                <p>Rezervasiyanızı təsdiqləmək üçün lütfən 24 saat ərzində ödənişi tamamlayın. Əks halda, rezervasiyanız avtomatik olaraq ləğv edilə bilər.</p>
+            </div>
+            
+            <div class="booking-details">
+                <div class="booking-detail-item">
+                    <strong>Rezervasiya nömrəsi:</strong> {{ booking.booking_reference }}
+                </div>
+                <div class="booking-detail-item">
+                    <strong>Sanatorium:</strong> {{ booking.sanatorium.name }}
+                </div>
+                <div class="booking-detail-item">
+                    <strong>Otaq növü:</strong> {{ booking.room_type.name }}
+                </div>
+                <div class="booking-detail-item">
+                    <strong>Giriş tarixi:</strong> {{ booking.check_in_date|date:"d.m.Y" }}
+                </div>
+                <div class="booking-detail-item">
+                    <strong>Çıxış tarixi:</strong> {{ booking.check_out_date|date:"d.m.Y" }}
+                </div>
+                <div class="booking-detail-item">
+                    <strong>Gecələrin sayı:</strong> {{ booking.days_of_stay }}
+                </div>
+                <div class="booking-detail-item">
+                    <strong>Qonaqların sayı:</strong> {{ booking.adults }} böyük, {{ booking.children }} uşaq
+                </div>
+                <div class="booking-detail-item">
+                    <strong>Ödənilməli məbləğ:</strong> {{ booking.total_price }} {{ booking.currency.code }}
+                </div>
+            </div>
+            
+            <div class="payment-info">
+                <h3>Ödəniş təlimatları</h3>
+                <p>Rezervasiyanızı təsdiqləmək üçün, zəhmət olmasa aşağıdakı bank hesabına {{ booking.total_price }} AZN məbləğində ödəniş edin:</p>
+                <p><strong>Bank adı:</strong> {{ bank_name|default:"Bank Respublika" }}</p>
+                <p><strong>Hesab sahibi:</strong> {{ account_holder|default:"Naftalan Resort" }}</p>
+                <p><strong>IBAN:</strong> {{ iban|default:"AZ79XXXX0000000000000000" }}</p>
+                <p><strong>SWIFT/BIC:</strong> {{ swift_code|default:"AZNBAZ22" }}</p>
+                <p><strong>Ödəniş təyinatı:</strong> Rezervasiya #{{ booking.booking_reference }} üçün ödəniş</p>
+            </div>
+            
+            <h3>Ödəniş təsdiqləməsi</h3>
+            <p>Ödənişi tamamladıqdan sonra, zəhmət olmasa ödəniş qəbzinin bir surətini {{ support_email }} ünvanına göndərin və ya aşağıdakı linkdən istifadə edərək rezervasiya hesabınıza yükləyin:</p>
+            
+            <p style="text-align: center;">
+                <a href="{{ booking_url }}" class="button">Rezervasiya hesabını ziyarət edin</a>
+            </p>
+            
+            <p>Ödənişiniz qəbul edildikdən sonra, rezervasiyanız avtomatik olaraq təsdiqlənəcək və sizə təsdiq e-poçtu göndəriləcək.</p>
+            
+            <h3>Əlaqə məlumatları</h3>
+            <p>Ödənişlə bağlı hər hansı bir sualınız və ya çətinliyiniz varsa, bizə {{ support_email }} ünvanı və ya {{ support_phone|default:"+994 XX XXX XX XX" }} nömrəsi vasitəsilə əlaqə saxlaya bilərsiniz.</p>
+            
+            <p>Hörmətlə,<br>{{ site_name }} komandası</p>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; {{ site_name }} - Bütün hüquqlar qorunur</p>
+            <p>Əgər bu e-poçt sizə səhvən göndərilibsə, zəhmət olmasa, bu barədə bizə məlumat verin</p>
+        </div>
+    </div>
+</body>
+</html> 

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rezervasiyanız tamamlandı</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background-color: #9C27B0;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .content {
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        .booking-details {
+            background-color: white;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 20px;
+            border: 1px solid #ddd;
+        }
+        .booking-detail-item {
+            margin-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        .booking-detail-item:last-child {
+            border-bottom: none;
+        }
+        .footer {
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+        }
+        .completed-banner {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            text-align: center;
+            padding: 10px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .thank-you-box {
+            background-color: #f3e5f5;
+            border-left: 4px solid #9C27B0;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .button {
+            display: inline-block;
+            background-color: #9C27B0;
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+        .rating-stars {
+            font-size: 30px;
+            letter-spacing: 5px;
+            color: #FFD700;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Rezervasiyanız tamamlandı</h1>
+        </div>
+        
+        <div class="content">
+            <div class="completed-banner">
+                <h2>Rezervasiyanız uğurla tamamlandı</h2>
+                <p>Bizi seçdiyiniz üçün təşəkkür edirik!</p>
+            </div>
+            
+            <p>Hörmətli {{ booking.first_name }} {{ booking.last_name }},</p>
+            
+            <p>{{ booking.sanatorium.name }} sanatoriyasında olan səyahətiniz tamamlandı. Umid edirik ki, qaldığınız müddətdə yaxşı istirahət etmisiniz və müalicələrimizdən faydalanmısınız.</p>
+            
+            <div class="thank-you-box">
+                <h3>Təşəkkürlər!</h3>
+                <p>Bizi seçdiyiniz üçün təşəkkür edirik. Siz bizim üçün dəyərlisiniz və qonaqperliymizin daimi olaraq təkmilləşdirilməsi üçün rəyiniz bizim üçün çox önəmlidir.</p>
+                <p>Təcrübənizi qiymətləndirmək üçün aşağıdakı düyməni sıxın:</p>
+                <p style="text-align: center;">
+                    <a href="{{ feedback_url|default:site_url }}" class="button">Rəy bildirin</a>
+                </p>
+                <div class="rating-stars" style="text-align: center;">★★★★★</div>
+            </div>
+            
+            <div class="booking-details">
+                <div class="booking-detail-item">
+                    <strong>Rezervasiya nömrəsi:</strong> {{ booking.booking_reference }}
+                </div>
+                <div class="booking-detail-item">
+                    <strong>Sanatorium:</strong> {{ booking.sanatorium.name }}
+                </div>
+                <div class="booking-detail-item">
+                    <strong>Otaq növü:</strong> {{ booking.room_type.name }}
+                </div>
+                <div class="booking-detail-item">
+                    <strong>Giriş tarixi:</strong> {{ booking.check_in_date|date:"d.m.Y" }}
+                </div>
+                <div class="booking-detail-item">
+                    <strong>Çıxış tarixi:</strong> {{ booking.check_out_date|date:"d.m.Y" }}
+                </div>
+                <div class="booking-detail-item">
+                    <strong>Qalma müddəti:</strong> {{ booking.days_of_stay }} gecə
+                </div>
+                <div class="booking-detail-item">
+                    <strong>Status:</strong> Tamamlandı
+                </div>
+            </div>
+            
+            <h3>Gələcək rezervasiyalar</h3>
+            <p>Yenidən bizi seçməyinizi ümid edirik. Naftalan Resorta növbəti səyahətinizi planlaşdırmaq üçün veb saytımızı ziyarət edə bilərsiniz:</p>
+            
+            <p style="text-align: center;">
+                <a href="{{ site_url }}" class="button">Yeni rezervasiya edin</a>
+            </p>
+            
+            <p>Bizim xüsusi təkliflərimizdən və endirimlərindən xəbərdar olmaq istəyirsinizsə, zəhmət olmasa bizim sosial media hesablarımızı izləyin:</p>
+            <p style="text-align: center;">
+                <a href="{{ facebook_url|default:'#' }}" style="margin: 0 10px;">Facebook</a> |
+                <a href="{{ instagram_url|default:'#' }}" style="margin: 0 10px;">Instagram</a> |
+                <a href="{{ twitter_url|default:'#' }}" style="margin: 0 10px;">Twitter</a>
+            </p>
+            
+            <h3>Əlaqə məlumatları</h3>
+            <p>Hər hansı bir sualınız və ya köməyə ehtiyacınız olarsa, bizə {{ support_email }} ünvanı və ya {{ support_phone|default:"+994 XX XXX XX XX" }} nömrəsi vasitəsilə əlaqə saxlaya bilərsiniz.</p>
+            
+            <p>Hörmətlə,<br>{{ site_name }} komandası</p>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; {{ site_name }} - Bütün hüquqlar qorunur</p>
+            <p>Əgər bu e-poçt sizə səhvən göndərilibsə, zəhmət olmasa, bu barədə bizə məlumat verin</p>
+        </div>
+    </div>
+</body>
+</html> 

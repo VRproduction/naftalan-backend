@@ -2,7 +2,7 @@ from rest_framework import serializers
 from .models import Booking, GuestDetail, ExtraBedBooking, BookingNote, Season
 from apps.sanatoriums.serializers import (
     SanatoriumListSerializer, RoomTypeSerializer,
-    SeasonSerializer, TreatmentOptionSerializer, CurrencySerializer
+    SeasonSerializer, TreatmentOptionSerializer, CurrencySerializer, ExtraBedPriceSerializer
 )
 from utils.api.mixins.translation import TranslationMixin
 from django.utils.translation import gettext_lazy as _
@@ -15,13 +15,15 @@ class GuestDetailSerializer(TranslationMixin, serializers.ModelSerializer):
 
 class ExtraBedBookingSerializer(TranslationMixin, serializers.ModelSerializer):
     treatment_option_detail = TreatmentOptionSerializer(source='treatment_option', read_only=True)
+    extra_bed_price_detail = ExtraBedPriceSerializer(source='extra_bed_price', read_only=True)
     
     class Meta:
         model = ExtraBedBooking
         fields = ['id', 'quantity', 'for_adult', 'with_treatment', 'treatment_option', 
-                 'treatment_option_detail', 'price_per_night']
+                 'treatment_option_detail', 'price_per_night', 'extra_bed_price', 'extra_bed_price_detail']
         extra_kwargs = {
-            'treatment_option': {'write_only': True}
+            'treatment_option': {'write_only': True},
+            'extra_bed_price': {'write_only': True}
         }
 
 class BookingNoteSerializer(TranslationMixin, serializers.ModelSerializer):

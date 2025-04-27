@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rezervasiyanız ləğv edildi</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background-color: #f44336;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .content {
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        .booking-details {
+            background-color: white;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 20px;
+            border: 1px solid #ddd;
+        }
+        .booking-detail-item {
+            margin-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        .booking-detail-item:last-child {
+            border-bottom: none;
+        }
+        .footer {
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+        }
+        .button {
+            display: inline-block;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+        .message-box {
+            background-color: #f5f5f5;
+            border-left: 4px solid #999;
+            padding: 10px 15px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Rezervasiyanız ləğv edildi</h1>
+        </div>
+        
+        <div class="content">
+            <p>Hörmətli {{ booking.first_name }} {{ booking.last_name }},</p>
+            
+            <p>Bu, {{ booking.sanatorium.name }} sanatoriyasındakı rezervasiyanızın ləğv edildiyini təsdiqləmək üçündür.</p>
+            
+            {% if cancellation_reason %}
+            <div class="message-box">
+                <p><strong>Ləğv səbəbi:</strong> {{ cancellation_reason }}</p>
+            </div>
+            {% endif %}
+            
+            <p>Ləğv edilmiş rezervasiya detalları:</p>
+            
+            <div class="booking-details">
+                <div class="booking-detail-item">
+                    <strong>Rezervasiya nömrəsi:</strong> {{ booking.booking_reference }}
+                </div>
+                <div class="booking-detail-item">
+                    <strong>Sanatorium:</strong> {{ booking.sanatorium.name }}
+                </div>
+                <div class="booking-detail-item">
+                    <strong>Otaq növü:</strong> {{ booking.room_type.name }}
+                </div>
+                <div class="booking-detail-item">
+                    <strong>Giriş tarixi:</strong> {{ booking.check_in_date|date:"d.m.Y" }}
+                </div>
+                <div class="booking-detail-item">
+                    <strong>Çıxış tarixi:</strong> {{ booking.check_out_date|date:"d.m.Y" }}
+                </div>
+                <div class="booking-detail-item">
+                    <strong>Ləğv edilmə tarixi:</strong> {{ cancellation_date|date:"d.m.Y H:i" }}
+                </div>
+            </div>
+            
+            <p>Əgər bu ləğv etmə sizin tərəfinizdən həyata keçirilməyibsə və ya hər hansı bir sualınız varsa, zəhmət olmasa bizimlə əlaqə saxlayın.</p>
+            
+            <p>Bizi yenidən seçəcəyinizi ümid edirik. Siz hər zaman {{ site_url }} saytımıza daxil olaraq yeni rezervasiya edə bilərsiniz.</p>
+            
+            <h3>Əlaqə məlumatları:</h3>
+            <p>Suallarınız və ya narahatlıqlarınız varsa, zəhmət olmasa, {{ support_email }} e-poçt ünvanı ilə əlaqə saxlayın.</p>
+            
+            <p>Hörmətlə,<br>{{ site_name }} komandası</p>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; {{ site_name }} - Bütün hüquqlar qorunur</p>
+            <p>Əgər bu e-poçt sizə səhvən göndərilibsə, zəhmət olmasa, bu barədə bizə məlumat verin</p>
+        </div>
+    </div>
+</body>
+</html> 
