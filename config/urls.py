@@ -9,7 +9,6 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, Spec
 from utils.translation.set_language import set_language
 
 urlpatterns = [
-    path('', admin.site.urls),
 
     path('api/', include('apps.urls')),
     
@@ -20,6 +19,8 @@ urlpatterns = [
     
     path('ckeditor/', include('ckeditor_uploader.urls')),
     path('_nested_admin/', include('nested_admin.urls')),
+
+    path('', admin.site.urls),
 
 ]
 
