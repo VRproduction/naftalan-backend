@@ -51,5 +51,5 @@ X_FRAME_OPTIONS = 'DENY'
 
 CELERY_BEAT_SCHEDULER='django_celery_beat.schedulers:DatabaseScheduler'
 
-SITE_URL='http://75.119.147.165:59/'
-SITE_NAME='NAFTALAN-KURORT'
+SITE_URL='http://naftalan-admin.mediamarketinq.az/'
+SITE_NAME='Kurort Naftalan'
