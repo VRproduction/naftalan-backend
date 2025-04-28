@@ -5,73 +5,85 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.urls import reverse
 from celery import shared_task
+from django.db import transaction
 
 from .models import Booking, BookingStatus
 
 logger = logging.getLogger(__name__)
 
-@shared_task
-def send_booking_status_email(booking_id, old_status=None):
+@shared_task(bind=True, max_retries=3)
+def send_booking_status_email(self, booking_id, old_status=None):
     """
     Send email notifications when a booking status changes
     """
     try:
-        booking = Booking.objects.get(id=booking_id)
+        with transaction.atomic():
+            booking = Booking.objects.select_for_update().get(id=booking_id)
+            
+            # Double check if status has changed since task was queued
+            if old_status is not None and booking.status == old_status:
+                logger.info(f"Booking {booking_id} status hasn't changed since task was queued")
+                return True
+                
+            # Determine recipients based on status
+            admin_emails = [email for name, email in settings.ADMINS]
+            
+            # Handle different status changes with appropriate templates and recipients
+            if booking.status == BookingStatus.NEW:
+                # New booking - send confirmation to customer and notification to admin
+                send_customer_email(
+                    booking=booking, 
+                    subject=f"Rezervasiya qəbul edildi - {booking.booking_reference}",
+                    template='emails/booking_confirmation.html',
+                )
+                
+                send_admin_email(
+                    booking=booking, 
+                    subject=f"Yeni rezervasiya - {booking.booking_reference}",
+                    template='emails/admin_new_booking.html',
+                )
+                
+            elif booking.status == BookingStatus.CONFIRMED:
+                # Booking confirmed - send confirmation to customer
+                send_customer_email(
+                    booking=booking, 
+                    subject=f"Rezervasiyanız təsdiqləndi - {booking.booking_reference}",
+                    template='emails/booking_confirmed.html',
+                )
+                
+            elif booking.status == BookingStatus.CANCELLED:
+                # Booking cancelled - notify customer
+                send_customer_email(
+                    booking=booking, 
+                    subject=f"Rezervasiyanız ləğv edildi - {booking.booking_reference}",
+                    template='emails/booking_cancelled.html',
+                )
+                
+            elif booking.status == BookingStatus.WAITING_PAYMENT:
+                # Payment pending - send payment instructions to customer
+                send_customer_email(
+                    booking=booking, 
+                    subject=f"Ödəniş tələb olunur - {booking.booking_reference}",
+                    template='emails/payment_instructions.html',
+                )
+                
+            elif booking.status == BookingStatus.COMPLETED:
+                # Booking completed - thank you email to customer
+                send_customer_email(
+                    booking=booking, 
+                    subject=f"Rezervasiyanız tamamlandı - {booking.booking_reference}",
+                    template='emails/booking_completed.html',
+                )
+            
+            return True
+            
     except Booking.DoesNotExist:
         logger.error(f"Booking with ID {booking_id} not found.")
         return False
-    
-    # Determine recipients based on status
-    admin_emails = [email for name, email in settings.ADMINS]
-    
-    # Handle different status changes with appropriate templates and recipients
-    if booking.status == BookingStatus.NEW:
-        # New booking - send confirmation to customer and notification to admin
-        send_customer_email(
-            booking=booking, 
-            subject=f"Rezervasiya qəbul edildi - {booking.booking_reference}",
-            template='emails/booking_confirmation.html',
-        )
-        
-        send_admin_email(
-            booking=booking, 
-            subject=f"Yeni rezervasiya - {booking.booking_reference}",
-            template='emails/admin_new_booking.html',
-        )
-        
-    elif booking.status == BookingStatus.CONFIRMED:
-        # Booking confirmed - send confirmation to customer
-        send_customer_email(
-            booking=booking, 
-            subject=f"Rezervasiyanız təsdiqləndi - {booking.booking_reference}",
-            template='emails/booking_confirmed.html',
-        )
-        
-    elif booking.status == BookingStatus.CANCELLED:
-        # Booking cancelled - notify customer
-        send_customer_email(
-            booking=booking, 
-            subject=f"Rezervasiyanız ləğv edildi - {booking.booking_reference}",
-            template='emails/booking_cancelled.html',
-        )
-        
-    elif booking.status == BookingStatus.WAITING_PAYMENT:
-        # Payment pending - send payment instructions to customer
-        send_customer_email(
-            booking=booking, 
-            subject=f"Ödəniş tələb olunur - {booking.booking_reference}",
-            template='emails/payment_instructions.html',
-        )
-        
-    elif booking.status == BookingStatus.COMPLETED:
-        # Booking completed - thank you email to customer
-        send_customer_email(
-            booking=booking, 
-            subject=f"Rezervasiyanız tamamlandı - {booking.booking_reference}",
-            template='emails/booking_completed.html',
-        )
-    
-    return True
+    except Exception as exc:
+        logger.error(f"Error sending booking status email for booking {booking_id}: {str(exc)}")
+        # Retry the task with exponential backoff
+        self.retry(exc=exc, countdown=2 ** self.request.retries)
 
 def send_customer_email(booking, subject, template):
     """Helper function to send email to the customer"""

@@ -59,14 +59,9 @@ class Booking(models.Model):
         # Track status changes for email notifications
         if self.pk:
             old_instance = Booking.objects.get(pk=self.pk)
-            if old_instance.status != self.status:
-                # Status changed, we'll send notification after save
-                status_changed = True
-                old_status = old_instance.status
-            else:
-                status_changed = False
+            old_status = old_instance.status
+            status_changed = old_status != self.status
         else:
-            # New booking
             status_changed = True
             old_status = None
             
