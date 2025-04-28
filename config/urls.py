@@ -9,7 +9,7 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, Spec
 from utils.translation.set_language import set_language
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('', admin.site.urls),
 
     path('api/', include('apps.urls')),
     
