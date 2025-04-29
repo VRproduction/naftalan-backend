@@ -32,8 +32,8 @@ CUSTOM_APPS = [
     'apps.pages.how_to_come.apps.HowToComeConfig',
     'apps.sanatoriums.apps.SanatoriumsConfig',
     'apps.booking.apps.BookingConfig',
-    'apps.core.apps.CoreConfig'
-
+    'apps.core.apps.CoreConfig',
+    'apps.packages.apps.PackagesConfig',
 ]
 
 THIRD_PARTY_APPS = [

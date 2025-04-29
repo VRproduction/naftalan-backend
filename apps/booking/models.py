@@ -43,7 +43,7 @@ class Booking(models.Model):
     
     # Price information 
     total_price = models.DecimalField(_("Ümumi məbləğ"), max_digits=10, decimal_places=2)
-    currency = models.ForeignKey(Currency, on_delete=models.PROTECT, related_name='bookings', verbose_name=_("Valyuta"))
+    currency = models.ForeignKey(Currency, on_delete=models.PROTECT, related_name='bookings', verbose_name=_("Valyuta"), null = True)
 
     # Meta information
     created_at = models.DateTimeField(_("Yaradılma tarixi"), auto_now_add=True)

@@ -42,7 +42,7 @@ class RoomTypeFilter(django_filters.FilterSet):
 
     class Meta:
         model = RoomType
-        fields = ['min_price', 'max_price', 'sanatorium']
+        fields = ['min_price', 'max_price', 'sanatorium'] 
 
 class RoomPriceFilter(django_filters.FilterSet):
     min_price = django_filters.NumberFilter(field_name='price', lookup_expr='gte')

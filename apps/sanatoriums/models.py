@@ -62,7 +62,8 @@ class Sanatorium(SEOModel):
     in_home = models.BooleanField(_("Ana səhifədə görünsün?"), default = False)
     created_at = models.DateTimeField(_("Yaradılma tarixi"), auto_now_add=True)
     updated_at = models.DateTimeField(_("Yenilənmə tarixi"), auto_now=True)
-    
+    priority = models.IntegerField(_("Prioritet"), default=1)
+
     def __str__(self):
         return self.name
     
@@ -77,14 +78,19 @@ class Sanatorium(SEOModel):
             self.og_title = self.name
         if not self.og_description:
             self.og_description = self.short_description[:200]
-   
-            
+
+        if not self.pk:
+            last_priority = (
+                Sanatorium.objects.aggregate(models.Max('priority'))['priority__max'] or 0
+            )
+            self.priority = last_priority + 1            
         super().save(*args, **kwargs)
     
     class Meta:
         ordering = ['-rating', 'name']
         verbose_name = _("Sanatoriya")
         verbose_name_plural = _("Sanatoriyalar")
+        ordering = ('priority', )
 
 
 class SanatoriumImage(models.Model):

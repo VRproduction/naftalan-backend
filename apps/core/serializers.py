@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from utils.api.mixins.translation import TranslationMixin
-from .models import SiteSettings, SEO, Currency, WorkingHours
+from .models import SiteSettings, SEO, Currency, WorkingHours, ContactEmail, ContactPhone
 
 
 
@@ -20,9 +20,23 @@ class WorkingHoursSerializer(TranslationMixin, serializers.ModelSerializer):
             'closing_time', 'lunch_start', 'lunch_end', 'note', 'order'
         )
 
+class ContactEmailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ContactEmail
+        fields = ['id', 'email', 'is_primary', 'priority', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
+
+class ContactPhoneSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ContactPhone
+        fields = ['id', 'phone', 'is_primary', 'priority', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
+
 class SiteSettingsSerializer(TranslationMixin, serializers.ModelSerializer):
     """Serializer for site-wide settings"""
     working_hours = WorkingHoursSerializer(source='working_hours_set', many=True, read_only=True)
+    contact_emails = ContactEmailSerializer(many=True, read_only=True)
+    contact_phones = ContactPhoneSerializer(many=True, read_only=True)
     
     class Meta:
         model = SiteSettings
@@ -31,15 +45,14 @@ class SiteSettingsSerializer(TranslationMixin, serializers.ModelSerializer):
             'site_name', 'site_tagline', 'site_description',
             
             # Contact Info
-            'contact_email', 'contact_email_secondary', 'contact_phone', 
-            'contact_phone_secondary', 'whatsapp_number', 'telegram_username',
+            'contact_emails', 'contact_phones', 'working_hours',
+            'whatsapp_number', 'telegram_username',
             
             # Location
             'address', 'map_latitude', 'map_longitude', 'map_zoom', 
-            'working_hours',  # This is now a nested serializer of related WorkingHours objects
             
             # Company Info
-            'company_name', 'foundation_year',
+            'company_name', 'tax_number', 'foundation_year',
             
             # Visual Assets
             'logo', 'logo_dark', 'footer_logo', 'favicon', 'mobile_app_icon',
@@ -70,8 +83,12 @@ class SiteSettingsSerializer(TranslationMixin, serializers.ModelSerializer):
             
             # System
             'maintenance_mode', 'maintenance_message', 'show_language_selector',
-            'default_language'
+            'default_language',
+            
+            # Additional fields
+            'created_at', 'updated_at'
         )
+        read_only_fields = ['created_at', 'updated_at']
 
 class SEOSerializer(TranslationMixin, serializers.ModelSerializer):
     """Serializer for SEO data"""

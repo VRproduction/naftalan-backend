@@ -132,7 +132,8 @@ class AgeGroupAdmin(TranslationAdmin, TranslationMedia):
 
 @admin.register(Sanatorium)
 class SanatoriumAdmin(nested_admin.NestedModelAdmin, TranslationAdmin, TranslationMedia):
-    list_display = ('name', 'location', 'rating', 'is_active')
+    list_display = ('name', 'location', 'rating', 'is_active', 'priority')
+    list_editable = ('priority', )
     list_filter = ('is_active', 'location', 'rating', 'location_type')
     search_fields = ('name', 'description', 'address')
     prepopulated_fields = {'slug': ('name',)}
@@ -145,7 +146,7 @@ class SanatoriumAdmin(nested_admin.NestedModelAdmin, TranslationAdmin, Translati
     
     fieldsets = (
         ('Əsas məlumatlar', {
-            'fields': ('name', 'slug', 'location', 'location_type', 'short_description', 'is_active', 'in_home'),
+            'fields': ('name', 'slug', 'location', 'location_type', 'short_description', 'priority', 'is_active', 'in_home'),
         }),
         ('Təsvir', {
             'fields': ('description', 'treatments'),

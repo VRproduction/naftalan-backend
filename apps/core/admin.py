@@ -2,7 +2,7 @@ from django.contrib import admin
 from modeltranslation.admin import TranslationAdmin, TranslationStackedInline, TranslationTabularInline
 from django.utils.translation import gettext_lazy as _
 
-from .models import Currency, SiteSettings, SEO, PageType, WorkingHours, DayOfWeek
+from .models import Currency, SiteSettings, SEO, PageType, WorkingHours, DayOfWeek, ContactEmail, ContactPhone
 
 class TranslationMedia:
     class Media:
@@ -20,6 +20,7 @@ class TranslationMedia:
 class CurrencyAdmin(TranslationAdmin, TranslationMedia):
     list_display = ('code', 'name', 'symbol')
     search_fields = ('code', 'name')
+    ordering = ('code',)
     
     fieldsets = (
         (None, {
@@ -72,77 +73,81 @@ class WorkingHoursAdmin(TranslationAdmin, TranslationMedia):
 
 @admin.register(SiteSettings)
 class SiteSettingsAdmin(TranslationAdmin, TranslationMedia):
-    list_display = ('site_name', 'contact_email', 'contact_phone', 'updated_at')
+    list_display = ('site_name', 'company_name', 'contact_email', 'contact_phone')
     inlines = [WorkingHoursInline]
     
     fieldsets = (
-        (_('Əsas Məlumatlar'), {
-            'fields': ('site_name', 'site_tagline', 'site_description'),
+        ('Əsas Məlumatlar', {
+            'fields': ('site_name', 'site_tagline', 'site_description')
         }),
-        (_('Əlaqə Məlumatları'), {
+        ('Əlaqə Məlumatları', {
+            'fields': ('whatsapp_number', 'telegram_username')
+        }),
+        ('Şirkət Məlumatları', {
+            'fields': ('company_name', 'tax_number', 'foundation_year')
+        }),
+        ('Vizual Elementlər', {
+            'fields': ('logo', 'logo_dark', 'footer_logo', 'favicon', 'mobile_app_icon')
+        }),
+        ('Rənglər', {
+            'fields': ('primary_color', 'secondary_color', 'accent_color')
+        }),
+        ('Alt Mətn', {
+            'fields': ('footer_text', 'copyright_text', 'show_social_in_footer')
+        }),
+        ('Sosial Media', {
             'fields': (
-                'contact_email', 'contact_email_secondary',
-                'contact_phone', 'contact_phone_secondary',
-                'whatsapp_number', 'telegram_username',
-            ),
+                'social_facebook', 'social_instagram', 'social_twitter',
+                'social_youtube', 'social_linkedin', 'social_tiktok',
+                'social_pinterest'
+            )
         }),
-        (_('Yer Məlumatları'), {
-            'fields': ('address', 'map_latitude', 'map_longitude', 'map_zoom'),
-            'description': _('İş saatları üçün aşağıdakı "İş saatları" bölməsindən istifadə edin'),
-        }),
-        (_('Şirkət Məlumatları'), {
-            'fields': ('company_name', 'tax_number', 'foundation_year'),
-            'classes': ('collapse',),
-        }),
-        (_('Vizual Elementlər'), {
-            'fields': ('logo', 'logo_dark', 'footer_logo', 'favicon', 'mobile_app_icon'),
-        }),
-        (_('Rəng və Dizayn'), {
-            'fields': ('primary_color', 'secondary_color', 'accent_color'),
-            'classes': ('collapse',),
-        }),
-        (_('Alt Bölmə'), {
-            'fields': ('footer_text', 'copyright_text', 'show_social_in_footer'),
-            'classes': ('collapse',),
-        }),
-        (_('Sosial Media'), {
+        ('SEO', {
             'fields': (
-                'social_facebook', 'social_instagram', 'social_twitter', 
-                'social_youtube', 'social_linkedin', 'social_tiktok', 'social_pinterest'
-            ),
+                'default_meta_title', 'default_meta_description',
+                'default_meta_keywords', 'default_og_image'
+            )
         }),
-        (_('SEO'), {
-            'fields': ('default_meta_title', 'default_meta_description', 'default_meta_keywords', 'default_og_image'),
-        }),
-        (_('Analitika və İzləmə'), {
+        ('Analitika', {
             'fields': (
-                'google_analytics_id', 'google_tag_manager_id', 
+                'google_analytics_id', 'google_tag_manager_id',
                 'google_site_verification', 'facebook_pixel_id'
-            ),
-            'classes': ('collapse',),
+            )
         }),
-        (_('reCAPTCHA'), {
-            'fields': ('recaptcha_site_key', 'recaptcha_secret_key'),
-            'classes': ('collapse',),
+        ('reCAPTCHA', {
+            'fields': ('recaptcha_site_key', 'recaptcha_secret_key')
         }),
-        (_('Cookie və Məxfilik'), {
-            'fields': ('cookie_policy_popup', 'cookie_popup_text', 'privacy_policy_page', 'terms_page'),
-            'classes': ('collapse',),
+        ('Cookie & Məxfilik', {
+            'fields': (
+                'cookie_policy_popup', 'cookie_popup_text',
+                'privacy_policy_page', 'terms_page'
+            )
         }),
-        (_('Haqqımızda Bölməsi'), {
-            'fields': ('about_short',),
+        ('Haqqımızda', {
+            'fields': ('about_short',)
         }),
-        (_('Əlavə Parametrlər'), {
-            'fields': ('maintenance_mode', 'maintenance_message', 'show_language_selector', 'default_language'),
-            'classes': ('collapse',),
+        ('Sistem', {
+            'fields': (
+                'maintenance_mode', 'maintenance_message',
+                'show_language_selector', 'default_language'
+            )
+        }),
+        ('Tarix', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
         }),
     )
-    
-    def has_add_permission(self, request):
-        # Allow only one instance
-        if self.model.objects.exists():
-            return False
-        return super().has_add_permission(request)
+    readonly_fields = ('created_at', 'updated_at')
+
+    def contact_email(self, obj):
+        primary_email = obj.contact_emails.filter(is_primary=True).first()
+        return primary_email.email if primary_email else '-'
+    contact_email.short_description = 'Əsas E-poçt'
+
+    def contact_phone(self, obj):
+        primary_phone = obj.contact_phones.filter(is_primary=True).first()
+        return primary_phone.phone if primary_phone else '-'
+    contact_phone.short_description = 'Əsas Telefon'
 
 @admin.register(SEO)
 class SEOAdmin(TranslationAdmin, TranslationMedia):
@@ -182,4 +187,50 @@ class SEOAdmin(TranslationAdmin, TranslationMedia):
         # If page type is not custom, clear the slug
         if obj.page_type != PageType.CUSTOM:
             obj.page_slug = None
+        super().save_model(request, obj, form, change)
+
+@admin.register(ContactEmail)
+class ContactEmailAdmin(admin.ModelAdmin):
+    list_display = ('email', 'is_primary', 'priority', 'created_at')
+    list_filter = ('is_primary',)
+    search_fields = ('email',)
+    ordering = ('-is_primary', 'priority', '-created_at')
+    list_editable = ('is_primary', 'priority')
+    fieldsets = (
+        (None, {
+            'fields': ('email', 'is_primary', 'priority')
+        }),
+        ('Tarix', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    readonly_fields = ('created_at', 'updated_at')
+
+    def save_model(self, request, obj, form, change):
+        if not obj.site_settings_id:
+            obj.site_settings = SiteSettings.objects.first()
+        super().save_model(request, obj, form, change)
+
+@admin.register(ContactPhone)
+class ContactPhoneAdmin(admin.ModelAdmin):
+    list_display = ('phone', 'is_primary', 'priority', 'created_at')
+    list_filter = ('is_primary',)
+    search_fields = ('phone',)
+    ordering = ('-is_primary', 'priority', '-created_at')
+    list_editable = ('is_primary', 'priority')
+    fieldsets = (
+        (None, {
+            'fields': ('phone', 'is_primary', 'priority')
+        }),
+        ('Tarix', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    readonly_fields = ('created_at', 'updated_at')
+
+    def save_model(self, request, obj, form, change):
+        if not obj.site_settings_id:
+            obj.site_settings = SiteSettings.objects.first()
         super().save_model(request, obj, form, change)

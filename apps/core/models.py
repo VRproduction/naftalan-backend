@@ -1,7 +1,6 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.core.cache import cache
-from django.conf import settings
 from ckeditor.fields import RichTextField
 
 class Currency(models.Model):
@@ -63,10 +62,6 @@ class SiteSettings(models.Model):
     site_description = models.TextField(_("Sayt haqqında qısa məlumat"), null=True, blank=True)
     
     # Contact Information
-    contact_email = models.EmailField(_("Əsas e-poçt"))
-    contact_email_secondary = models.EmailField(_("Əlavə e-poçt"), null=True, blank=True)
-    contact_phone = models.CharField(_("Əsas telefon"), max_length=20)
-    contact_phone_secondary = models.CharField(_("Əlavə telefon"), max_length=20, null=True, blank=True)
     whatsapp_number = models.CharField(_("WhatsApp nömrəsi"), max_length=20, null=True, blank=True)
     telegram_username = models.CharField(_("Telegram istifadəçi adı"), max_length=50, null=True, blank=True)
     
@@ -253,3 +248,59 @@ class SEO(models.Model):
         verbose_name = _("SEO tənzimləməsi")
         verbose_name_plural = _("SEO tənzimləmələri")
         unique_together = ('page_type', 'page_slug')
+
+class ContactEmail(models.Model):
+    email = models.EmailField(_("E-poçt"))
+    is_primary = models.BooleanField(_("Əsas e-poçt"), default=False)
+    priority = models.PositiveIntegerField(_("Prioritet"), default=0)
+    site_settings = models.ForeignKey(SiteSettings, on_delete=models.CASCADE, related_name='contact_emails')
+    created_at = models.DateTimeField(_("Yaradılma tarixi"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("Yenilənmə tarixi"), auto_now=True)
+
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            last_priority = (
+                ContactEmail.objects.aggregate(models.Max('priority'))['priority__max'] or 0
+            )
+            self.priority = last_priority + 1
+  
+        if self.is_primary:
+            # Set all other emails of this site_settings to non-primary
+            ContactEmail.objects.filter(site_settings=self.site_settings).exclude(pk=self.pk).update(is_primary=False)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.email
+
+    class Meta:
+        verbose_name = _("Əlaqə e-poçtu")
+        verbose_name_plural = _("Əlaqə e-poçtları")
+        ordering = ['-is_primary', 'priority', '-created_at']
+
+class ContactPhone(models.Model):
+    phone = models.CharField(_("Telefon"), max_length=20)
+    is_primary = models.BooleanField(_("Əsas telefon"), default=False)
+    priority = models.PositiveIntegerField(_("Prioritet"), default=0)
+    site_settings = models.ForeignKey(SiteSettings, on_delete=models.CASCADE, related_name='contact_phones')
+    created_at = models.DateTimeField(_("Yaradılma tarixi"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("Yenilənmə tarixi"), auto_now=True)
+
+    def save(self, *args, **kwargs):
+        if self.is_primary:
+            # Set all other phones of this site_settings to non-primary
+            ContactPhone.objects.filter(site_settings=self.site_settings).exclude(pk=self.pk).update(is_primary=False)
+        if not self.pk:
+            last_priority = (
+                ContactPhone.objects.aggregate(models.Max('priority'))['priority__max'] or 0
+            )
+            self.priority = last_priority + 1
+        super().save(*args, **kwargs)
+        
+    def __str__(self):
+        return self.phone
+
+
+    class Meta:
+        verbose_name = _("Əlaqə telefonu")
+        verbose_name_plural = _("Əlaqə telefonları")
+        ordering = ['-is_primary', 'priority', '-created_at']

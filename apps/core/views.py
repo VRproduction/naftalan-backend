@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.core.cache import cache
 from django.db.models import Q
 from rest_framework import generics, status, views, viewsets, filters
@@ -7,10 +7,10 @@ from rest_framework.decorators import action
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter, OpenApiExample
 
-from .models import SiteSettings, SEO, PageType, Currency, WorkingHours, DayOfWeek
+from .models import SiteSettings, SEO, PageType, Currency, WorkingHours, DayOfWeek, ContactEmail, ContactPhone
 from .serializers import (
     SiteSettingsSerializer, SEOSerializer, SEOByPageTypeSerializer, 
-    CurrencySerializer, WorkingHoursSerializer
+    CurrencySerializer, WorkingHoursSerializer, ContactEmailSerializer, ContactPhoneSerializer
 )
 
 @extend_schema_view(
@@ -264,3 +264,71 @@ class SEOByPageView(generics.GenericAPIView):
                 
         serializer = self.get_serializer(seo)
         return Response(serializer.data)
+
+class SiteSettingsViewSet(viewsets.ModelViewSet):
+    queryset = SiteSettings.objects.all()
+    serializer_class = SiteSettingsSerializer
+
+    @action(detail=True, methods=['post'])
+    def add_email(self, request, pk=None):
+        site_settings = self.get_object()
+        serializer = ContactEmailSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(site_settings=site_settings)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['post'])
+    def add_phone(self, request, pk=None):
+        site_settings = self.get_object()
+        serializer = ContactPhoneSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(site_settings=site_settings)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['delete'])
+    def remove_email(self, request, pk=None):
+        site_settings = self.get_object()
+        email_id = request.data.get('email_id')
+        if not email_id:
+            return Response({'error': 'email_id is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        email = get_object_or_404(ContactEmail, id=email_id, site_settings=site_settings)
+        email.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=['delete'])
+    def remove_phone(self, request, pk=None):
+        site_settings = self.get_object()
+        phone_id = request.data.get('phone_id')
+        if not phone_id:
+            return Response({'error': 'phone_id is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        phone = get_object_or_404(ContactPhone, id=phone_id, site_settings=site_settings)
+        phone.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=['patch'])
+    def set_primary_email(self, request, pk=None):
+        site_settings = self.get_object()
+        email_id = request.data.get('email_id')
+        if not email_id:
+            return Response({'error': 'email_id is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        email = get_object_or_404(ContactEmail, id=email_id, site_settings=site_settings)
+        email.is_primary = True
+        email.save()
+        return Response(ContactEmailSerializer(email).data)
+
+    @action(detail=True, methods=['patch'])
+    def set_primary_phone(self, request, pk=None):
+        site_settings = self.get_object()
+        phone_id = request.data.get('phone_id')
+        if not phone_id:
+            return Response({'error': 'phone_id is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        phone = get_object_or_404(ContactPhone, id=phone_id, site_settings=site_settings)
+        phone.is_primary = True
+        phone.save()
+        return Response(ContactPhoneSerializer(phone).data)
