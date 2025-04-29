@@ -103,7 +103,9 @@ class SiteSettings(models.Model):
     # Footer options
     footer_text = models.TextField(_("Alt mətn"), null=True, blank=True)
     copyright_text = models.CharField(_("Müəllif hüquqları mətni"), max_length=200, null=True, blank=True,
-                                     help_text=_("Məsələn: © 2023 Şirkət Adı. Bütün hüquqlar qorunur."))
+                                     help_text=_("Məsələn: Şirkət Adı."))
+    copyright_link = models.URLField(_("Müəllif hüquqları linki"), null=True, blank=True,
+                                     help_text=_("Məsələn: https://example.com/."))
     show_social_in_footer = models.BooleanField(_("Alt hissədə sosial ikonları göstər"), default=True)
     
     # Social Media

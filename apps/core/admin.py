@@ -93,7 +93,7 @@ class SiteSettingsAdmin(TranslationAdmin, TranslationMedia):
             'fields': ('primary_color', 'secondary_color', 'accent_color')
         }),
         ('Alt Mətn', {
-            'fields': ('footer_text', 'copyright_text', 'show_social_in_footer')
+            'fields': ('footer_text', 'copyright_text', 'copyright_link', 'show_social_in_footer')
         }),
         ('Sosial Media', {
             'fields': (

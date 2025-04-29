@@ -61,7 +61,7 @@ class SiteSettingsSerializer(TranslationMixin, serializers.ModelSerializer):
             'primary_color', 'secondary_color', 'accent_color',
             
             # Footer
-            'footer_text', 'copyright_text', 'show_social_in_footer',
+            'footer_text', 'copyright_text', 'show_social_in_footer', 'copyright_link',
             
             # Social
             'social_facebook', 'social_instagram', 'social_twitter', 
