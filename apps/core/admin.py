@@ -108,6 +108,13 @@ class SiteSettingsAdmin(TranslationAdmin, TranslationMedia):
                 'default_meta_keywords', 'default_og_image'
             )
         }),
+        ("Ünvan", {
+            'fields': (
+                'address', 'map_latitude',
+                'map_longitude', 'map_zoom',
+                'map_src'
+            )
+        }),
         ('Analitika', {
             'fields': (
                 'google_analytics_id', 'google_tag_manager_id',

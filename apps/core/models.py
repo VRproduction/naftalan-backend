@@ -70,7 +70,12 @@ class SiteSettings(models.Model):
     map_latitude = models.DecimalField(_("Xəritə enliyi"), max_digits=10, decimal_places=7, null=True, blank=True)
     map_longitude = models.DecimalField(_("Xəritə uzunluğu"), max_digits=10, decimal_places=7, null=True, blank=True)
     map_zoom = models.PositiveSmallIntegerField(_("Xəritə yaxınlaşması"), default=15, null=True, blank=True)
-    
+    map_src = models.URLField(
+        help_text="Google Maps iframe içindəki src hissəsini daxil edin",
+        verbose_name="Google Maps Link (src)",
+        null=True,
+        blank=True
+    )
     # Legacy working hours field (will be deprecated)
     working_hours = models.TextField(_("İş saatları (köhnə)"), null=True, blank=True, 
                                     help_text=_("Məsələn: Bazar ertəsi-Cümə: 9:00-18:00, Şənbə: 10:00-15:00"))
