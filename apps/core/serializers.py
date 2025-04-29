@@ -49,7 +49,7 @@ class SiteSettingsSerializer(TranslationMixin, serializers.ModelSerializer):
             'whatsapp_number', 'telegram_username',
             
             # Location
-            'address', 'map_latitude', 'map_longitude', 'map_zoom', 
+            'address', 'map_latitude', 'map_longitude', 'map_zoom', 'map_src', 
             
             # Company Info
             'company_name', 'tax_number', 'foundation_year',
