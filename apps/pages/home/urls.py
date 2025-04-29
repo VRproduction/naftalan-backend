@@ -12,6 +12,8 @@ urlpatterns = [
          name='treatments-section'),
     path('packages-section/', views.PackagesSectionView.as_view(),
          name='packages-section'),
+    path('packages/', views.PackageView.as_view(), name='packages'),
+     
     path('customer-comments-section/',
          views.CustomerCommentsSectionView.as_view(),
          name='customer-comments-section'),

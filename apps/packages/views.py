@@ -3,6 +3,10 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
+
+from utils.api.pagination.page_number_pagination import CustomPageNumberPagination
+
+
 from .models import Package, PackageOrder
 from .serializers import PackageSerializer, PackageOrderSerializer, PackageOrderCreateSerializer
 
@@ -14,6 +18,7 @@ class PackageListView(generics.ListAPIView):
     search_fields = ['name', 'sanatorium__name']
     ordering_fields = ['name', 'original_price', 'discounted_price', 'created_at']
     ordering = ['-is_featured', '-created_at']
+    pagination_class = CustomPageNumberPagination
 
 class PackageDetailView(generics.RetrieveAPIView):
     queryset = Package.objects.filter(is_active=True)

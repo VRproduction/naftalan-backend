@@ -2,9 +2,11 @@ from rest_framework.generics import ListAPIView, RetrieveAPIView
 
 from apps.sanatoriums.serializers import SanatoriumListSerializer
 from apps.pages.blogs.serializers import BlogSerializer
+from apps.packages.serializers import PackageSerializer
 
 from apps.sanatoriums.models import Sanatorium
 from apps.pages.blogs.models import Blog
+from apps.packages.models import Package
 
 
 from .models import (
@@ -59,6 +61,7 @@ class SanatoriumsView(ListAPIView):
     serializer_class = SanatoriumListSerializer
 
 
+
 class TreatmentsSectionView(RetrieveAPIView):
     serializer_class = TreatmentsSectionSerializer
 
@@ -71,6 +74,11 @@ class PackagesSectionView(RetrieveAPIView):
 
     def get_object(self):
         return PackagesSection.objects.first()
+    
+
+class PackageView(ListAPIView):
+    queryset = Package.objects.filter(is_active=True, in_home = True)
+    serializer_class = PackageSerializer
 
 
 class CustomerCommentsSectionView(RetrieveAPIView):
