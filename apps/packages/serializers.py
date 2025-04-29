@@ -1,13 +1,14 @@
 from rest_framework import serializers
 from .models import Package, PackageInclusion, PackageOrder
 from django.utils.translation import gettext_lazy as _
+from utils.api.mixins.translation import TranslationMixin
 
-class PackageInclusionSerializer(serializers.ModelSerializer):
+class PackageInclusionSerializer(TranslationMixin, serializers.ModelSerializer):
     class Meta:
         model = PackageInclusion
         fields = ['id', 'name', 'priority']
 
-class PackageSerializer(serializers.ModelSerializer):
+class PackageSerializer(TranslationMixin, serializers.ModelSerializer):
     inclusions = PackageInclusionSerializer(many=True, read_only=True)
     sanatorium_name = serializers.CharField(source='sanatorium.name', read_only=True)
     currency_code = serializers.CharField(source='currency.code', read_only=True)
@@ -26,7 +27,7 @@ class PackageSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['created_at', 'updated_at', 'discounted_price']
 
-class PackageOrderSerializer(serializers.ModelSerializer):
+class PackageOrderSerializer(TranslationMixin, serializers.ModelSerializer):
     package_name = serializers.CharField(source='package.name', read_only=True)
     status_display = serializers.CharField(source='get_status_display', read_only=True)
     currency_code = serializers.CharField(source='currency.code', read_only=True)
