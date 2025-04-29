@@ -20,8 +20,6 @@ urlpatterns = [
     path('ckeditor/', include('ckeditor_uploader.urls')),
     path('_nested_admin/', include('nested_admin.urls')),
 
-    path('', admin.site.urls),
-
 ]
 
 urlpatterns = [
@@ -32,8 +30,12 @@ urlpatterns = [
 
 if 'rosetta' in settings.INSTALLED_APPS:
     urlpatterns += [
-        re_path(r'^translation/', include('rosetta.urls'))
+        re_path(r'^translation/', include('rosetta.urls')),
     ]
+
+urlpatterns += [
+    path('', admin.site.urls),
+]
 
 # Local settings
 if settings.DEBUG:
