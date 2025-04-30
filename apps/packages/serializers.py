@@ -59,7 +59,7 @@ class PackageOrderCreateSerializer(serializers.ModelSerializer):
         check_out = data['check_out']
 
         # Validate occupancy
-        if adults + children > package.occupancy:
+        if adults > package.occupancy:
             raise serializers.ValidationError({
                 'adults': _("Ümumi nəfər sayı paketin tutumundan çox ola bilməz"),
                 'children': _("Ümumi nəfər sayı paketin tutumundan çox ola bilməz")
