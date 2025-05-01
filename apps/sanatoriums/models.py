@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.utils.text import slugify
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils.translation import gettext_lazy as _
+from django.core.exceptions import ValidationError
 from datetime import date
 
 from ckeditor_uploader.fields import RichTextUploadingField
@@ -171,6 +172,11 @@ class RoomType(models.Model):
 
 
 class RoomPrice(models.Model):
+    DISCOUNT_TYPE_CHOICES = [
+        ('percentage', _('Faiz')),
+        ('fixed', _('Məbləğ')),
+    ]
+    
     room_type = models.ForeignKey(RoomType, on_delete=models.CASCADE, related_name='prices', verbose_name=_("Otaq növü"))
     season = models.ForeignKey(Season, on_delete=models.CASCADE, verbose_name=_("Mövsüm"), null=True, blank=True)
     is_standard = models.BooleanField(_("Standart qiymət"), default=False, help_text=_("Seçildiyi təqdirdə, mövsüm olmadığı hallarda bu qiymət istifadə olunacaq"))
@@ -180,6 +186,43 @@ class RoomPrice(models.Model):
                                        verbose_name=_("Müalicə növü"))
     price = models.DecimalField(_("Qiymət"), max_digits=10, decimal_places=2)
     currency = models.ForeignKey(Currency, on_delete=models.PROTECT, verbose_name=_("Valyuta"), null=True)
+    
+    # Discount fields
+    discount_type = models.CharField(
+        _("Endirim növü"),
+        max_length=10,
+        choices=DISCOUNT_TYPE_CHOICES,
+        default='percentage',
+        null=True,
+        blank=True
+    )
+    discount_value = models.FloatField(
+        _("Endirim dəyəri"),
+        default=0,
+        validators=[MinValueValidator(0)],
+        help_text=_("Faiz üçün 0-100 arası, məbləğ üçün 0 və ya daha böyük dəyər daxil edin"),
+        null=True,
+        blank=True
+    )
+    
+    @property
+    def discounted_price(self):
+        if not self.price or not self.discount_value:
+            return self.price
+
+        if self.discount_type == 'percentage':
+            if self.discount_value > 100:
+                return self.price
+            discount_amount = (self.price * self.discount_value) / 100
+        else:  # fixed amount
+            discount_amount = self.discount_value
+
+        return max(0, self.price - discount_amount)
+    
+    def clean(self):
+        super().clean()
+        if self.discount_type == 'percentage' and self.discount_value > 100:
+            raise ValidationError(_("Faiz dəyəri 100-dən böyük ola bilməz"))
     
     def __str__(self):
         treatment_status = _("müalicə ilə") if self.with_treatment else _("müalicəsiz")
@@ -207,6 +250,11 @@ class AgeGroup(models.Model):
 
 
 class ExtraBedPrice(models.Model):
+    DISCOUNT_TYPE_CHOICES = [
+        ('percentage', _('Faiz')),
+        ('fixed', _('Məbləğ')),
+    ]
+    
     room_type = models.ForeignKey(RoomType, on_delete=models.CASCADE, related_name='extra_bed_prices', 
                                 verbose_name=_("Otaq növü"))
     age_group = models.ForeignKey(AgeGroup, on_delete=models.CASCADE, verbose_name=_("Yaş qrupu"))
@@ -215,9 +263,46 @@ class ExtraBedPrice(models.Model):
 
     with_treatment = models.BooleanField(_("Müalicə ilə"), default=False)
     treatment_option = models.ForeignKey(TreatmentOption, on_delete=models.SET_NULL, null=True, blank=True, 
-                                       verbose_name=_("Müalicə növü"))
+                                        verbose_name=_("Müalicə növü"))
     price = models.DecimalField(_("Qiymət"), max_digits=10, decimal_places=2)
     currency = models.ForeignKey(Currency, on_delete=models.PROTECT, verbose_name=_("Valyuta"), null=True)
+    
+    # Discount fields
+    discount_type = models.CharField(
+        _("Endirim növü"),
+        max_length=10,
+        choices=DISCOUNT_TYPE_CHOICES,
+        default='percentage',
+        null=True,
+        blank=True
+    )
+    discount_value = models.FloatField(
+        _("Endirim dəyəri"),
+        default=0,
+        validators=[MinValueValidator(0)],
+        help_text=_("Faiz üçün 0-100 arası, məbləğ üçün 0 və ya daha böyük dəyər daxil edin"),
+        null=True,
+        blank=True
+    )
+    
+    @property
+    def discounted_price(self):
+        if not self.price or not self.discount_value:
+            return self.price
+
+        if self.discount_type == 'percentage':
+            if self.discount_value > 100:
+                return self.price
+            discount_amount = (self.price * self.discount_value) / 100
+        else:  # fixed amount
+            discount_amount = self.discount_value
+
+        return max(0, self.price - discount_amount)
+    
+    def clean(self):
+        super().clean()
+        if self.discount_type == 'percentage' and self.discount_value > 100:
+            raise ValidationError(_("Faiz dəyəri 100-dən böyük ola bilməz"))
     
     def __str__(self):
         treatment_status = _("müalicə ilə") if self.with_treatment else _("müalicəsiz")

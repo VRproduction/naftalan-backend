@@ -15,5 +15,6 @@ urlpatterns = [
     path('treatment-options/', views.TreatmentOptionListView.as_view(), name='treatment-options'),
     path('room-types/', views.RoomTypeListView.as_view(), name='room-types'),
     path('room-types/<int:pk>/', views.RoomTypeDetailView.as_view(), name='room-type-detail'),
+    path('room-prices/', views.RoomPriceListView.as_view(), name='room-prices'),
     path('<slug:slug>/', views.SanatoriumDetailView.as_view(), name='sanatorium-detail'),
 ]

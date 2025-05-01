@@ -56,6 +56,8 @@ class RoomPriceInline(nested_admin.NestedTabularInline):
     extra = 0
     verbose_name = "Qiymət"
     verbose_name_plural = "Qiymətlər"
+    fields = ('season', 'is_standard', 'occupancy', 'with_treatment', 'treatment_option', 'price', 'currency', 
+              'discount_type', 'discount_value')
 
 
 class ExtraBedPriceInline(nested_admin.NestedTabularInline):
@@ -63,6 +65,8 @@ class ExtraBedPriceInline(nested_admin.NestedTabularInline):
     extra = 0
     verbose_name = "Əlavə çarpayı qiyməti"
     verbose_name_plural = "Əlavə çarpayı qiymətləri"
+    fields = ('age_group', 'season', 'is_standard', 'with_treatment', 'treatment_option', 'price', 'currency',
+              'discount_type', 'discount_value')
 
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
         if db_field.name == "age_group":
