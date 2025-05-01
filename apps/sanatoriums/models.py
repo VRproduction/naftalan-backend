@@ -130,7 +130,7 @@ class Facility(models.Model):
 
 
 class SanatoriumFacility(models.Model):
-    sanatorium = models.ForeignKey(Sanatorium, on_delete=models.CASCADE, related_name='sanatoiruim', verbose_name=_("Sanatorium"))
+    sanatorium = models.ForeignKey(Sanatorium, on_delete=models.CASCADE, related_name='facilities', verbose_name=_("Sanatorium"))
     facility = models.ForeignKey(Facility, on_delete=models.CASCADE, verbose_name=_("Xidmət"))
     
     def __str__(self):
