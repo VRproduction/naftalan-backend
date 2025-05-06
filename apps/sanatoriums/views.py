@@ -91,7 +91,7 @@ class SanatoriumListView(generics.ListAPIView):
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = SanatoriumFilter
     search_fields = ['name', 'location__region', 'location__country']
-    ordering_fields = ['name', 'rating', 'created_at']
+    ordering_fields = ['name', 'rating', 'created_at', 'total_price']
     pagination_class = CustomPageNumberPagination
     
     @extend_schema(
@@ -102,6 +102,7 @@ class SanatoriumListView(generics.ListAPIView):
             OpenApiParameter(name='max_price', description='Maximum price filter', required=False, type=float),
             OpenApiParameter(name='has_treatment', description='Filter by treatment availability', required=False, type=bool),
             OpenApiParameter(name='location_type', description='Filter by location type (e.g., naftalan, other)', required=False, type=str),
+            OpenApiParameter(name='ordering', description='Order by field (e.g., name, -rating, total_price, -total_price)', required=False, type=str),
         ],
         responses={200: SanatoriumListSerializer}
     )
@@ -111,6 +112,23 @@ class SanatoriumListView(generics.ListAPIView):
     def get_queryset(self):
         try:
             queryset = super().get_queryset()
+            
+            # Check if we need to order by total_price
+            ordering = self.request.query_params.get('ordering', None)
+            
+            # Store original ordering to handle after all other filters
+            is_total_price_ordering = False
+            total_price_ordering_desc = False
+            
+            if ordering:
+                if ordering == 'total_price':
+                    is_total_price_ordering = True
+                    total_price_ordering_desc = False
+                elif ordering == '-total_price':
+                    is_total_price_ordering = True
+                    total_price_ordering_desc = True
+            
+            # Process all other filters first
             location_type = self.request.query_params.get('location_type', None)
             if location_type:
                 queryset = queryset.filter(location_type=location_type)
@@ -251,6 +269,54 @@ class SanatoriumListView(generics.ListAPIView):
                     pass
             
             logger.info(f"Final queryset count: {queryset.count()}")
+            
+            # Handle total_price ordering after all filters
+            if is_total_price_ordering and queryset.exists():
+                from datetime import datetime
+                
+                # Get check-in and check-out dates for total price calculation
+                check_in_str = self.request.query_params.get('check_in')
+                check_out_str = self.request.query_params.get('check_out')
+                
+                if check_in_str and check_out_str:
+                    try:
+                        check_in = datetime.strptime(check_in_str, '%Y-%m-%d').date()
+                        check_out = datetime.strptime(check_out_str, '%Y-%m-%d').date()
+                        
+                        # Calculate number of nights
+                        nights = (check_out - check_in).days
+                        
+                        if nights > 0:
+                            # Calculate total price for each sanatorium and sort
+                            sanatorium_total_prices = []
+                            
+                            for sanatorium in queryset:
+                                # Instantiate the serializer to calculate min_price
+                                serializer = self.get_serializer(sanatorium)
+                                min_price = serializer.get_min_price(sanatorium)
+                                
+                                if min_price is not None:
+                                    total_price = min_price * nights
+                                    sanatorium_total_prices.append((sanatorium.id, total_price))
+                            
+                            # Sort by total price
+                            sanatorium_total_prices.sort(key=lambda x: x[1], reverse=total_price_ordering_desc)
+                            
+                            # Extract sorted IDs
+                            sorted_ids = [id for id, _ in sanatorium_total_prices]
+                            
+                            # Create preserved order
+                            from django.db.models import Case, When, Value, IntegerField
+                            
+                            if sorted_ids:
+                                preserved_order = Case(
+                                    *[When(id=pk, then=Value(pos)) for pos, pk in enumerate(sorted_ids)],
+                                    output_field=IntegerField()
+                                )
+                                queryset = queryset.filter(id__in=sorted_ids).order_by(preserved_order)
+                    except (ValueError, TypeError) as e:
+                        logger.error(f"Error in total_price ordering: {str(e)}")
+            
             return queryset
             
         except Exception as e:
