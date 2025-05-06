@@ -3,9 +3,12 @@ from .models import Sanatorium, RoomType, RoomPrice, AgeGroup
 from django.db.models import Q, Min, Max
 
 class SanatoriumFilter(django_filters.FilterSet):
-    min_price = django_filters.NumberFilter(field_name='price', lookup_expr='gte')
-    max_price = django_filters.NumberFilter(field_name='price', lookup_expr='lte')
+    min_price = django_filters.NumberFilter(field_name='min_price_value', lookup_expr='gte')
+    max_price = django_filters.NumberFilter(field_name='min_price_value', lookup_expr='lte')
+    min_total_price = django_filters.NumberFilter(method='filter_min_total_price')
+    max_total_price = django_filters.NumberFilter(method='filter_max_total_price')
     min_rating = django_filters.NumberFilter(field_name='rating', lookup_expr='gte')
+    ratings = django_filters.CharFilter(method='filter_ratings')
     location = django_filters.CharFilter(field_name='location__id')
     location_type = django_filters.CharFilter(field_name='location__location_type')
     facilities = django_filters.CharFilter(method='filter_facilities')
@@ -19,9 +22,87 @@ class SanatoriumFilter(django_filters.FilterSet):
 
     class Meta:
         model = Sanatorium
-        fields = ['min_price', 'max_price', 'min_rating', 'location', 'location_type', 
+        fields = ['min_price', 'max_price', 'min_total_price', 'max_total_price', 
+                 'min_rating', 'ratings', 'location', 'location_type', 
                  'facilities', 'room_types', 'occupancy', 'min_occupancy', 'max_occupancy',
                  'children_ages', 'check_in', 'check_out']
+
+    def filter_min_total_price(self, queryset, name, value):
+        """
+        Filter by minimum total price. 
+        Since total_price is calculated in the serializer based on the stay duration,
+        we need to estimate the filter by adjusting for the number of nights.
+        """
+        if not value:
+            return queryset
+            
+        try:
+            # Get check-in and check-out dates to calculate number of nights
+            from datetime import datetime
+            check_in_str = self.request.query_params.get('check_in')
+            check_out_str = self.request.query_params.get('check_out')
+            
+            if check_in_str and check_out_str:
+                check_in = datetime.strptime(check_in_str, '%Y-%m-%d').date()
+                check_out = datetime.strptime(check_out_str, '%Y-%m-%d').date()
+                nights = (check_out - check_in).days
+                
+                if nights > 0:
+                    # Adjust the min_price filter based on number of nights
+                    min_price_per_night = float(value) / nights
+                    return queryset.filter(min_price_value__gte=min_price_per_night)
+            
+            # If no dates provided or calculation failed, use the value directly
+            return queryset.filter(min_price_value__gte=float(value))
+        except (ValueError, TypeError, ZeroDivisionError):
+            return queryset
+            
+    def filter_max_total_price(self, queryset, name, value):
+        """
+        Filter by maximum total price.
+        Since total_price is calculated in the serializer based on the stay duration,
+        we need to estimate the filter by adjusting for the number of nights.
+        """
+        if not value:
+            return queryset
+            
+        try:
+            # Get check-in and check-out dates to calculate number of nights
+            from datetime import datetime
+            check_in_str = self.request.query_params.get('check_in')
+            check_out_str = self.request.query_params.get('check_out')
+            
+            if check_in_str and check_out_str:
+                check_in = datetime.strptime(check_in_str, '%Y-%m-%d').date()
+                check_out = datetime.strptime(check_out_str, '%Y-%m-%d').date()
+                nights = (check_out - check_in).days
+                
+                if nights > 0:
+                    # Adjust the max_price filter based on number of nights
+                    max_price_per_night = float(value) / nights
+                    return queryset.filter(min_price_value__lte=max_price_per_night)
+            
+            # If no dates provided or calculation failed, use the value directly
+            return queryset.filter(min_price_value__lte=float(value))
+        except (ValueError, TypeError, ZeroDivisionError):
+            return queryset
+            
+    def filter_ratings(self, queryset, name, value):
+        """
+        Filter sanatoriums by a list of ratings values.
+        Expects a comma-separated list of rating values (e.g., "3,4,5").
+        """
+        if not value:
+            return queryset
+            
+        try:
+            ratings = [float(r.strip()) for r in value.split(',') if r.strip()]
+            if ratings:
+                return queryset.filter(rating__in=ratings)
+        except (ValueError, TypeError):
+            pass
+            
+        return queryset
 
     def filter_facilities(self, queryset, name, value):
         facility_ids = value.split(',')

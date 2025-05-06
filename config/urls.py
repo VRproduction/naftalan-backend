@@ -9,7 +9,7 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, Spec
 from utils.translation.set_language import set_language
 
 urlpatterns = [
-
+    path('admin/', admin.site.urls),
     path('api/', include('apps.urls')),
     
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
@@ -33,13 +33,11 @@ if 'rosetta' in settings.INSTALLED_APPS:
         re_path(r'^translation/', include('rosetta.urls')),
     ]
 
-urlpatterns += [
-    path('', admin.site.urls),
-]
-
 # Local settings
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL,
                           document_root=settings.STATIC_ROOT)
     urlpatterns += static(settings.MEDIA_URL,
                           document_root=settings.MEDIA_ROOT)
+
+

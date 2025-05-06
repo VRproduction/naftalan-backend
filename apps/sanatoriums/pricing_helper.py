@@ -12,30 +12,48 @@ def get_price_details(sanatorium, room_type, price, is_current_season=False, sea
         price: RoomPrice nesnesi
         is_current_season: Mevcut sezon mu
         season: Fiyatın ait olduğu sezon
-        min_price: Hesaplanan minimum fiyat
+        min_price: Hesaplanan minimum fiyat (ek yatak fiyatları dahil toplam fiyat)
         occupancy: İstek parametresi olarak gelen kişi sayısı
         children_ages: İstek parametresi olarak gelen çocuk yaşları
         
     Returns:
         dict: Fiyatlandırma detaylarını içeren sözlük
     """
-    # Discount calculations
+    # İndirim hesaplaması için temel fiyat
     from decimal import Decimal
     base_price = price.price if price else 0
-    discount_amount = 0
-    discounted_price = base_price
+    room_discount_amount = 0
+    room_discounted_price = base_price
     
+    # Oda fiyatı için indirim hesapla
     if price and hasattr(price, 'discount_type') and hasattr(price, 'discount_value') and price.discount_value:
         if price.discount_type == 'percentage':
             if price.discount_value <= 100:  # Valid percentage
                 # Convert float to Decimal for calculation
                 discount_percentage = Decimal(str(price.discount_value))
-                discount_amount = (base_price * discount_percentage) / Decimal('100')
+                room_discount_amount = (base_price * discount_percentage) / Decimal('100')
         else:  # fixed amount
             # Convert float to Decimal for calculation
+            room_discount_amount = Decimal(str(price.discount_value))
+        
+        room_discounted_price = max(Decimal('0'), base_price - room_discount_amount)
+    
+    # min_price için indirim hesaplaması
+    min_price_decimal = Decimal(str(min_price)) if min_price is not None else Decimal('0')
+    discount_amount = 0
+    discounted_price = min_price_decimal
+    
+    # Eğer fiyat için indirim varsa, aynı indirim yüzdesini min_price'a uygula
+    if price and hasattr(price, 'discount_type') and hasattr(price, 'discount_value') and price.discount_value:
+        if price.discount_type == 'percentage':
+            if price.discount_value <= 100:  # Valid percentage
+                discount_percentage = Decimal(str(price.discount_value))
+                discount_amount = (min_price_decimal * discount_percentage) / Decimal('100')
+        else:  # fixed amount
+            # Sabit miktar indirimini direkt olarak kullan
             discount_amount = Decimal(str(price.discount_value))
         
-        discounted_price = max(Decimal('0'), base_price - discount_amount)
+        discounted_price = max(Decimal('0'), min_price_decimal - discount_amount)
     
     details = {
         "sanatorium": {
@@ -53,6 +71,7 @@ def get_price_details(sanatorium, room_type, price, is_current_season=False, sea
         },
         "pricing": {
             "base_price": base_price,
+            "total_base_price": min_price_decimal,  # Ek yatak fiyatları dahil toplam taban fiyat
             "currency": price.currency.code if price and price.currency else None,
             "with_treatment": price.with_treatment if hasattr(price, 'with_treatment') else None,
             "treatment_option": price.treatment_option.name if hasattr(price, 'treatment_option') and price.treatment_option else None,
@@ -61,7 +80,9 @@ def get_price_details(sanatorium, room_type, price, is_current_season=False, sea
                 "type": price.discount_type if price and hasattr(price, 'discount_type') else None,
                 "value": price.discount_value if price and hasattr(price, 'discount_value') else 0,
                 "amount": discount_amount,
-                "discounted_price": discounted_price
+                "discounted_price": discounted_price,
+                "room_discount_amount": room_discount_amount,
+                "room_discounted_price": room_discounted_price
             }
         },
         "season": {
@@ -76,7 +97,9 @@ def get_price_details(sanatorium, room_type, price, is_current_season=False, sea
             "total_guests": (occupancy or 0) + len(children_ages) if children_ages else occupancy,
         },
         "result": {
-            "total_price": min_price,
+            "base_price": min_price,  # İndirimsiz toplam fiyat
+            "discounted_price": float(discounted_price),  # İndirimli toplam fiyat
+            "discount_amount": float(discount_amount),  # Uygulanan indirim miktarı
             "pricing_method": "current_season" if is_current_season else "other_season"
         }
     }

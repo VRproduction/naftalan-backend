@@ -18,7 +18,7 @@ from utils.api.pagination.page_number_pagination import CustomPageNumberPaginati
 from apps.core.models import Currency
 from .filters import SanatoriumFilter, RoomTypeFilter, RoomPriceFilter
 
-
+import logging
 # Create your views here.
 
 class LocationListView(generics.ListAPIView):
@@ -86,49 +86,21 @@ class RoomPriceListView(generics.ListAPIView):
 
 
 class SanatoriumListView(generics.ListAPIView):
-    queryset = Sanatorium.objects.filter(is_active=True)
     serializer_class = SanatoriumListSerializer
-    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_class = SanatoriumFilter
     search_fields = ['name', 'location__region', 'location__country']
-    ordering_fields = ['name', 'rating', 'created_at', 'total_price']
     pagination_class = CustomPageNumberPagination
     
-    @extend_schema(
-        parameters=[
-            OpenApiParameter(name='occupancy', description='Number of occupants', required=False, type=int),
-            OpenApiParameter(name='children_ages', description='Ages of children, comma separated (e.g., 5,7,11)', required=False, type=str),
-            OpenApiParameter(name='min_price', description='Minimum price filter', required=False, type=float),
-            OpenApiParameter(name='max_price', description='Maximum price filter', required=False, type=float),
-            OpenApiParameter(name='has_treatment', description='Filter by treatment availability', required=False, type=bool),
-            OpenApiParameter(name='location_type', description='Filter by location type (e.g., naftalan, other)', required=False, type=str),
-            OpenApiParameter(name='ordering', description='Order by field (e.g., name, -rating, total_price, -total_price)', required=False, type=str),
-        ],
-        responses={200: SanatoriumListSerializer}
-    )
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
-
     def get_queryset(self):
+        """
+        Tüm sanatoriumları getir ve ön işlem yap
+        """
         try:
-            queryset = super().get_queryset()
+            # Queryset'i oluştur
+            queryset = Sanatorium.objects.filter(is_active=True)
             
-            # Check if we need to order by total_price
-            ordering = self.request.query_params.get('ordering', None)
-            
-            # Store original ordering to handle after all other filters
-            is_total_price_ordering = False
-            total_price_ordering_desc = False
-            
-            if ordering:
-                if ordering == 'total_price':
-                    is_total_price_ordering = True
-                    total_price_ordering_desc = False
-                elif ordering == '-total_price':
-                    is_total_price_ordering = True
-                    total_price_ordering_desc = True
-            
-            # Process all other filters first
+            # Diğer filtreleme işlemleri...
             location_type = self.request.query_params.get('location_type', None)
             if location_type:
                 queryset = queryset.filter(location_type=location_type)
@@ -161,72 +133,75 @@ class SanatoriumListView(generics.ListAPIView):
                 # Go through each sanatorium and check if it meets criteria
                 for sanatorium in queryset:
                     for room_type in sanatorium.room_types.all():
-                        # Check if room can accommodate the extra beds needed
-                        # If max_extra_beds is None, it means unlimited capacity
-                        max_extra_beds = room_type.max_extra_beds
+                        logger.debug(f"Checking room {room_type.id} in sanatorium {sanatorium.id}")
                         
-                        logger.debug(f"Checking room {room_type.id} in sanatorium {sanatorium.id} - max_extra_beds: {max_extra_beds}, children: {len(children_ages) if children_ages else 0}")
+                        # Check if room can accommodate the extra beds needed based on max_extra_beds
+                        max_extra_beds = room_type.max_extra_beds if room_type.max_extra_beds is not None else float('inf')
                         
-                        # If children and max_extra_beds is not None, check capacity
-                        if children_ages and max_extra_beds is not None and len(children_ages) > max_extra_beds:
-                            logger.debug(f"Room {room_type.id} skipped - not enough extra beds (max: {max_extra_beds}, needed: {len(children_ages)})")
+                        # Öncelikle basic capacity kontrolü yap
+                        if children_ages and max_extra_beds < len(children_ages):
+                            logger.debug(f"Room {room_type.id} skipped - max_extra_beds {max_extra_beds} < children {len(children_ages)}")
                             continue
                         
-                        # Check if room has prices for specified occupancy
+                        # Occupancy kontrolü
                         if occupancy:
                             try:
                                 occupancy_int = int(occupancy)
-                                room_has_occupancy = room_type.prices.filter(occupancy=occupancy_int).exists()
-                                if not room_has_occupancy:
+                                # Occupancy değeri fiyatlar içinde var mı kontrol et
+                                if not room_type.prices.filter(occupancy=occupancy_int).exists():
+                                    logger.debug(f"Room {room_type.id} skipped - no price for occupancy {occupancy_int}")
                                     continue
                             except (ValueError, TypeError):
                                 continue
                         
-                        # Check if room has extra bed prices for the specified children ages
+                        # Çocuklar için extra bed gerekiyorsa
                         if children_ages:
-                            # First, check if the room has any extra bed prices configured at all
+                            # Extra bed fiyatları var mı kontrol et
                             has_extra_bed_prices = room_type.extra_bed_prices.exists()
                             
-                            if not has_extra_bed_prices:
-                                logger.info(f"Room {room_type.id} skipped - no extra bed prices configured at all")
-                                continue
-                                
-                            # Get all age groups available for this room
-                            available_age_groups = set()
-                            for extra_bed_price in room_type.extra_bed_prices.all():
-                                if extra_bed_price.age_group:
-                                    available_age_groups.add(extra_bed_price.age_group)
-                                    
-                            # If there are no age groups available, skip this room regardless of max_extra_beds
-                            if not available_age_groups:
-                                logger.info(f"Room {room_type.id} skipped - no age groups available in extra bed prices")
-                                continue
-                                
-                            # If max_extra_beds is None, it means unlimited capacity, we still need age groups but don't check limits
+                            # Eğer oda için max_extra_beds tanımlanmışsa ve > 0 ise, 
+                            # ama extra_bed_prices tanımlanmamışsa, bu durumda yaş kontrolü yapmadan odayı kabul et
+                            if max_extra_beds > 0 and not has_extra_bed_prices:
+                                logger.info(f"Room {room_type.id} accepted - has max_extra_beds={max_extra_beds} but no extra bed prices configured")
+                                valid_sanatorium_ids.add(sanatorium.id)
+                                break
                             
-                            # Check if each child age fits into at least one age group
-                            # We do this check for all cases now, regardless of max_extra_beds value
-                            # All children must have a matching age group in the available age groups
-                            all_ages_fit = True
-                            for age in children_ages:
-                                age_fits = False
-                                for age_group in available_age_groups:
-                                    if age_group.min_age <= age <= age_group.max_age:
-                                        age_fits = True
-                                        break
+                            # Eğer extra_bed_prices varsa, yaş kontrolü yap
+                            if has_extra_bed_prices:
+                                # Get all age groups available for this room
+                                available_age_groups = set()
+                                for extra_bed_price in room_type.extra_bed_prices.all():
+                                    if extra_bed_price.age_group:
+                                        available_age_groups.add(extra_bed_price.age_group)
                                 
-                                if not age_fits:
-                                    logger.info(f"Child age {age} doesn't fit any age group for room {room_type.id}")
-                                    all_ages_fit = False
+                                # Eğer hiç yaş grubu tanımlanmamışsa ama max_extra_beds > 0 ise, odayı kabul et
+                                if not available_age_groups and max_extra_beds > 0:
+                                    logger.info(f"Room {room_type.id} accepted - has extra_bed_prices but no age groups defined")
+                                    valid_sanatorium_ids.add(sanatorium.id)
                                     break
-                            
-                            if not all_ages_fit:
-                                logger.info(f"Room {room_type.id} skipped - not all children ages fit available age groups")
-                                continue
+                                
+                                # Eğer yaş grupları tanımlanmışsa, çocuk yaşlarının en az birinin bu gruplara uyduğunu kontrol et
+                                # Tüm çocukların uyduğu zorunluluğunu kaldırıyoruz, en az 1 çocuk uygunsa kabul edeceğiz
+                                if available_age_groups:
+                                    matching_ages_count = 0
+                                    for age in children_ages:
+                                        for age_group in available_age_groups:
+                                            if age_group.min_age <= age <= age_group.max_age:
+                                                matching_ages_count += 1
+                                                break
+                                    
+                                    # En az 1 çocuk yaş grubuna uyuyorsa, odayı kabul et
+                                    if matching_ages_count > 0:
+                                        logger.info(f"Room {room_type.id} accepted - {matching_ages_count} of {len(children_ages)} children fit age groups")
+                                        valid_sanatorium_ids.add(sanatorium.id)
+                                        break
+                                    else:
+                                        logger.info(f"Room {room_type.id} skipped - no children fit available age groups")
+                                        continue
                         
-                        # If we get here, the room meets all criteria
+                        # Buraya kadar geldiyse, tüm kriterler OK
                         valid_sanatorium_ids.add(sanatorium.id)
-                        break  # Don't need to check other rooms in this sanatorium
+                        break  # Sonraki odaları kontrol etmeye gerek yok
                 
                 # Filter queryset by valid IDs
                 if valid_sanatorium_ids:
@@ -236,97 +211,135 @@ class SanatoriumListView(generics.ListAPIView):
                 
                 logger.info(f"After occupancy and children filter - count: {queryset.count()}")
                 logger.info(f"Valid sanatorium IDs: {valid_sanatorium_ids}")
-                
-                # Alternatively, use a simpler approach with just occupancy filter if no children
-                # This is the original approach and works fine without children
-                if occupancy and not children_ages:
-                    try:
-                        occupancy_int = int(occupancy)
-                        filtered_queryset = queryset.filter(room_types__prices__occupancy=occupancy_int).distinct()
-                        if filtered_queryset.exists():
-                            queryset = filtered_queryset
-                            logger.info(f"Using simple occupancy filter - count: {queryset.count()}")
-                    except (ValueError, TypeError) as e:
-                        logger.error(f"Error in occupancy conversion: {str(e)}")
-                        pass
-                    
+            
             # Filter by min_price and max_price if specified
             min_price = self.request.query_params.get('min_price', None)
             max_price = self.request.query_params.get('max_price', None)
             
+            # Önce min_price'ı hesaplamak için alt sorgu oluştur
+            from django.db.models import Min, OuterRef, Subquery
+            
+            # Fiyatlara göre sıralama - Oda fiyatlarından en düşük olanı bul
+            room_prices = RoomPrice.objects.filter(
+                room_type__sanatorium=OuterRef('id')
+            ).order_by('price').values('price')[:1]
+            
+            # min_price_value'yu queryset'e ekle ve ona göre sırala
+            queryset = queryset.annotate(
+                min_price_value=Subquery(room_prices)
+            )
+            
+            # min_price ve max_price filtreleri uygula
             if min_price:
                 try:
                     min_price = float(min_price)
-                    queryset = queryset.filter(room_types__prices__price__gte=min_price).distinct()
+                    queryset = queryset.filter(min_price_value__gte=min_price).distinct()
                 except (ValueError, TypeError):
                     pass
                     
             if max_price:
                 try:
                     max_price = float(max_price)
-                    queryset = queryset.filter(room_types__prices__price__lte=max_price).distinct()
+                    queryset = queryset.filter(min_price_value__lte=max_price).distinct()
                 except (ValueError, TypeError):
                     pass
             
-            logger.info(f"Final queryset count: {queryset.count()}")
+            # min_price'a göre sırala
+            queryset = queryset.order_by('min_price_value')
             
-            # Handle total_price ordering after all filters
-            if is_total_price_ordering and queryset.exists():
-                from datetime import datetime
-                
-                # Get check-in and check-out dates for total price calculation
-                check_in_str = self.request.query_params.get('check_in')
-                check_out_str = self.request.query_params.get('check_out')
-                
-                if check_in_str and check_out_str:
-                    try:
-                        check_in = datetime.strptime(check_in_str, '%Y-%m-%d').date()
-                        check_out = datetime.strptime(check_out_str, '%Y-%m-%d').date()
-                        
-                        # Calculate number of nights
-                        nights = (check_out - check_in).days
-                        
-                        if nights > 0:
-                            # Calculate total price for each sanatorium and sort
-                            sanatorium_total_prices = []
-                            
-                            for sanatorium in queryset:
-                                # Instantiate the serializer to calculate min_price
-                                serializer = self.get_serializer(sanatorium)
-                                min_price = serializer.get_min_price(sanatorium)
-                                
-                                if min_price is not None:
-                                    total_price = min_price * nights
-                                    sanatorium_total_prices.append((sanatorium.id, total_price))
-                            
-                            # Sort by total price
-                            sanatorium_total_prices.sort(key=lambda x: x[1], reverse=total_price_ordering_desc)
-                            
-                            # Extract sorted IDs
-                            sorted_ids = [id for id, _ in sanatorium_total_prices]
-                            
-                            # Create preserved order
-                            from django.db.models import Case, When, Value, IntegerField
-                            
-                            if sorted_ids:
-                                preserved_order = Case(
-                                    *[When(id=pk, then=Value(pos)) for pos, pk in enumerate(sorted_ids)],
-                                    output_field=IntegerField()
-                                )
-                                queryset = queryset.filter(id__in=sorted_ids).order_by(preserved_order)
-                    except (ValueError, TypeError) as e:
-                        logger.error(f"Error in total_price ordering: {str(e)}")
+            logger = logging.getLogger(__name__)
+            logger.info(f"Final queryset ordered by min_price: {[s.id for s in queryset[:10]]}")
             
             return queryset
             
         except Exception as e:
-            import logging
             logger = logging.getLogger(__name__)
             logger.error(f"Error in SanatoriumListView.get_queryset: {str(e)}")
             import traceback
             logger.error(traceback.format_exc())
             return Sanatorium.objects.none()
     
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(name='occupancy', description='Number of occupants', required=False, type=int),
+            OpenApiParameter(name='children_ages', description='Ages of children, comma separated (e.g., 5,7,11)', required=False, type=str),
+            OpenApiParameter(name='min_price', description='Minimum price per night filter', required=False, type=float),
+            OpenApiParameter(name='max_price', description='Maximum price per night filter', required=False, type=float),
+            OpenApiParameter(name='min_total_price', description='Minimum total price for entire stay', required=False, type=float),
+            OpenApiParameter(name='max_total_price', description='Maximum total price for entire stay', required=False, type=float),
+            OpenApiParameter(name='min_rating', description='Minimum rating filter', required=False, type=float),
+            OpenApiParameter(name='ratings', description='Filter by specific ratings, comma separated (e.g., 3,4,5)', required=False, type=str),
+            OpenApiParameter(name='has_treatment', description='Filter by treatment availability', required=False, type=bool),
+            OpenApiParameter(name='location_type', description='Filter by location type (e.g., naftalan, other)', required=False, type=str),
+            OpenApiParameter(name='check_in', description='Check-in date (YYYY-MM-DD)', required=False, type=str),
+            OpenApiParameter(name='check_out', description='Check-out date (YYYY-MM-DD)', required=False, type=str),
+            OpenApiParameter(name='ordering', description='Sıralama alanı. Desteklenen değerler: total_price, total_discount_price. Azalan sıra için - ekleyin.', required=False, type=str),
+        ],
+        responses={200: SanatoriumListSerializer}
+    )
+    def list(self, request, *args, **kwargs):
+        response = super().list(request, *args, **kwargs)
+        
+        # Fiyata göre manuel sıralama
+        ordering = request.query_params.get('ordering', 'total_discount_price')  # Varsayılan olarak total_discount_price
+        
+        # Sonuçları manuel olarak sırala
+        if 'results' in response.data and response.data['results']:
+            reverse_sort = ordering.startswith('-')
+            sort_field = ordering[1:] if reverse_sort else ordering
+            
+            # Hangi alana göre sıralama yapacağız?
+            if sort_field in ['total_price', 'total_discount_price']:
+                logger = logging.getLogger(__name__)
+                logger.info(f"Sorting by {ordering}")
+                
+                # Key fonksiyonu tanımla
+                def get_sort_key(item):
+                    if sort_field == 'total_discount_price':
+                        value = item.get('total_discount_price')
+                        if value is None:
+                            value = item.get('total_price')  # Total discount price yoksa total price kullan
+                    else:
+                        value = item.get(sort_field)
+                        
+                    # None değerler için sonsuz değer döndür (sıralamada en sona kalsın)
+                    if value is None:
+                        return float('inf')
+                    
+                    # Sayıya dönüştürmeyi dene
+                    try:
+                        return float(value)
+                    except (ValueError, TypeError):
+                        return float('inf')
+                
+                # Herhangi bir sorunu görmek için sıralama öncesi değerleri yazdır
+                try:
+                    logger.info(f"Before sorting - IDs: {[item.get('id') for item in response.data['results']]}")
+                    logger.info(f"Before sorting - Values: {[(item.get('id'), get_sort_key(item)) for item in response.data['results'][:5]]}")
+                except Exception as e:
+                    logger.error(f"Error logging before sorting: {str(e)}")
+                
+                # Sıralama yap
+                try:
+                    sorted_results = sorted(
+                        response.data['results'],
+                        key=get_sort_key,
+                        reverse=reverse_sort
+                    )
+                    
+                    # Sıralama sonrası değerleri yazdır
+                    logger.info(f"After sorting - IDs: {[item.get('id') for item in sorted_results]}")
+                    logger.info(f"After sorting - Values: {[(item.get('id'), get_sort_key(item)) for item in sorted_results[:5]]}")
+                    
+                    # Sıralanmış sonuçları response'a yerleştir
+                    response.data['results'] = sorted_results
+                except Exception as e:
+                    logger.error(f"Error during sorting: {str(e)}")
+            else:
+                logger.info(f"No custom sorting applied. Using ordering: {ordering}")
+        
+        return response
+
 
 class SanatoriumDetailView(generics.RetrieveAPIView):
     queryset = Sanatorium.objects.filter(is_active=True)
@@ -337,10 +350,14 @@ class SanatoriumDetailView(generics.RetrieveAPIView):
         parameters=[
             OpenApiParameter(name='occupancy', description='Number of occupants', required=False, type=int),
             OpenApiParameter(name='children_ages', description='Ages of children, comma separated (e.g., 5,7,11)', required=False, type=str),
-            OpenApiParameter(name='min_price', description='Minimum price filter', required=False, type=float),
-            OpenApiParameter(name='max_price', description='Maximum price filter', required=False, type=float),
-            OpenApiParameter(name='has_treatment', description='Filter by treatment availability', required=False, type=bool),
-            OpenApiParameter(name='location_type', description='Filter by location type (e.g., naftalan, other)', required=False, type=str),
+            OpenApiParameter(name='min_price', description='Minimum price per night filter', required=False, type=float),
+            OpenApiParameter(name='max_price', description='Maximum price per night filter', required=False, type=float),
+            OpenApiParameter(name='min_total_price', description='Minimum total price for entire stay', required=False, type=float),
+            OpenApiParameter(name='max_total_price', description='Maximum total price for entire stay', required=False, type=float),
+            OpenApiParameter(name='min_rating', description='Minimum rating filter', required=False, type=float),
+            OpenApiParameter(name='ratings', description='Filter by specific ratings, comma separated (e.g., 3,4,5)', required=False, type=str),
+            OpenApiParameter(name='check_in', description='Check-in date (YYYY-MM-DD)', required=False, type=str),
+            OpenApiParameter(name='check_out', description='Check-out date (YYYY-MM-DD)', required=False, type=str),
         ],
         responses={200: SanatoriumSerializer}
     )
