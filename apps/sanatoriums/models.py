@@ -5,6 +5,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
 from datetime import date
+from decimal import Decimal
 
 from ckeditor_uploader.fields import RichTextUploadingField
 
@@ -213,11 +214,12 @@ class RoomPrice(models.Model):
         if self.discount_type == 'percentage':
             if self.discount_value > 100:
                 return self.price
-            discount_amount = (self.price * self.discount_value) / 100
+            discount_amount = self.price * Decimal(str(self.discount_value)) / Decimal('100')
         else:  # fixed amount
-            discount_amount = self.discount_value
+            discount_amount = Decimal(str(self.discount_value))
 
-        return max(0, self.price - discount_amount)
+        return max(Decimal('0'), self.price - discount_amount)
+
     
     def clean(self):
         super().clean()
@@ -293,7 +295,7 @@ class ExtraBedPrice(models.Model):
         if self.discount_type == 'percentage':
             if self.discount_value > 100:
                 return self.price
-            discount_amount = (self.price * self.discount_value) / 100
+            discount_amount = (float(self.price) * self.discount_value) / 100
         else:  # fixed amount
             discount_amount = self.discount_value
 

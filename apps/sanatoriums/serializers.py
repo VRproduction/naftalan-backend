@@ -89,15 +89,12 @@ class RoomPriceSerializer(TranslationMixin, serializers.ModelSerializer):
     season = SeasonSerializer(read_only=True)
     currency = CurrencySerializer(read_only=True)
     treatment_option = TreatmentOptionSerializer(read_only=True)
-    discounted_price = serializers.SerializerMethodField()
     
     class Meta:
         model = RoomPrice
         fields = ['id', 'season', 'occupancy', 'with_treatment', 'treatment_option', 'price', 'currency',
                  'discount_type', 'discount_value', 'discounted_price']
-    
-    def get_discounted_price(self, obj):
-        return obj.discounted_price
+ 
 
 
 class ExtraBedPriceSerializer(TranslationMixin, serializers.ModelSerializer):
