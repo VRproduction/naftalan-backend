@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import Booking, GuestDetail, ExtraBedBooking, BookingNote, Season
 from apps.sanatoriums.serializers import (
-    SanatoriumListSerializer, RoomTypeSerializer,
+    SanatoriumSearchSerializer, RoomTypeSerializer,
     SeasonSerializer, TreatmentOptionSerializer, CurrencySerializer, ExtraBedPriceSerializer
 )
 from utils.api.mixins.translation import TranslationMixin
@@ -37,7 +37,7 @@ class BookingSerializer(TranslationMixin, serializers.ModelSerializer):
     extra_beds = ExtraBedBookingSerializer(many=True, read_only=True)
     notes = BookingNoteSerializer(many=True, read_only=True)
     
-    sanatorium_detail = SanatoriumListSerializer(source='sanatorium', read_only=True)
+    sanatorium_detail = SanatoriumSearchSerializer(source='sanatorium', read_only=True)
     room_type_detail = RoomTypeSerializer(source='room_type', read_only=True)
     season_detail = SeasonSerializer(source='season', read_only=True)
     treatment_option_detail = TreatmentOptionSerializer(source='treatment_option', read_only=True)

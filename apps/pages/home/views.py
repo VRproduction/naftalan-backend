@@ -1,6 +1,6 @@
 from rest_framework.generics import ListAPIView, RetrieveAPIView
 
-from apps.sanatoriums.serializers import SanatoriumListSerializer
+from apps.sanatoriums.serializers import  SanatoriumSearchSerializer
 from apps.pages.blogs.serializers import BlogSerializer
 from apps.packages.serializers import PackageSerializer
 
@@ -58,7 +58,7 @@ class SanatoriesSectionView(RetrieveAPIView):
 
 class SanatoriumsView(ListAPIView):
     queryset = Sanatorium.objects.filter(is_active=True, location_type='naftalan', in_home = True)
-    serializer_class = SanatoriumListSerializer
+    serializer_class = SanatoriumSearchSerializer
 
 
 

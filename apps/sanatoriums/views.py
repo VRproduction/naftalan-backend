@@ -9,10 +9,10 @@ from .models import (
     Season, RoomType, RoomPrice, AgeGroup, ExtraBedPrice, TreatmentOption
     )
 from .serializers import (
-    LocationSerializer, SanatoriumSerializer, SanatoriumListSerializer, 
+    LocationSerializer, SanatoriumSerializer, SanatoriumSearchSerializer,
     NaftalanSanatoriumsPageSerializer, OtherCitiesSanatoriumsPageSerializer,
     CurrencySerializer, SeasonSerializer, RoomTypeSerializer, RoomPriceSerializer,
-    AgeGroupSerializer, ExtraBedPriceSerializer, TreatmentOptionSerializer
+    AgeGroupSerializer, ExtraBedPriceSerializer, TreatmentOptionSerializer, SanatoriumListSerializer
 )
 from utils.api.pagination.page_number_pagination import CustomPageNumberPagination
 from apps.core.models import Currency
@@ -85,8 +85,8 @@ class RoomPriceListView(generics.ListAPIView):
         return RoomPrice.objects.all()
 
 
-class SanatoriumListView(generics.ListAPIView):
-    serializer_class = SanatoriumListSerializer
+class SanatoriumSearchView(generics.ListAPIView):
+    serializer_class = SanatoriumSearchSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_class = SanatoriumFilter
     search_fields = ['name', 'location__region', 'location__country']
@@ -275,7 +275,7 @@ class SanatoriumListView(generics.ListAPIView):
             OpenApiParameter(name='check_out', description='Check-out date (YYYY-MM-DD)', required=False, type=str),
             OpenApiParameter(name='ordering', description='Sıralama alanı. Desteklenen değerler: total_price, total_discount_price. Azalan sıra için - ekleyin.', required=False, type=str),
         ],
-        responses={200: SanatoriumListSerializer}
+        responses={200: SanatoriumSearchSerializer}
     )
     def list(self, request, *args, **kwargs):
         response = super().list(request, *args, **kwargs)
@@ -341,6 +341,8 @@ class SanatoriumListView(generics.ListAPIView):
         return response
 
 
+
+
 class SanatoriumDetailView(generics.RetrieveAPIView):
     queryset = Sanatorium.objects.filter(is_active=True)
     serializer_class = SanatoriumSerializer
@@ -380,9 +382,21 @@ class OtherCitiesSanatoriumsPageView(generics.RetrieveAPIView):
 
 class NaftalanSanatoriums(generics.ListAPIView):
     queryset = Sanatorium.objects.filter(is_active=True, location_type='naftalan')
-    serializer_class = SanatoriumListSerializer
+    serializer_class = SanatoriumSearchSerializer
 
 
 class OtherCitiesSanatoriums(generics.ListAPIView):
     queryset = Sanatorium.objects.filter(is_active=True, location_type='other_cities')
+    serializer_class = SanatoriumSearchSerializer
+
+
+class SanatoriumList(generics.ListAPIView):
     serializer_class = SanatoriumListSerializer
+    filter_backends = [DjangoFilterBackend, SearchFilter]
+    filterset_class = SanatoriumFilter
+    
+    def get_queryset(self):
+        return Sanatorium.objects.filter(is_active=True)
+    
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)

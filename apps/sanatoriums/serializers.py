@@ -220,7 +220,7 @@ class SanatoriumFacilitySerializer(TranslationMixin, serializers.ModelSerializer
         )
     ]
 )
-class SanatoriumListSerializer(TranslationMixin, serializers.ModelSerializer):
+class SanatoriumSearchSerializer(TranslationMixin, serializers.ModelSerializer):
     location = LocationSerializer(read_only=True)
     main_image = serializers.SerializerMethodField()
     facilities = SanatoriumFacilitySerializer(many=True, read_only=True)
@@ -790,7 +790,7 @@ class SanatoriumSerializer(TranslationMixin, serializers.ModelSerializer):
 
     def get_min_price(self, obj):
         # Geçici bir list serializer oluştur ve context'i geçir
-        list_serializer = SanatoriumListSerializer(context=self.context)
+        list_serializer = SanatoriumSearchSerializer(context=self.context)
         min_price = list_serializer.get_min_price(obj)
         # _min_price_currency ve _min_price_details değerlerini aktarma
         if hasattr(list_serializer, '_min_price_currency'):
@@ -800,11 +800,11 @@ class SanatoriumSerializer(TranslationMixin, serializers.ModelSerializer):
         return min_price
 
     def get_total_price(self, obj):
-        list_serializer = SanatoriumListSerializer(context=self.context)
+        list_serializer = SanatoriumSearchSerializer(context=self.context)
         return list_serializer.get_total_price(obj)
     
     def get_total_discount_price(self, obj):
-        list_serializer = SanatoriumListSerializer(context=self.context)
+        list_serializer = SanatoriumSearchSerializer(context=self.context)
         return list_serializer.get_total_discount_price(obj)
     
     def get_min_price_currency(self, obj):
@@ -818,12 +818,12 @@ class SanatoriumSerializer(TranslationMixin, serializers.ModelSerializer):
         serializer = SEOSerializer(obj, context=self.context)
         return serializer.data
     
-    @extend_schema_field(SanatoriumListSerializer(many=True))
+    @extend_schema_field(SanatoriumSearchSerializer(many=True))
     def get_similar_sanatoriums(self, obj):
         queryset = Sanatorium.objects.filter(
             location_type=obj.location_type
         ).exclude(id=obj.id)[:3]
-        return SanatoriumListSerializer(queryset, many=True, context=self.context).data
+        return SanatoriumSearchSerializer(queryset, many=True, context=self.context).data
 
 class ReviewCreateSerializer(TranslationMixin, serializers.ModelSerializer):
     class Meta:
@@ -850,3 +850,9 @@ class OtherCitiesSanatoriumsPageSerializer(TranslationMixin, serializers.ModelSe
                   'main_section_title', 'main_section_description', 'main_section_image',
                   'sanatoriums_section_title', 'sanatoriums_section_description',
                   'contact_section_title', 'contact_section_description']
+
+
+class SanatoriumListSerializer(TranslationMixin, serializers.ModelSerializer):
+    class Meta:
+        model = Sanatorium
+        fields = ['id', 'name', 'location', ]

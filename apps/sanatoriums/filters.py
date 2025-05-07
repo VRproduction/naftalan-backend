@@ -3,6 +3,7 @@ from .models import Sanatorium, RoomType, RoomPrice, AgeGroup
 from django.db.models import Q, Min, Max
 
 class SanatoriumFilter(django_filters.FilterSet):
+    id = django_filters.NumberFilter(field_name='id', lookup_expr='exact')
     min_price = django_filters.NumberFilter(field_name='min_price_value', lookup_expr='gte')
     max_price = django_filters.NumberFilter(field_name='min_price_value', lookup_expr='lte')
     min_total_price = django_filters.NumberFilter(method='filter_min_total_price')
@@ -22,7 +23,7 @@ class SanatoriumFilter(django_filters.FilterSet):
 
     class Meta:
         model = Sanatorium
-        fields = ['min_price', 'max_price', 'min_total_price', 'max_total_price', 
+        fields = ['id', 'min_price', 'max_price', 'min_total_price', 'max_total_price', 
                  'min_rating', 'ratings', 'location', 'location_type', 
                  'facilities', 'room_types', 'occupancy', 'min_occupancy', 'max_occupancy',
                  'children_ages', 'check_in', 'check_out']

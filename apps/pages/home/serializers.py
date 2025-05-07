@@ -15,11 +15,11 @@ from .models import (
     ContactSection,
 )
 from utils.api.mixins.translation import TranslationMixin
-from apps.sanatoriums.serializers import SanatoriumListSerializer
+from apps.sanatoriums.serializers import SanatoriumSearchSerializer
 
 
 class HeroSliderSerializer(TranslationMixin, serializers.ModelSerializer):
-    sanatorium = SanatoriumListSerializer()
+    sanatorium = SanatoriumSearchSerializer()
     class Meta:
         model = HeroSlider
         fields = ['sanatorium',]
