@@ -194,3 +194,26 @@ class TreatmentProcess(models.Model):
         verbose_name = 'Müalicə prosesi'
         verbose_name_plural = 'Müalicə olunan xəstəliklər səhifə | Müalicə prosesləri'
         ordering = ['priority']
+
+
+
+class Indication(models.Model):
+    content = RichTextUploadingField(verbose_name='Məlumat')
+
+    def __str__(self):
+        return 'Naftalandan göstərişlər'
+
+    class Meta:
+        verbose_name = 'Naftalandan göstərişlər'
+        verbose_name_plural = 'Naftalandan göstərişlər'
+    
+
+class Contraindications(models.Model):
+    content = RichTextUploadingField(verbose_name='Məlumat')
+
+    def __str__(self):
+        return 'Əks göstərişlər'
+
+    class Meta:
+        verbose_name = 'Əks göstərişlər'
+        verbose_name_plural = 'Əks göstərişlər'

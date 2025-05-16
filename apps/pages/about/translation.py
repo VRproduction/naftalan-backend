@@ -1,5 +1,5 @@
 from modeltranslation.translator import TranslationOptions,register
-from .models import About, History, TimelinePunkt, ModernPunkt, TreatmentPage, Treatment, TreatmentBenefit, TreatmentProcess, TreatmentCategory
+from .models import About, History, TimelinePunkt, ModernPunkt, TreatmentPage, Treatment, TreatmentBenefit, TreatmentProcess, TreatmentCategory, Indication, Contraindications
 
 
 @register(About)
@@ -45,3 +45,12 @@ class TreatmentBenefitTranslationOptions(TranslationOptions):
 @register(TreatmentProcess)
 class TreatmentProcessTranslationOptions(TranslationOptions):
     fields = ('title', 'content')
+
+@register(Indication)
+class IndicationTranslationOptions(TranslationOptions):
+    fields = ('content',)
+
+
+@register(Contraindications)
+class ContraindicationsTranslationOptions(TranslationOptions):
+    fields = ('content',)

@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from modeltranslation.admin import TranslationAdmin, TranslationStackedInline
 
-from .models import About, History, TimelinePunkt, ModernPunkt, Treatment, TreatmentPage,TreatmentBenefit, TreatmentProcess, TreatmentCategory
+from .models import About, History, TimelinePunkt, ModernPunkt, Treatment, TreatmentPage,TreatmentBenefit, TreatmentProcess, TreatmentCategory, Indication, Contraindications
 
 
 
@@ -161,3 +161,34 @@ class TreatmentCategoryAdmin(TranslationAdmin):
         css = {
             'screen': ('modeltranslation/css/tabbed_translation_fields.css',),
         }
+
+
+@admin.register(Indication)
+class IndicationAdmin(TranslationAdmin):
+    class Media:
+        js = (
+            'http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js',
+            'http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js',
+            'modeltranslation/js/tabbed_translation_fields.js',
+        )
+        css = {
+            'screen': ('modeltranslation/css/tabbed_translation_fields.css',),
+        }
+    
+    def has_add_permission(self, request):
+        return not Indication.objects.exists()
+
+@admin.register(Contraindications)
+class ContraindicationsAdmin(TranslationAdmin):
+    class Media:
+        js = (
+            'http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js',
+            'http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js',
+            'modeltranslation/js/tabbed_translation_fields.js',
+        )
+        css = {
+            'screen': ('modeltranslation/css/tabbed_translation_fields.css',),
+        }
+    
+    def has_add_permission(self, request):
+        return not Contraindications.objects.exists()

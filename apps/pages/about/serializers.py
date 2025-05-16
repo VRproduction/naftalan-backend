@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from utils.api.mixins.translation import TranslationMixin
-from .models import About, History, TimelinePunkt, ModernPunkt, Treatment, TreatmentProcess, TreatmentCategory, TreatmentBenefit, TreatmentPage
+from .models import About, History, TimelinePunkt, ModernPunkt, Treatment, TreatmentProcess, TreatmentCategory, TreatmentBenefit, TreatmentPage, Indication, Contraindications
 
 
 class AboutSerializer(TranslationMixin, serializers.ModelSerializer):
@@ -60,3 +60,15 @@ class TreatmentProcessSerializer(TranslationMixin, serializers.ModelSerializer):
         model = TreatmentProcess
         fields = ['title', 'content', 'priority']
 
+
+class IndicationSerializer(TranslationMixin, serializers.ModelSerializer):
+    class Meta:
+        model = Indication
+        fields = ['content',]
+    
+
+class ContraindicationsSerializer(TranslationMixin, serializers.ModelSerializer):
+    class Meta:
+        model = Contraindications
+        fields = ['content',]
+    

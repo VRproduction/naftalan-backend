@@ -9,4 +9,6 @@ urlpatterns = [
    path('treatment-category-list/', views.TreatmentCategoryView.as_view(), name='treatment-category'),
    path('treatment-list/', views.TreatmentListView.as_view(), name='treatment-list'),
    path('treatment-process-list/', views.TreatmentProcessListView.as_view(), name='treatment-process-list'),
+   path('indication/', views.IndicationView.as_view(), name='indication'),
+   path('contraindications/', views.ContraindicationsView.as_view(), name='contraindications'),
 ]
