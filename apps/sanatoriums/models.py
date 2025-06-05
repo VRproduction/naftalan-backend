@@ -287,6 +287,19 @@ class ExtraBedPrice(models.Model):
         blank=True
     )
     
+    # @property
+    # def discounted_price(self):
+    #     if not self.price or not self.discount_value:
+    #         return self.price
+
+    #     if self.discount_type == 'percentage':
+    #         if self.discount_value > 100:
+    #             return self.price
+    #         discount_amount = (float(self.price) * self.discount_value) / 100
+    #     else:  # fixed amount
+    #         discount_amount = self.discount_value
+
+    #     return max(0, self.price - discount_amount)
     @property
     def discounted_price(self):
         if not self.price or not self.discount_value:
@@ -295,12 +308,11 @@ class ExtraBedPrice(models.Model):
         if self.discount_type == 'percentage':
             if self.discount_value > 100:
                 return self.price
-            discount_amount = (float(self.price) * self.discount_value) / 100
+            discount_amount = (self.price * Decimal(self.discount_value)) / Decimal(100)
         else:  # fixed amount
-            discount_amount = self.discount_value
+            discount_amount = Decimal(self.discount_value)
 
-        return max(0, self.price - discount_amount)
-    
+        return max(Decimal('0'), self.price - discount_amount)
     def clean(self):
         super().clean()
         if self.discount_type == 'percentage' and self.discount_value > 100:
