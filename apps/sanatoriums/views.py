@@ -228,6 +228,9 @@ class SanatoriumSearchView(generics.ListAPIView):
             queryset = queryset.annotate(
                 min_price_value=Subquery(room_prices)
             )
+
+            # Fiyatı olmayan sanatoryumları hariç tut
+            queryset = queryset.filter(min_price_value__isnull=False)
             
             # min_price ve max_price filtreleri uygula
             if min_price:
