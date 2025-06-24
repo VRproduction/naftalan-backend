@@ -18,4 +18,6 @@ urlpatterns = [
     path('room-types/<int:pk>/', views.RoomTypeDetailView.as_view(), name='room-type-detail'),
     path('room-prices/', views.RoomPriceListView.as_view(), name='room-prices'),
     path('<slug:slug>/', views.SanatoriumDetailView.as_view(), name='sanatorium-detail'),
+    path("<int:sanatorium_pk>/rooms/<int:room_pk>/", views.SanatoriumRoomDetailView.as_view(), name="sanatorium-room-detail"),
+    path("<int:pk>/similar/", views.SimilarSanatoriumsView.as_view(), name="similar-sanatoriums"),
 ]

@@ -123,6 +123,58 @@ class RoomTypeSerializer(TranslationMixin, serializers.ModelSerializer):
         fields = ['id', 'name', 'description', 'min_capacity', 'max_capacity', 'max_extra_beds', 'size', 'images', 'prices', 'extra_bed_prices']
 
 
+class SanatoriumRoomDetailSerializer(TranslationMixin, serializers.ModelSerializer):
+    price_info = serializers.SerializerMethodField()
+    images = serializers.SerializerMethodField()
+    requested_occupancy = serializers.SerializerMethodField()
+    requested_children_ages = serializers.SerializerMethodField()
+
+    class Meta:
+        model = RoomType
+        fields = (
+            "id",
+            "name",
+            "description",
+            "min_capacity",
+            "max_capacity",
+            "max_extra_beds",
+            "size",
+            "images",
+            "price_info",
+            "requested_occupancy",
+            "requested_children_ages",
+        )
+
+    def get_images(self, obj):
+        request = self.context.get("request")
+        if not request:
+            return []
+        return [request.build_absolute_uri(img.image.url) for img in obj.images.all()]
+
+    def get_requested_occupancy(self, obj):
+        occupancy_str = self.context.get("occupancy")
+        return int(occupancy_str) if occupancy_str and occupancy_str.isdigit() else 1
+
+    def get_requested_children_ages(self, obj):
+        children_ages_str = self.context.get("children_ages", "")
+        if not children_ages_str:
+            return []
+        return [int(age) for age in children_ages_str.split(',') if age.strip().isdigit()]
+
+    def get_price_info(self, obj):
+        context = self.context
+        occupancy = self.get_requested_occupancy(obj)
+        children_ages = self.get_requested_children_ages(obj)
+
+        sanatorium = obj.sanatorium
+        search_serializer = SanatoriumSearchSerializer(instance=sanatorium, context=context)
+        matched_rooms = search_serializer.get_matched_room_types(sanatorium)
+        for room in matched_rooms:
+            if room['room_type']['id'] == obj.id:
+                return room
+        return None
+
+
 class MatchedRoomsRoomTypeSerializer(TranslationMixin, serializers.ModelSerializer):
     images = RoomImageSerializer(many=True, read_only=True)
     
@@ -306,6 +358,155 @@ class SanatoriumSearchSerializer(TranslationMixin, serializers.ModelSerializer):
         if hasattr(self, '_min_price_details'):
             return self._min_price_details
         return None
+
+    def get_matched_room_types(self, obj):
+        request = self.context.get('request')
+        if not request:
+            return []
+        occupancy = None
+        try:
+            occupancy = int(request.query_params.get('occupancy')) if request.query_params.get('occupancy') else None
+        except (ValueError, TypeError):
+            pass
+        children_ages = []
+        try:
+            children_ages = [int(age) for age in request.query_params.get('children_ages', '').split(',') if age.strip()]
+        except (ValueError, TypeError):
+            pass
+        from datetime import date, datetime
+        today = date.today()
+        try:
+            from apps.sanatoriums.models import Season
+            current_season = Season.objects.filter(start_date__lte=today, end_date__gte=today).first()
+        except Exception:
+            current_season = None
+        # Gece sayısı hesapla
+        nights = None
+        check_in_str = request.query_params.get('check_in')
+        check_out_str = request.query_params.get('check_out')
+        if check_in_str and check_out_str:
+            try:
+                check_in = datetime.strptime(check_in_str, '%Y-%m-%d').date()
+                check_out = datetime.strptime(check_out_str, '%Y-%m-%d').date()
+                nights = (check_out - check_in).days
+                if nights <= 0:
+                    nights = None
+            except Exception:
+                nights = None
+        matched = []
+        for room_type in obj.room_types.all():
+            max_extra_beds = room_type.max_extra_beds if room_type.max_extra_beds is not None else float('inf')
+            if children_ages and len(children_ages) > max_extra_beds:
+                continue
+            prices = room_type.prices.all()
+            price_candidates = []
+            if current_season:
+                price_candidates += list(prices.filter(season=current_season))
+            price_candidates += list(prices.filter(is_standard=True))
+            price_candidates += list(prices)
+            if occupancy:
+                price_candidates = [p for p in price_candidates if p.occupancy == occupancy]
+            if not price_candidates:
+                continue
+            best_price = min(price_candidates, key=lambda p: p.price)
+            extra_bed_total = 0
+            extra_bed_details = []
+            if children_ages:
+                extra_bed_prices = room_type.extra_bed_prices.all()
+                if current_season:
+                    extra_bed_prices = extra_bed_prices.filter(season=current_season)
+                if not extra_bed_prices.exists():
+                    extra_bed_prices = room_type.extra_bed_prices.filter(is_standard=True)
+                if not extra_bed_prices.exists():
+                    extra_bed_prices = room_type.extra_bed_prices.all()
+                for age in children_ages:
+                    matched_extra = None
+                    for ebp in extra_bed_prices:
+                        if ebp.age_group and ebp.age_group.min_age <= age <= ebp.age_group.max_age:
+                            matched_extra = ebp
+                            break
+                    if matched_extra:
+                        extra_bed_total += matched_extra.price
+                        extra_bed_details.append({
+                            'child_age': age,
+                            'price_added': matched_extra.price,
+                            'currency': CurrencySerializer(matched_extra.currency).data if matched_extra.currency else None
+                        })
+            # İndirimli fiyatı hesapla
+            discount_type = getattr(best_price, 'discount_type', None)
+            discount_value = getattr(best_price, 'discount_value', 0)
+            from decimal import Decimal
+            discounted_base = float(best_price.price)
+            if discount_type and discount_value:
+                if discount_type == 'percentage' and discount_value <= 100:
+                    discounted_base = float(Decimal(str(best_price.price)) * (Decimal('1') - Decimal(str(discount_value))/Decimal('100')))
+                elif discount_type == 'fixed':
+                    discounted_base = float(Decimal(str(best_price.price)) - Decimal(str(discount_value)))
+            # Final indirimli fiyat: indirimli baz fiyat + ekstra yataklar
+            discounted_total_price = discounted_base + float(extra_bed_total)
+            total_price = None
+            total_discounted_price = None
+            if nights is not None:
+                total_price = (float(best_price.price) + float(extra_bed_total)) * nights
+                total_discounted_price = discounted_total_price * nights
+            # Discount info: indirim miktarı ve indirimli fiyat, ekstra yataklar dahil toplam üzerinden
+            discount_amount = None
+            if discount_type == 'percentage':
+                discount_amount = float(best_price.price) - discounted_base
+            elif discount_type == 'fixed':
+                discount_amount = float(best_price.price) - discounted_base
+            else:
+                if float(best_price.price) != discounted_base:
+                    discount_amount = float(best_price.price) - discounted_base
+                else:
+                    discount_amount = None
+            discount_info = {
+                'discount_type': discount_type,
+                'discount_value': discount_value,
+                'discount_amount': discount_amount,
+                'discounted_price': discounted_total_price
+            }
+            # 1 gecelik indirimsiz toplam fiyat (oda + ekstra yataklar)
+            price = float(best_price.price) + float(extra_bed_total)
+
+            # İndirimi (oda + ekstra yataklar) toplamına uygula
+            final_discounted_price = price
+            final_discount_amount = 0
+            if discount_type and discount_value:
+                if discount_type == 'percentage' and discount_value <= 100:
+                    final_discounted_price = float(Decimal(str(price)) * (Decimal('1') - Decimal(str(discount_value))/Decimal('100')))
+                elif discount_type == 'fixed':
+                    final_discounted_price = float(Decimal(str(price)) - Decimal(str(discount_value)))
+                final_discount_amount = price - final_discounted_price
+            
+            # Gecelere göre toplam fiyatlar
+            total_price = price * nights if nights is not None else None
+            total_discounted_price = final_discounted_price * nights if nights is not None else None
+
+            discount_info = {
+                'discount_type': discount_type,
+                'discount_value': discount_value,
+                'discount_amount': final_discount_amount,
+                'discounted_price': final_discounted_price
+            }
+
+            matched.append({
+                'room_type': MatchedRoomsRoomTypeSerializer(room_type, context=self.context).data,
+                'currency': CurrencySerializer(best_price.currency).data if best_price.currency else None,
+                'season': best_price.season.id if best_price.season else None,
+                'extra_bed_total': float(extra_bed_total),
+                'extra_bed_details': extra_bed_details,
+                'price': price,
+                'nights': nights,
+                'total_price': total_price,
+                'total_discounted_price': total_discounted_price,
+                'discount': discount_info,
+                'occupancy': occupancy,
+                'extra_bed_count': len(children_ages) if children_ages else 0
+            })
+        def sort_key(x):
+            return x['total_price'] if x['total_price'] is not None else float('inf')
+        return sorted(matched, key=sort_key)
 
     # --- Helper Methods ---
     def _get_today(self):

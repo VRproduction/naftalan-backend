@@ -13,7 +13,7 @@ from .serializers import (
     NaftalanSanatoriumsPageSerializer, OtherCitiesSanatoriumsPageSerializer,
     CurrencySerializer, SeasonSerializer, RoomTypeSerializer, RoomPriceSerializer,
     AgeGroupSerializer, ExtraBedPriceSerializer, TreatmentOptionSerializer, SanatoriumListSerializer,
-    SanatoriumSerializer
+    SanatoriumSerializer, SanatoriumRoomDetailSerializer
 )
 from utils.api.pagination.page_number_pagination import CustomPageNumberPagination
 from apps.core.models import Currency
@@ -339,3 +339,85 @@ class SanatoriumList(generics.ListAPIView):
     
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
+
+
+def is_valid_room_for_search(room, occupancy, children_ages):
+    # Oda kapasitesi kontrolü
+    if occupancy:
+        max_capacity = room.max_capacity if room.max_capacity is not None else None
+        if max_capacity is not None and occupancy > max_capacity:
+            return False
+        # RoomPrice tablosunda uygun bir fiyat var mı?
+        if not room.prices.filter(occupancy__gte=occupancy).exists():
+            return False
+
+    # Çocuk yaşları kontrolü
+    if children_ages:
+        if not room.extra_bed_prices.exists():
+            # Ekstra yatak fiyatı tanımlı değilse, yine de geçerli say
+            pass
+        else:
+            available_age_groups = {
+                ebp.age_group for ebp in room.extra_bed_prices.all() if ebp.age_group
+            }
+            if available_age_groups:
+                is_match = any(
+                    any(ag.min_age <= child_age <= ag.max_age for ag in available_age_groups)
+                    for child_age in children_ages
+                )
+                if not is_match:
+                    return False
+    return True
+
+
+@extend_schema(
+    parameters=[
+        OpenApiParameter(name='check_in', description='Check-in date (YYYY-MM-DD)', required=False, type=str),
+        OpenApiParameter(name='check_out', description='Check-out date (YYYY-MM-DD)', required=False, type=str),
+        OpenApiParameter(name='occupancy', description='Number of occupants', required=False, type=int),
+        OpenApiParameter(name='children_ages', description='Ages of children, comma separated (e.g., 5,7,11)', required=False, type=str),
+    ]
+)
+class SanatoriumRoomDetailView(generics.RetrieveAPIView):
+    serializer_class = SanatoriumRoomDetailSerializer
+    lookup_url_kwarg = "room_pk"
+
+    def get_queryset(self):
+        sanatorium_pk = self.kwargs.get("sanatorium_pk")
+        return RoomType.objects.filter(sanatorium_id=sanatorium_pk)
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({
+            "request": self.request,
+            "check_in": self.request.query_params.get("check_in"),
+            "check_out": self.request.query_params.get("check_out"),
+            "occupancy": self.request.query_params.get("occupancy"),
+            "children_ages": self.request.query_params.get("children_ages", ""),
+        })
+        return context
+    
+    def get(self, request, *args, **kwargs):
+        room = self.get_object()
+        
+        context = self.get_serializer_context()
+        occupancy_str = context.get("occupancy")
+        children_ages_str = context.get("children_ages", "")
+
+        occupancy = int(occupancy_str) if occupancy_str and occupancy_str.isdigit() else 1
+        children_ages = [int(age) for age in children_ages_str.split(',') if age.strip().isdigit()]
+
+        is_valid = is_valid_room_for_search(room, occupancy, children_ages)
+        
+        if not is_valid:
+            return Response(
+                {"detail": "This room does not match the specified criteria (e.g., occupancy, children)."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
+        return super().get(request, *args, **kwargs)
+
+
+class SimilarSanatoriumsView(generics.ListAPIView):
+    serializer_class = SanatoriumSearchSerializer
+    pagination_class = CustomPageNumberPagination
