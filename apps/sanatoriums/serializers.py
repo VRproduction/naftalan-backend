@@ -870,45 +870,71 @@ class SanatoriumSerializer(TranslationMixin, serializers.ModelSerializer):
                             'price_added': matched_extra.price,
                             'currency': CurrencySerializer(matched_extra.currency).data if matched_extra.currency else None
                         })
+            # İndirimli fiyatı hesapla
             discount_type = getattr(best_price, 'discount_type', None)
             discount_value = getattr(best_price, 'discount_value', 0)
             from decimal import Decimal
-            discounted_price = float(best_price.price)
+            discounted_base = float(best_price.price)
             if discount_type and discount_value:
                 if discount_type == 'percentage' and discount_value <= 100:
-                    discounted_price = float(Decimal(str(best_price.price)) * (Decimal('1') - Decimal(str(discount_value))/Decimal('100')))
+                    discounted_base = float(Decimal(str(best_price.price)) * (Decimal('1') - Decimal(str(discount_value))/Decimal('100')))
                 elif discount_type == 'fixed':
-                    discounted_price = float(Decimal(str(best_price.price)) - Decimal(str(discount_value)))
-            final_price = discounted_price + float(extra_bed_total)
+                    discounted_base = float(Decimal(str(best_price.price)) - Decimal(str(discount_value)))
+            # Final indirimli fiyat: indirimli baz fiyat + ekstra yataklar
+            discounted_total_price = discounted_base + float(extra_bed_total)
             total_price = None
             total_discounted_price = None
             if nights is not None:
                 total_price = (float(best_price.price) + float(extra_bed_total)) * nights
-                total_discounted_price = final_price * nights
-            # Calculate discount amount
+                total_discounted_price = discounted_total_price * nights
+            # Discount info: indirim miktarı ve indirimli fiyat, ekstra yataklar dahil toplam üzerinden
             discount_amount = None
             if discount_type == 'percentage':
-                discount_amount = float(discount_value)
+                discount_amount = float(best_price.price) - discounted_base
             elif discount_type == 'fixed':
-                discount_amount = float(best_price.price) - discounted_price
+                discount_amount = float(best_price.price) - discounted_base
             else:
-                if float(best_price.price) != discounted_price:
-                    discount_amount = float(best_price.price) - discounted_price
+                if float(best_price.price) != discounted_base:
+                    discount_amount = float(best_price.price) - discounted_base
+                else:
+                    discount_amount = None
             discount_info = {
                 'discount_type': discount_type,
                 'discount_value': discount_value,
                 'discount_amount': discount_amount,
-                'discounted_price': discounted_price
+                'discounted_price': discounted_total_price
             }
+            # 1 gecelik indirimsiz toplam fiyat (oda + ekstra yataklar)
+            price = float(best_price.price) + float(extra_bed_total)
+
+            # İndirimi (oda + ekstra yataklar) toplamına uygula
+            final_discounted_price = price
+            final_discount_amount = 0
+            if discount_type and discount_value:
+                if discount_type == 'percentage' and discount_value <= 100:
+                    final_discounted_price = float(Decimal(str(price)) * (Decimal('1') - Decimal(str(discount_value))/Decimal('100')))
+                elif discount_type == 'fixed':
+                    final_discounted_price = float(Decimal(str(price)) - Decimal(str(discount_value)))
+                final_discount_amount = price - final_discounted_price
+            
+            # Gecelere göre toplam fiyatlar
+            total_price = price * nights if nights is not None else None
+            total_discounted_price = final_discounted_price * nights if nights is not None else None
+
+            discount_info = {
+                'discount_type': discount_type,
+                'discount_value': discount_value,
+                'discount_amount': final_discount_amount,
+                'discounted_price': final_discounted_price
+            }
+
             matched.append({
                 'room_type': MatchedRoomsRoomTypeSerializer(room_type, context=self.context).data,
-                'base_price': float(best_price.price),
-                'discounted_price': discounted_price,
                 'currency': CurrencySerializer(best_price.currency).data if best_price.currency else None,
                 'season': best_price.season.id if best_price.season else None,
                 'extra_bed_total': float(extra_bed_total),
                 'extra_bed_details': extra_bed_details,
-                'final_price': final_price,
+                'price': price,
                 'nights': nights,
                 'total_price': total_price,
                 'total_discounted_price': total_discounted_price,
@@ -916,7 +942,9 @@ class SanatoriumSerializer(TranslationMixin, serializers.ModelSerializer):
                 'occupancy': occupancy,
                 'extra_bed_count': len(children_ages) if children_ages else 0
             })
-        return sorted(matched, key=lambda x: x['final_price'])
+        def sort_key(x):
+            return x['total_price'] if x['total_price'] is not None else float('inf')
+        return sorted(matched, key=sort_key)
 
     @extend_schema_field(SEOSerializer)
     def get_seo(self, obj):

@@ -128,59 +128,67 @@ def filter_sanatorium_queryset(queryset, request, single_instance=None):
 
     # Uygunluk kontrolü
     def is_valid_sanatorium(sanatorium):
+        # Kural: Bir sanatoryum, tüm kriterlere uyan en az bir odaya sahipse geçerlidir.
+
+        # Kriter 1 & 2: Doluluk & Çocuklar
         if occupancy or children_ages:
-            valid = False
+            room_is_available = False
             for room_type in sanatorium.room_types.all():
-                max_extra_beds = room_type.max_extra_beds if room_type.max_extra_beds is not None else float('inf')
+                max_extra_beds = room_type.max_extra_beds if room_type.max_extra_beds is not None else 0
                 if children_ages and max_extra_beds < len(children_ages):
                     continue
+
+                # YENİ: occupancy >= aranan occupancy ve oda max_capacity >= aranan occupancy olmalı
                 if occupancy:
-                    if not room_type.prices.filter(occupancy=occupancy).exists():
+                    max_capacity = room_type.max_capacity if room_type.max_capacity is not None else None
+                    if max_capacity is not None and occupancy > max_capacity:
                         continue
+                    if not room_type.prices.filter(occupancy__gte=occupancy).exists():
+                        continue
+
+                # Çocuk yaş gereksinimlerini ekstra yatak fiyatlarına göre kontrol et
                 if children_ages:
-                    has_extra_bed_prices = room_type.extra_bed_prices.exists()
-                    if max_extra_beds > 0 and not has_extra_bed_prices:
-                        valid = True
-                        break
-                    if has_extra_bed_prices:
-                        available_age_groups = set(
+                    if not room_type.extra_bed_prices.exists():
+                        # Bu odada ekstra yatak fiyatı tanımlanmamış. Kullanıcı geçerli sayılmasını istiyor.
+                        pass
+                    else:
+                        # Ekstra yatak fiyatları var, bu yüzden eşleşen bir yaş grubu bulmalıyız.
+                        available_age_groups = {
                             ebp.age_group for ebp in room_type.extra_bed_prices.all() if ebp.age_group
-                        )
-                        if not available_age_groups and max_extra_beds > 0:
-                            valid = True
-                            break
+                        }
+                        # Fiyatlar var ama belirli yaş grupları yoksa, bu herkes için geçerli demektir.
                         if available_age_groups:
-                            if any(
-                                any(age_group.min_age <= age <= age_group.max_age for age_group in available_age_groups)
-                                for age in children_ages
-                            ):
-                                valid = True
-                                break
-                            else:
-                                continue
-                valid = True
-                break
-            if not valid:
-                return False
-        # Fiyat uygunluk kontrolü
-        min_price_value = None
-        try:
-            min_price_value = RoomPrice.objects.filter(room_type__sanatorium=sanatorium.id).order_by('price').values_list('price', flat=True).first()
-        except Exception:
-            pass
+                            is_match = any(
+                                any(ag.min_age <= child_age <= ag.max_age for ag in available_age_groups)
+                                for child_age in children_ages
+                            )
+                            if not is_match:
+                                continue # Hiçbir çocuk yaş grubuna uymuyor, bu yüzden bu oda uygun değil.
+
+                # Bu noktaya ulaştıysak, bu oda doluluk/çocuklar için geçerlidir.
+                room_is_available = True
+                break # Geçerli bir oda bulundu, diğerlerini kontrol etmeye gerek yok.
+            
+            if not room_is_available:
+                return False # Bu sanatoryumda doluluk/çocuk kriterlerini karşılayan oda yok.
+
+        # Kriter 3: Fiyat Aralığı (tüm sanatoryum için)
+        min_price_value = RoomPrice.objects.filter(room_type__sanatorium=sanatorium.id).order_by('price').values_list('price', flat=True).first()
+
         if min_price_value is None:
+            return False # Sanatoryumun hiç fiyatı yok.
+        
+        if min_price is not None and min_price_value < min_price:
             return False
-        if min_price is not None and (min_price_value is None or min_price_value < min_price):
+            
+        if max_price is not None and min_price_value > max_price:
             return False
-        if max_price is not None and (min_price_value is None or min_price_value > max_price):
-            return False
+
+        # Tüm kontrollerden geçti
         return True
 
     # Tek bir instance için kontrol
     if single_instance is not None:
-        if not is_valid_sanatorium(single_instance):
-            from rest_framework.exceptions import NotFound
-            raise NotFound('No suitable room found for this sanatorium with the given filters.')
         return single_instance
 
     # Liste için filtreleme
