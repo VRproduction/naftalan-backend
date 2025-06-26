@@ -1246,23 +1246,68 @@ class SanatoriumRoomDetailSerializer(TranslationMixin, serializers.ModelSerializ
         children_ages = self.get_requested_children_ages(obj)
         with_treatment = context.get("with_treatment")
         if with_treatment is not None:
-            # String olarak gelirse bool'a çevir
             if isinstance(with_treatment, str):
                 with_treatment = with_treatment.lower() in ["true", "1", "yes"]
         sanatorium = obj.sanatorium
-        search_serializer = SanatoriumSearchSerializer(instance=sanatorium, context=context)
-        matched_rooms = search_serializer.get_matched_room_types(sanatorium)
+        request = context.get('request')
+        from datetime import date
+        today = date.today()
+        season = get_season_from_request(request)
+        if not season:
+            season = _get_current_season(today)
+        if not season:
+            from apps.sanatoriums.models import RoomPrice
+            standard_price = RoomPrice.objects.filter(is_standard=True).order_by('season').first()
+            if standard_price and standard_price.season:
+                season = standard_price.season
+        matched_rooms = []
+        if season:
+            prices = obj.prices.filter(Q(season=season) | Q(season__isnull=True, is_standard=True))
+        else:
+            prices = obj.prices.all()
+        for with_treatment_value in [True, False]:
+            if season:
+                price_candidates = list(prices.filter(with_treatment=with_treatment_value))
+            else:
+                price_candidates = list(prices.filter(is_standard=True, with_treatment=with_treatment_value))
+                price_candidates += list(prices.filter(with_treatment=with_treatment_value))
+            if occupancy:
+                price_candidates = [p for p in price_candidates if p.occupancy >= occupancy]
+            if not price_candidates:
+                continue
+            best_price = min(price_candidates, key=lambda p: p.price)
+            extra_bed_total = 0
+            extra_bed_details = []
+            if children_ages:
+                if season:
+                    extra_bed_prices = obj.extra_bed_prices.filter(Q(season=season) | Q(season__isnull=True, is_standard=True))
+                else:
+                    extra_bed_prices = obj.extra_bed_prices.all()
+                for age in children_ages:
+                    matched_extra = None
+                    for ebp in extra_bed_prices:
+                        if ebp.age_group and ebp.age_group.min_age <= age <= ebp.age_group.max_age:
+                            matched_extra = ebp
+                            break
+                        if matched_extra:
+                            extra_bed_total += matched_extra.price
+                            extra_bed_details.append({
+                                'child_age': age,
+                                'price_added': matched_extra.price,
+                                'currency': CurrencySerializer(matched_extra.currency).data if matched_extra.currency else None
+                            })
+            price_info = {
+                'price': float(best_price.price) + float(extra_bed_total),
+                'currency': CurrencySerializer(best_price.currency).data if best_price.currency else None,
+                'extra_bed_total': float(extra_bed_total),
+                'extra_bed_details': extra_bed_details,
+                'with_treatment': getattr(best_price, 'with_treatment', None),
+            }
+            matched_rooms.append(price_info)
         for room in matched_rooms:
-            if room['room_type']['id'] == obj.id:
-                if with_treatment is None or room.get('with_treatment') == with_treatment:
-                    price_info = room.copy()
-                    price_info.pop('room_type', None)
-                    return price_info
+            if with_treatment is None or room.get('with_treatment') == with_treatment:
+                return room
         return None
-
-    @extend_schema_field(SanatoriumSerializer)
-    def get_sanatorium(self, obj):
-        return SanatoriumSerializer(obj.sanatorium, context=self.context).data
 
     @extend_schema_field(
         serializers.ListField(
@@ -1274,19 +1319,28 @@ class SanatoriumRoomDetailSerializer(TranslationMixin, serializers.ModelSerializ
     )
     def get_price_options(self, obj):
         from datetime import date
+        from django.db.models import Q
         try:
             from apps.sanatoriums.models import Season
             today = date.today()
-            current_season = Season.objects.filter(start_date__lte=today, end_date__gte=today).first()
+            request = self.context.get("request")
+            season = get_season_from_request(request)
+            if not season:
+                season = _get_current_season(today)
+            if not season:
+                from apps.sanatoriums.models import RoomPrice
+                standard_price = RoomPrice.objects.filter(is_standard=True).order_by('season').first()
+                if standard_price and standard_price.season:
+                    season = standard_price.season
         except Exception:
-            current_season = None
+            season = None
         request = self.context.get("request")
         occupancy_str = request.query_params.get("occupancy") if request else None
         occupancy = int(occupancy_str) if occupancy_str and occupancy_str.isdigit() else 1
         options = []
         for with_treatment in [True, False]:
-            if current_season:
-                price = obj.prices.filter(with_treatment=with_treatment, occupancy__gte=occupancy, season=current_season).order_by('occupancy').first()
+            if season:
+                price = obj.prices.filter(Q(season=season) | Q(season__isnull=True, is_standard=True), with_treatment=with_treatment, occupancy__gte=occupancy).order_by('occupancy').first()
             else:
                 price = obj.prices.filter(with_treatment=with_treatment, occupancy__gte=occupancy).order_by('occupancy').first()
             if price:
@@ -1295,20 +1349,24 @@ class SanatoriumRoomDetailSerializer(TranslationMixin, serializers.ModelSerializ
 
     @extend_schema_field(serializers.IntegerField())
     def get_max_capacity(self, obj):
+        from django.db.models import Q
         from datetime import date
-        try:
-            from apps.sanatoriums.models import Season
-            today = date.today()
-            current_season = Season.objects.filter(start_date__lte=today, end_date__gte=today).first()
-        except Exception:
-            current_season = None
-        # Find max occupancy from prices for current season
+        request = self.context.get("request")
+        today = date.today()
+        season = get_season_from_request(request)
+        if not season:
+            season = _get_current_season(today)
+        if not season:
+            from apps.sanatoriums.models import RoomPrice
+            standard_price = RoomPrice.objects.filter(is_standard=True).order_by('season').first()
+            if standard_price and standard_price.season:
+                season = standard_price.season
         max_by_room_type = None
         if hasattr(obj, 'sanatorium') and hasattr(obj.sanatorium, 'room_types'):
             found = obj.sanatorium.room_types.filter(id=obj.id).first()
             if found and hasattr(found, 'prices'):
-                if current_season:
-                    price_occupancies = [p.occupancy for p in found.prices.filter(season=current_season) if p.occupancy is not None]
+                if season:
+                    price_occupancies = [p.occupancy for p in found.prices.filter(Q(season=season) | Q(season__isnull=True, is_standard=True)) if p.occupancy is not None]
                 else:
                     price_occupancies = [p.occupancy for p in found.prices.all() if p.occupancy is not None]
                 if price_occupancies:
@@ -1321,20 +1379,24 @@ class SanatoriumRoomDetailSerializer(TranslationMixin, serializers.ModelSerializ
 
     @extend_schema_field(serializers.IntegerField())
     def get_max_extra_beds(self, obj):
+        from django.db.models import Q
         from datetime import date
-        try:
-            from apps.sanatoriums.models import Season
-            today = date.today()
-            current_season = Season.objects.filter(start_date__lte=today, end_date__gte=today).first()
-        except Exception:
-            current_season = None
-        # Find if there are extra_bed_prices for this room in current season
+        request = self.context.get("request")
+        today = date.today()
+        season = get_season_from_request(request)
+        if not season:
+            season = _get_current_season(today)
+        if not season:
+            from apps.sanatoriums.models import RoomPrice
+            standard_price = RoomPrice.objects.filter(is_standard=True).order_by('season').first()
+            if standard_price and standard_price.season:
+                season = standard_price.season
         has_extra_bed = False
         if hasattr(obj, 'sanatorium') and hasattr(obj.sanatorium, 'room_types'):
             found = obj.sanatorium.room_types.filter(id=obj.id).first()
             if found and hasattr(found, 'extra_bed_prices'):
-                if current_season:
-                    if found.extra_bed_prices.filter(season=current_season).exists():
+                if season:
+                    if found.extra_bed_prices.filter(Q(season=season) | Q(season__isnull=True, is_standard=True)).exists():
                         has_extra_bed = True
                 else:
                     if found.extra_bed_prices.exists():
@@ -1342,4 +1404,8 @@ class SanatoriumRoomDetailSerializer(TranslationMixin, serializers.ModelSerializ
         if obj.max_extra_beds is not None and has_extra_bed:
             return obj.max_extra_beds
         return 0
+
+    @extend_schema_field(SanatoriumSerializer)
+    def get_sanatorium(self, obj):
+        return SanatoriumSerializer(obj.sanatorium, context=self.context).data
 
