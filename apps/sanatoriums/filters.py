@@ -114,7 +114,7 @@ class SanatoriumFilter(django_filters.FilterSet):
         return queryset.filter(room_types__id__in=room_type_ids)
         
     def filter_occupancy(self, queryset, name, value):
-        return queryset.filter(room_types__prices__occupancy=value).distinct()
+        return queryset.filter(room_types__prices__occupancy__gte=value).distinct()
         
     def filter_min_occupancy(self, queryset, name, value):
         return queryset.filter(room_types__prices__occupancy__gte=value).distinct()
@@ -152,7 +152,7 @@ class RoomTypeFilter(django_filters.FilterSet):
                  'min_extra_beds']
     
     def filter_occupancy(self, queryset, name, value):
-        return queryset.filter(prices__occupancy=value).distinct()
+        return queryset.filter(prices__occupancy__gte=value).distinct()
         
     def filter_min_occupancy(self, queryset, name, value):
         return queryset.filter(prices__occupancy__gte=value).distinct()

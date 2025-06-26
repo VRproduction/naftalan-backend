@@ -71,7 +71,7 @@ def get_price_details(sanatorium, room_type, price, is_current_season=False, sea
         },
         "pricing": {
             "base_price": base_price,
-            "total_base_price": min_price_decimal,  # Ek yatak fiyatları dahil toplam taban fiyat
+            "final_price": min_price_decimal,  # Ek yatak fiyatları dahil toplam taban fiyat
             "currency": price.currency.code if price and price.currency else None,
             "with_treatment": price.with_treatment if hasattr(price, 'with_treatment') else None,
             "treatment_option": price.treatment_option.name if hasattr(price, 'treatment_option') and price.treatment_option else None,
@@ -95,12 +95,6 @@ def get_price_details(sanatorium, room_type, price, is_current_season=False, sea
             "occupancy": occupancy,
             "children_ages": children_ages,
             "total_guests": (occupancy or 0) + len(children_ages) if children_ages else occupancy,
-        },
-        "result": {
-            "base_price": min_price,  # İndirimsiz toplam fiyat
-            "discounted_price": float(discounted_price),  # İndirimli toplam fiyat
-            "discount_amount": float(discount_amount),  # Uygulanan indirim miktarı
-            "pricing_method": "current_season" if is_current_season else "other_season"
         }
     }
     

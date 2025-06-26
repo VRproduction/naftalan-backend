@@ -22,6 +22,7 @@ from .filters import SanatoriumFilter, RoomTypeFilter, RoomPriceFilter
 import logging
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound
+from datetime import date, datetime
 
 # Create your views here.
 
@@ -97,6 +98,9 @@ def filter_sanatorium_queryset(queryset, request, single_instance=None):
     single_instance: Eğer sadece bir sanatoryum kontrol edilecekse, instance olarak verilir
     """
     logger = logging.getLogger(__name__)
+    from apps.sanatoriums.models import RoomPrice
+    season = get_season_from_request(request)
+
     def _get_int_query_param(key):
         value = request.query_params.get(key)
         try:
@@ -137,13 +141,30 @@ def filter_sanatorium_queryset(queryset, request, single_instance=None):
                 max_extra_beds = room_type.max_extra_beds if room_type.max_extra_beds is not None else 0
                 if children_ages and max_extra_beds < len(children_ages):
                     continue
+                # children_ages varsa, her biri için uygun extra_bed_price olmalı
+                if children_ages:
+                    extra_bed_prices = room_type.extra_bed_prices.all()
+                    all_children_matched = True
+                    for age in children_ages:
+                        matched_extra = None
+                        for ebp in extra_bed_prices:
+                            if ebp.age_group and ebp.age_group.min_age <= age <= ebp.age_group.max_age:
+                                matched_extra = ebp
+                                break
+                        if not matched_extra:
+                            all_children_matched = False
+                            break
+                    if not all_children_matched:
+                        continue
 
                 # YENİ: occupancy >= aranan occupancy ve oda max_capacity >= aranan occupancy olmalı
                 if occupancy:
                     max_capacity = room_type.max_capacity if room_type.max_capacity is not None else None
                     if max_capacity is not None and occupancy > max_capacity:
                         continue
-                    if not room_type.prices.filter(occupancy__gte=occupancy).exists():
+                    # GÜNCELLEME: uygun fiyatı bul
+                    suitable_price = room_type.prices.filter(occupancy__gte=occupancy).order_by('occupancy').first()
+                    if not suitable_price:
                         continue
 
                 # Çocuk yaş gereksinimlerini ekstra yatak fiyatlarına göre kontrol et
@@ -173,7 +194,10 @@ def filter_sanatorium_queryset(queryset, request, single_instance=None):
                 return False # Bu sanatoryumda doluluk/çocuk kriterlerini karşılayan oda yok.
 
         # Kriter 3: Fiyat Aralığı (tüm sanatoryum için)
-        min_price_value = RoomPrice.objects.filter(room_type__sanatorium=sanatorium.id).order_by('price').values_list('price', flat=True).first()
+        if season:
+            min_price_value = RoomPrice.objects.filter(room_type__sanatorium=sanatorium.id, season=season).order_by('price').values_list('price', flat=True).first()
+        else:
+            min_price_value = RoomPrice.objects.filter(room_type__sanatorium=sanatorium.id).order_by('price').values_list('price', flat=True).first()
 
         if min_price_value is None:
             return False # Sanatoryumun hiç fiyatı yok.
@@ -319,14 +343,33 @@ class OtherCitiesSanatoriumsPageView(generics.RetrieveAPIView):
         return OtherCitiesSanatoriumsPage.objects.first()
 
 
+def get_season_from_request(request):
+    check_in_str = request.query_params.get('check_in')
+    check_out_str = request.query_params.get('check_out')
+    if check_in_str and check_out_str:
+        try:
+            check_in = datetime.strptime(check_in_str, '%Y-%m-%d').date()
+            check_out = datetime.strptime(check_out_str, '%Y-%m-%d').date()
+            # Sezonun check_in ve check_out aralığını kapsaması gerekir
+            season = Season.objects.filter(start_date__lte=check_in, end_date__gte=check_out).first()
+            return season
+        except Exception:
+            return None
+    return None
+
+
 class NaftalanSanatoriums(generics.ListAPIView):
-    queryset = Sanatorium.objects.filter(is_active=True, location_type='naftalan')
     serializer_class = SanatoriumSearchSerializer
+
+    def get_queryset(self):
+        return Sanatorium.objects.filter(is_active=True, location_type='naftalan')
 
 
 class OtherCitiesSanatoriums(generics.ListAPIView):
-    queryset = Sanatorium.objects.filter(is_active=True, location_type='other_cities')
     serializer_class = SanatoriumSearchSerializer
+
+    def get_queryset(self):
+        return Sanatorium.objects.filter(is_active=True, location_type='other_cities')
 
 
 class SanatoriumList(generics.ListAPIView):
@@ -376,6 +419,7 @@ def is_valid_room_for_search(room, occupancy, children_ages):
         OpenApiParameter(name='check_out', description='Check-out date (YYYY-MM-DD)', required=False, type=str),
         OpenApiParameter(name='occupancy', description='Number of occupants', required=False, type=int),
         OpenApiParameter(name='children_ages', description='Ages of children, comma separated (e.g., 5,7,11)', required=False, type=str),
+        OpenApiParameter(name='with_treatment', description='With treatment (true/false)', required=False, type=bool),
     ]
 )
 class SanatoriumRoomDetailView(generics.RetrieveAPIView):
@@ -394,6 +438,7 @@ class SanatoriumRoomDetailView(generics.RetrieveAPIView):
             "check_out": self.request.query_params.get("check_out"),
             "occupancy": self.request.query_params.get("occupancy"),
             "children_ages": self.request.query_params.get("children_ages", ""),
+            "with_treatment": self.request.query_params.get("with_treatment"),
         })
         return context
     
