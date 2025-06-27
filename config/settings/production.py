@@ -53,3 +53,23 @@ CELERY_BEAT_SCHEDULER='django_celery_beat.schedulers:DatabaseScheduler'
 
 SITE_URL='https://adminnn.kurortnaftalan.com'
 SITE_NAME='Kurort Naftalan'
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,  # varsayılan logları devre dışı bırakma
+    'handlers': {
+        'file': {
+            'level': 'ERROR',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs', 'django_errors.log'),
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+    },
+}
