@@ -42,8 +42,13 @@ class Booking(models.Model):
     status_changed_at = models.DateTimeField(_("Status dəyişiklik tarixi"), auto_now=True)
     
     # Price information 
+    price = models.DecimalField(_("Qiymət"), max_digits=10, decimal_places=2, null=True, blank=True)
+    discounted_price = models.DecimalField(_("Endirimli qiymət"), max_digits=10, decimal_places=2, null=True, blank=True)
+    discount_type = models.CharField(_("Endirim tipi"), max_length=20, choices=(('percent', _('Faiz')), ('amount', _('Məbləğ'))), null=True, blank=True)
+    discount_value = models.DecimalField(_("Endirim dəyəri"), max_digits=10, decimal_places=2, null=True, blank=True)
+    total_discounted_price = models.DecimalField(_("Ümumi endirimli məbləğ"), max_digits=10, decimal_places=2, null=True, blank=True)
     total_price = models.DecimalField(_("Ümumi məbləğ"), max_digits=10, decimal_places=2)
-    currency = models.ForeignKey(Currency, on_delete=models.PROTECT, related_name='bookings', verbose_name=_("Valyuta"), null = True)
+    currency = models.ForeignKey(Currency, on_delete=models.PROTECT, related_name='bookings', verbose_name=_("Valyuta"), null=True)
 
     # Meta information
     created_at = models.DateTimeField(_("Yaradılma tarixi"), auto_now_add=True)
@@ -77,8 +82,6 @@ class Booking(models.Model):
         verbose_name = _("Rezervasiya")
         verbose_name_plural = _("Rezervasiyalar")
         ordering = ['-created_at']
-
-
 class GuestDetail(models.Model):
     GENDER_CHOICES = (
         ('male', _('Kişi')),

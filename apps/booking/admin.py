@@ -49,11 +49,24 @@ class BookingNoteInline(nested_admin.NestedStackedInline):
 
 @admin.register(Booking)
 class BookingAdmin(nested_admin.NestedModelAdmin):
-    list_display = ('booking_reference','display_status', 'first_name', 'last_name', 'sanatorium', 'room_type', 
-                   'check_in_date', 'check_out_date', 'total_price', 'currency', 'status_changed_at')
+    list_display = (
+        'booking_reference',
+        'display_status',
+        'first_name',
+        'last_name',
+        'sanatorium',
+        'room_type',
+        'created_at',
+        'check_in_date',
+        'check_out_date',
+        'total_days',
+        'total_price',
+        'currency',
+        'status_changed_at'
+    )
     list_filter = ('status', 'sanatorium', 'room_type', 'check_in_date', 'with_treatment', 'season')
     search_fields = ('booking_reference', 'first_name', 'last_name', 'email', 'phone')
-    readonly_fields = ('booking_reference', 'created_at', 'updated_at', 'status_changed_at')
+    readonly_fields = ('booking_reference', 'created_at', 'updated_at', 'status_changed_at', 'total_days')
     date_hierarchy = 'check_in_date'
     
     inlines = [
@@ -85,6 +98,12 @@ class BookingAdmin(nested_admin.NestedModelAdmin):
             obj.get_status_display() if hasattr(obj, 'get_status_display') else obj.status
         )
     
+    @admin.display(description='Gecə sayı')
+    def total_days(self, obj):
+        if obj.check_in_date and obj.check_out_date:
+            return (obj.check_out_date - obj.check_in_date).days
+        return None
+
     def save_formset(self, request, form, formset, change):
         instances = formset.save(commit=False)
         
@@ -152,19 +171,37 @@ class BookingAdmin(nested_admin.NestedModelAdmin):
     
     fieldsets = (
         ('Qiymət və Status', {
-            'fields': ('total_price', 'currency', 'status', 'status_note', 'status_changed_at')
+            'fields': (
+                'price',
+                'discounted_price',
+                'discount_type',
+                'discount_value',
+                'total_discounted_price',
+                'total_price',
+                'currency',
+                'status',
+                'status_note',
+                'status_changed_at',
+                'total_days'            )
         }),
         ('Şəxsi məlumatlar', {
             'fields': ('first_name', 'last_name', 'email', 'phone')
         }),
         ('Rezervasiya məlumatları', {
-            'fields': ('booking_reference', 'sanatorium', 'room_type', 'season', 
-                      'check_in_date', 'check_out_date', 'adults', 'children')
+            'fields': (
+                'booking_reference',
+                'sanatorium',
+                'room_type',
+                'season',
+                'check_in_date',
+                'check_out_date',
+                'adults',
+                'children'
+            )
         }),
         ('Müalicə məlumatları', {
             'fields': ('with_treatment', 'treatment_option')
         }),
-        
         ('Xüsusi istəklər', {
             'fields': ('special_requests',),
         }),

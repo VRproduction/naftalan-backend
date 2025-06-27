@@ -77,6 +77,7 @@ class BookingCreateSerializer(TranslationMixin, serializers.ModelSerializer):
             'first_name', 'last_name', 'email', 'phone',
             'sanatorium', 'room_type', 'season', 'check_in_date', 'check_out_date',
             'adults', 'children', 'special_requests', 'with_treatment', 'treatment_option',
+            'price', 'discounted_price', 'discount_type', 'discount_value', 'total_discounted_price', 
             'total_price', 'currency', 'guests', 'extra_beds'
         ]
         extra_kwargs = {
