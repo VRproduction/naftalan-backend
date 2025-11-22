@@ -195,7 +195,11 @@ def filter_sanatorium_queryset(queryset, request, single_instance=None):
 
         # Kriter 3: Fiyat Aralığı (tüm sanatoryum için)
         if season:
-            min_price_value = RoomPrice.objects.filter(room_type__sanatorium=sanatorium.id, season=season).order_by('price').values_list('price', flat=True).first()
+            # Season'a ait veya season=null olan fiyatları al
+            from django.db.models import Q
+            min_price_value = RoomPrice.objects.filter(
+                Q(room_type__sanatorium=sanatorium.id) & (Q(season=season) | Q(season__isnull=True))
+            ).order_by('price').values_list('price', flat=True).first()
         else:
             min_price_value = RoomPrice.objects.filter(room_type__sanatorium=sanatorium.id).order_by('price').values_list('price', flat=True).first()
 
@@ -265,6 +269,40 @@ class SanatoriumSearchView(generics.ListAPIView):
     )
     def list(self, request, *args, **kwargs):
         response = super().list(request, *args, **kwargs)
+        
+        # Apply min_total_price and max_total_price filters
+        min_total_price = request.query_params.get('min_total_price')
+        max_total_price = request.query_params.get('max_total_price')
+        
+        if 'results' in response.data and response.data['results']:
+            filtered_results = response.data['results']
+            
+            # Filter by min_total_price
+            if min_total_price:
+                try:
+                    min_total = float(min_total_price)
+                    filtered_results = [
+                        item for item in filtered_results
+                        if item.get('total_discount_price') is not None and item.get('total_discount_price') >= min_total
+                    ]
+                except (ValueError, TypeError):
+                    pass
+            
+            # Filter by max_total_price
+            if max_total_price:
+                try:
+                    max_total = float(max_total_price)
+                    filtered_results = [
+                        item for item in filtered_results
+                        if item.get('total_discount_price') is not None and item.get('total_discount_price') <= max_total
+                    ]
+                except (ValueError, TypeError):
+                    pass
+            
+            response.data['results'] = filtered_results
+            response.data['count'] = len(filtered_results)
+        
+        # Apply sorting
         ordering = request.query_params.get('ordering', 'total_discount_price')
         if 'results' in response.data and response.data['results']:
             reverse_sort = ordering.startswith('-')
@@ -325,8 +363,11 @@ class SanatoriumDetailView(generics.RetrieveAPIView):
     )
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
-        filter_sanatorium_queryset(Sanatorium.objects.filter(id=instance.id), request, single_instance=instance)
         serializer = self.get_serializer(instance)
+        
+        # 404 hatası yerine boş liste döndür
+        # matched_room_types boş olsa bile sanatorium bilgilerini göster
+        
         return Response(serializer.data)
 
 
@@ -384,35 +425,6 @@ class SanatoriumList(generics.ListAPIView):
         return super().list(request, *args, **kwargs)
 
 
-def is_valid_room_for_search(room, occupancy, children_ages):
-    # Oda kapasitesi kontrolü
-    if occupancy:
-        max_capacity = room.max_capacity if room.max_capacity is not None else None
-        if max_capacity is not None and occupancy > max_capacity:
-            return False
-        # RoomPrice tablosunda uygun bir fiyat var mı?
-        if not room.prices.filter(occupancy__gte=occupancy).exists():
-            return False
-
-    # Çocuk yaşları kontrolü
-    if children_ages:
-        if not room.extra_bed_prices.exists():
-            # Ekstra yatak fiyatı tanımlı değilse, yine de geçerli say
-            pass
-        else:
-            available_age_groups = {
-                ebp.age_group for ebp in room.extra_bed_prices.all() if ebp.age_group
-            }
-            if available_age_groups:
-                is_match = any(
-                    any(ag.min_age <= child_age <= ag.max_age for ag in available_age_groups)
-                    for child_age in children_ages
-                )
-                if not is_match:
-                    return False
-    return True
-
-
 @extend_schema(
     parameters=[
         OpenApiParameter(name='check_in', description='Check-in date (YYYY-MM-DD)', required=False, type=str),
@@ -445,22 +457,27 @@ class SanatoriumRoomDetailView(generics.RetrieveAPIView):
     def get(self, request, *args, **kwargs):
         room = self.get_object()
         
-        context = self.get_serializer_context()
-        occupancy_str = context.get("occupancy")
-        children_ages_str = context.get("children_ages", "")
-
-        occupancy = int(occupancy_str) if occupancy_str and occupancy_str.isdigit() else 1
-        children_ages = [int(age) for age in children_ages_str.split(',') if age.strip().isdigit()]
-
-        is_valid = is_valid_room_for_search(room, occupancy, children_ages)
+        # Search parametrelerinin olup olmadığını kontrol et
+        has_search_params = any([
+            request.query_params.get('occupancy'),
+            request.query_params.get('children_ages'),
+            request.query_params.get('check_in'),
+            request.query_params.get('check_out'),
+            request.query_params.get('with_treatment')
+        ])
         
-        if not is_valid:
+        # Serializer'ı oluştur
+        serializer = self.get_serializer(room)
+        
+        # Eğer search parametreleri varsa ve price_info None ise, oda kriterlere uymuyor
+        if has_search_params and serializer.data.get('price_info') is None:
             return Response(
-                {"detail": "This room does not match the specified criteria (e.g., occupancy, children)."},
+                {"detail": "This room does not match the specified criteria (e.g., occupancy, children, treatment)."},
                 status=status.HTTP_400_BAD_REQUEST
             )
-            
-        return super().get(request, *args, **kwargs)
+        
+        # Search parametreleri yoksa veya price_info varsa, odayı göster
+        return Response(serializer.data)
 
 
 class SimilarSanatoriumsView(generics.ListAPIView):

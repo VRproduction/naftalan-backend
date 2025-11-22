@@ -1,0 +1,44 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+<h2>Hörmətli {{ booking.full_name }},</h2>
+
+<p style="color: #27ae60; font-weight: bold;">Rezervasiyanız tamamlandı!</p>
+
+<p>{{ booking.sanatorium.name }} sanatoriyasında qaldığınız üçün təşəkkür edirik.</p>
+
+<div class="booking-details">
+    <h3>Tamamlanmış Rezervasiya</h3>
+    
+    <div class="detail-row">
+        <span class="detail-label">Rezervasiya nömrəsi:</span> {{ booking.booking_reference }}
+    </div>
+    
+    <div class="detail-row">
+        <span class="detail-label">Sanatoriya:</span> {{ booking.sanatorium.name }}
+    </div>
+    
+    <div class="detail-row">
+        <span class="detail-label">Qalma müddəti</span>
+        <span class="detail-value">{{ booking.check_in|date:"d.m.Y" }} - {{ booking.check_out|date:"d.m.Y" }}</span>
+    </div>
+    
+    <div class="detail-row">
+        <span class="detail-label">Gecələr</span>
+        <span class="detail-value">{{ booking.nights }} gecə</span>
+    </div>
+</div>
+
+<h3>Rəyinizi paylaşın</h3>
+<p>Təcrübənizi digər qonaqlarla paylaşın və xidmətlərimizi yaxşılaşdırmağa kömək edin.</p>
+
+{% if booking_url %}
+<div style="text-align: center;">
+    <a href="{{ booking_url }}" class="button">Rəy yazın</a>
+</div>
+{% endif %}
+
+<p>Gələcəkdə yenidən xidmətlərimizdən istifadə etməyinizi səbirsizliklə gözləyirik!</p>
+
+<p>Hörmətlə,<br>{{ site_name }} komandası</p>
+{% endblock %}

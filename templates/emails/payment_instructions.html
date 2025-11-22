@@ -1,0 +1,55 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+<h2>Hörmətli {{ booking.full_name }},</h2>
+
+<p>Rezervasiyanızı tamamlamaq üçün ödəniş tələb olunur.</p>
+
+<div class="booking-details">
+    <h3>Ödəniş Məlumatları</h3>
+    
+    <div class="detail-row">
+        <span class="detail-label">Rezervasiya nömrəsi:</span> {{ booking.booking_reference }}
+    </div>
+    
+    <div class="detail-row">
+        <span class="detail-label">Sanatoriya:</span> {{ booking.sanatorium.name }}
+    </div>
+    
+    <div class="detail-row">
+        <span class="detail-label">Giriş tarixi</span>
+        <span class="detail-value">{{ booking.check_in|date:"d.m.Y" }}</span>
+    </div>
+    
+    <div class="detail-row">
+        <span class="detail-label">Çıxış tarixi</span>
+        <span class="detail-value">{{ booking.check_out|date:"d.m.Y" }}</span>
+    </div>
+    
+    <div class="detail-row" style="background-color: #fff3cd; padding: 15px; margin-top: 15px;">
+        <span class="detail-label" style="font-size: 18px;">Ödəniləcək məbləğ:</span>
+        <span style="font-size: 24px; color: #e74c3c; font-weight: bold;">{{ booking.total_price }} {{ booking.currency.code }}</span>
+    </div>
+</div>
+
+<h3>Ödəniş Üsulları:</h3>
+<p>Ödənişi aşağıdakı üsullardan biri ilə edə bilərsiniz:</p>
+
+<ul>
+    <li><strong>Bank köçürməsi:</strong> Rezervasiya nömrəsini qeyd etməklə</li>
+    <li><strong>Onlayn ödəniş:</strong> Aşağıdakı linkdən</li>
+    <li><strong>Yerində ödəniş:</strong> Gəlişdə resepşndə</li>
+</ul>
+
+{% if booking_url %}
+<div style="text-align: center;">
+    <a href="{{ booking_url }}" class="button">Ödəniş et</a>
+</div>
+{% endif %}
+
+<p><strong>Qeyd:</strong> Ödəniş edilmədikdə rezervasiya avtomatik olaraq ləğv edilə bilər.</p>
+
+<p>Suallarınız olarsa, bizimlə əlaqə saxlaya bilərsiniz.</p>
+
+<p>Hörmətlə,<br>{{ site_name }} komandası</p>
+{% endblock %}

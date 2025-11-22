@@ -1,0 +1,41 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+<h2>Hörmətli {{ booking.full_name }},</h2>
+
+<p style="color: #e74c3c;">Rezervasiyanız ləğv edildi.</p>
+
+<div class="booking-details">
+    <h3>Ləğv Edilmiş Rezervasiya</h3>
+    
+    <div class="detail-row">
+        <span class="detail-label">Rezervasiya nömrəsi:</span> {{ booking.booking_reference }}
+    </div>
+    
+    <div class="detail-row">
+        <span class="detail-label">Sanatoriya:</span> {{ booking.sanatorium.name }}
+    </div>
+    
+    <div class="detail-row">
+        <span class="detail-label">Giriş tarixi</span>
+        <span class="detail-value">{{ booking.check_in|date:"d.m.Y" }}</span>
+    </div>
+    
+    <div class="detail-row">
+        <span class="detail-label">Çıxış tarixi</span>
+        <span class="detail-value">{{ booking.check_out|date:"d.m.Y" }}</span>
+    </div>
+    
+    {% if booking.cancellation_reason %}
+    <div class="detail-row">
+        <span class="detail-label">Ləğv səbəbi:</span> {{ booking.cancellation_reason }}
+    </div>
+    {% endif %}
+</div>
+
+<p>Əgər bu ləğvetmə səhv olaraq baş veribsə və ya suallarınız varsa, zəhmət olmasa bizimlə əlaqə saxlayın.</p>
+
+<p>Gələcəkdə yenidən xidmətlərimizdən istifadə etməyinizi gözləyirik.</p>
+
+<p>Hörmətlə,<br>{{ site_name }} komandası</p>
+{% endblock %}

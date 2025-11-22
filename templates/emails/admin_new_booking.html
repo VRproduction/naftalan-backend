@@ -1,0 +1,118 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+<h2>Yeni Rezervasiya Alındı</h2>
+
+<div class="highlight">
+    <p style="margin: 0; font-weight: 600;">Sistemdə yeni rezervasiya yaradıldı və təsdiq gözləyir.</p>
+</div>
+
+<div class="booking-details">
+    <h3>Rezervasiya Məlumatları</h3>
+    
+    <table class="detail-table">
+        <tr>
+            <td class="detail-label">Rezervasiya nömrəsi</td>
+            <td class="detail-value"><strong>{{ booking.booking_reference }}</strong></td>
+        </tr>
+        <tr>
+            <td class="detail-label">Müştəri</td>
+            <td class="detail-value">{{ booking.full_name }}</td>
+        </tr>
+        <tr>
+            <td class="detail-label">Email</td>
+            <td class="detail-value">{{ booking.email }}</td>
+        </tr>
+        <tr>
+            <td class="detail-label">Telefon</td>
+            <td class="detail-value">{{ booking.phone }}</td>
+        </tr>
+        <tr>
+            <td class="detail-label">Sanatoriya</td>
+            <td class="detail-value">{{ booking.sanatorium.name }}</td>
+        </tr>
+        <tr>
+            <td class="detail-label">Otaq</td>
+            <td class="detail-value">{{ booking.room_type.name }}</td>
+        </tr>
+        <tr>
+            <td class="detail-label">Giriş</td>
+            <td class="detail-value">{{ booking.check_in|date:"d.m.Y" }}</td>
+        </tr>
+        <tr>
+            <td class="detail-label">Çıxış</td>
+            <td class="detail-value">{{ booking.check_out|date:"d.m.Y" }}</td>
+        </tr>
+        <tr>
+            <td class="detail-label">Gecələr</td>
+            <td class="detail-value">{{ booking.nights }} gecə</td>
+        </tr>
+        <tr>
+            <td class="detail-label">Böyüklər</td>
+            <td class="detail-value">{{ booking.adults }} nəfər</td>
+        </tr>
+        {% if booking.children %}
+        <tr>
+            <td class="detail-label">Uşaqlar</td>
+            <td class="detail-value">{{ booking.children }} nəfər</td>
+        </tr>
+        {% endif %}
+        <tr>
+            <td class="detail-label">Müalicə</td>
+            <td class="detail-value">{% if booking.with_treatment %}Bəli{% else %}Xeyr{% endif %}</td>
+        </tr>
+        {% if booking.special_requests %}
+        <tr style="background-color: #fff3cd;">
+            <td colspan="2" style="padding: 15px 8px;">
+                <strong style="color: #856404;">Xüsusi istəklər:</strong><br>
+                <span style="color: #856404;">{{ booking.special_requests }}</span>
+            </td>
+        </tr>
+        {% endif %}
+        <tr>
+            <td class="detail-label">Yaradılma tarixi</td>
+            <td class="detail-value">{{ booking.created_at|date:"d.m.Y H:i" }}</td>
+        </tr>
+    </table>
+    
+    <h3 style="margin-top: 20px;">Qiymət Məlumatları</h3>
+    
+    <table class="detail-table">
+        <tr>
+            <td class="detail-label">Ümumi məbləğ</td>
+            <td class="detail-value">{{ booking.total_price }} {{ booking.currency.code }}</td>
+        </tr>
+        {% if booking.discount_value %}
+        <tr>
+            <td class="detail-label">Endirim dəyəri</td>
+            <td class="detail-value" style="color: #28a745; font-weight: 600;">
+                {% if booking.discount_type == 'percent' %}
+                    {{ booking.discount_value }}%
+                {% else %}
+                    {{ booking.discount_value }} {{ booking.currency.code }}
+                {% endif %}
+            </td>
+        </tr>
+        <tr style="background-color: #d4edda; border-top: 2px solid #155724;">
+            <td class="detail-label" style="color: #155724; font-size: 18px; padding: 15px 8px; font-weight: 700;">Ümumi endirimli məbləğ</td>
+            <td class="detail-value" style="color: #155724; font-weight: 700; font-size: 18px; padding: 15px 8px;">{{ booking.total_discounted_price }} {{ booking.currency.code }}</td>
+        </tr>
+        {% endif %}
+    </table>
+</div>
+
+{% if admin_url %}
+<div style="text-align: center;">
+    <a href="{{ admin_url }}" class="button">Admin paneldə bax</a>
+</div>
+{% endif %}
+
+<div class="highlight warning">
+    <p style="margin: 0;"><strong>Qeyd:</strong> Rezervasiyanı tezliklə təsdiqləyin və müştəriyə bildiriş göndərin.</p>
+</div>
+
+<p style="margin-top: 25px;">
+    <strong>Hörmətlə,</strong><br>
+    {{ site_name|default:"NAFTALAN-KURORT" }} Sistem
+</p>
+{% endblock %}

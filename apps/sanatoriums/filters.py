@@ -11,7 +11,7 @@ class SanatoriumFilter(django_filters.FilterSet):
     min_rating = django_filters.NumberFilter(field_name='rating', lookup_expr='gte')
     ratings = django_filters.CharFilter(method='filter_ratings')
     location = django_filters.CharFilter(field_name='location__id')
-    location_type = django_filters.CharFilter(field_name='location__location_type')
+    location_type = django_filters.CharFilter(field_name='location_type')
     facilities = django_filters.CharFilter(method='filter_facilities')
     room_types = django_filters.CharFilter(method='filter_room_types')
     occupancy = django_filters.NumberFilter(method='filter_occupancy')

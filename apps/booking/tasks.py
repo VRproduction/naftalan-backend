@@ -91,12 +91,19 @@ def send_customer_email(booking, subject, template):
         logger.error(f"No email address for booking {booking.booking_reference}")
         return False
     
+    # Try to generate booking URL, fallback to None if URL doesn't exist
+    booking_url = None
+    try:
+        booking_url = settings.SITE_URL + reverse('booking-detail', args=[booking.booking_reference])
+    except Exception:
+        logger.warning(f"Could not generate booking URL for {booking.booking_reference}")
+    
     context = {
         'booking': booking,
-        'booking_url': settings.SITE_URL + reverse('booking-detail', args=[booking.booking_reference]),
+        'booking_url': booking_url,
         'support_email': settings.DEFAULT_FROM_EMAIL,
-        'site_name': settings.SITE_NAME,
-        'site_url': settings.SITE_URL,
+        'site_name': getattr(settings, 'SITE_NAME', 'NAFTALAN-KURORT'),
+        'site_url': getattr(settings, 'SITE_URL', 'http://localhost:8000'),
     }
     
     html_message = render_to_string(template, context)
@@ -123,11 +130,18 @@ def send_admin_email(booking, subject, template):
     if not admin_emails:
         admin_emails = [settings.DEFAULT_FROM_EMAIL]
     
+    # Try to generate admin URL, fallback to None if URL doesn't exist
+    admin_url = None
+    try:
+        admin_url = settings.SITE_URL + reverse('admin:booking_booking_change', args=[booking.id])
+    except Exception:
+        logger.warning(f"Could not generate admin URL for booking {booking.id}")
+    
     context = {
         'booking': booking,
-        'admin_url': settings.SITE_URL + reverse('admin:booking_booking_change', args=[booking.id]),
-        'site_name': settings.SITE_NAME,
-        'site_url': settings.SITE_URL,
+        'admin_url': admin_url,
+        'site_name': getattr(settings, 'SITE_NAME', 'NAFTALAN-KURORT'),
+        'site_url': getattr(settings, 'SITE_URL', 'http://localhost:8000'),
     }
     
     html_message = render_to_string(template, context)

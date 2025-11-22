@@ -1,0 +1,92 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+<h2>Hörmətli {{ booking.full_name }},</h2>
+
+<div class="highlight success">
+    <p style="margin: 0; font-weight: 600; color: #155724;">✓ Rezervasiyanız uğurla qəbul edildi!</p>
+</div>
+
+<p>Rezervasiya məlumatlarınız aşağıdakı kimidir:</p>
+
+<div class="booking-details">
+    <h3>Rezervasiya Məlumatları</h3>
+    
+    <table class="detail-table">
+        <tr>
+            <td class="detail-label">Rezervasiya nömrəsi</td>
+            <td class="detail-value"><strong>{{ booking.booking_reference }}</strong></td>
+        </tr>
+        <tr>
+            <td class="detail-label">Sanatoriya</td>
+            <td class="detail-value">{{ booking.sanatorium.name }}</td>
+        </tr>
+        <tr>
+            <td class="detail-label">Otaq</td>
+            <td class="detail-value">{{ booking.room_type.name }}</td>
+        </tr>
+        <tr>
+            <td class="detail-label">Giriş tarixi</td>
+            <td class="detail-value">{{ booking.check_in|date:"d.m.Y" }}</td>
+        </tr>
+        <tr>
+            <td class="detail-label">Çıxış tarixi</td>
+            <td class="detail-value">{{ booking.check_out|date:"d.m.Y" }}</td>
+        </tr>
+        <tr>
+            <td class="detail-label">Gecələr</td>
+            <td class="detail-value">{{ booking.nights }} gecə</td>
+        </tr>
+        <tr>
+            <td class="detail-label">Böyüklər</td>
+            <td class="detail-value">{{ booking.adults }} nəfər</td>
+        </tr>
+        {% if booking.children %}
+        <tr>
+            <td class="detail-label">Uşaqlar</td>
+            <td class="detail-value">{{ booking.children }} nəfər</td>
+        </tr>
+        {% endif %}
+        <tr>
+            <td class="detail-label">Status</td>
+            <td class="detail-value">{{ booking.get_status_display }}</td>
+        </tr>
+    </table>
+    
+    <h3 style="margin-top: 20px;">Qiymət Məlumatları</h3>
+    
+    <table class="detail-table">
+        <tr>
+            <td class="detail-label">Ümumi məbləğ</td>
+            <td class="detail-value">{{ booking.total_price }} {{ booking.currency.code }}</td>
+        </tr>
+        {% if booking.discount_value %}
+        <tr>
+            <td class="detail-label">Endirim dəyəri</td>
+            <td class="detail-value" style="color: #28a745; font-weight: 600;">
+                {% if booking.discount_type == 'percent' %}
+                    {{ booking.discount_value }}%
+                {% else %}
+                    {{ booking.discount_value }} {{ booking.currency.code }}
+                {% endif %}
+            </td>
+        </tr>
+        <tr style="background-color: #e7f3ff; border-top: 2px solid #004085;">
+            <td class="detail-label" style="color: #004085; font-size: 18px; padding: 15px 8px; font-weight: 700;">Ümumi endirimli məbləğ</td>
+            <td class="detail-value" style="color: #004085; font-weight: 700; font-size: 18px; padding: 15px 8px;">{{ booking.total_discounted_price }} {{ booking.currency.code }}</td>
+        </tr>
+        {% endif %}
+    </table>
+</div>
+
+<div class="highlight">
+    <p style="margin: 0;"><strong>Növbəti addım:</strong> Rezervasiyanız tezliklə təsdiqlənəcək. Təsdiq olunduqdan sonra sizə bildiriş göndəriləcək.</p>
+</div>
+
+<p>Suallarınız olarsa, <a href="mailto:{{ support_email }}">{{ support_email }}</a> ünvanı ilə bizimlə əlaqə saxlaya bilərsiniz.</p>
+
+<p style="margin-top: 25px;">
+    <strong>Hörmətlə,</strong><br>
+    {{ site_name|default:"NAFTALAN-KURORT" }} komandası
+</p>
+{% endblock %}

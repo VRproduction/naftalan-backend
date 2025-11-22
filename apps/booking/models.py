@@ -42,12 +42,12 @@ class Booking(models.Model):
     status_changed_at = models.DateTimeField(_("Status dəyişiklik tarixi"), auto_now=True)
     
     # Price information 
-    price = models.DecimalField(_("Qiymət"), max_digits=10, decimal_places=2, null=True, blank=True)
-    discounted_price = models.DecimalField(_("Endirimli qiymət"), max_digits=10, decimal_places=2, null=True, blank=True)
+    price = models.DecimalField(_("Qiymət"), max_digits=15, decimal_places=2, null=True, blank=True)
+    discounted_price = models.DecimalField(_("Endirimli qiymət"), max_digits=15, decimal_places=2, null=True, blank=True)
     discount_type = models.CharField(_("Endirim tipi"), max_length=20, choices=(('percent', _('Faiz')), ('amount', _('Məbləğ'))), null=True, blank=True)
-    discount_value = models.DecimalField(_("Endirim dəyəri"), max_digits=10, decimal_places=2, null=True, blank=True)
-    total_discounted_price = models.DecimalField(_("Ümumi endirimli məbləğ"), max_digits=10, decimal_places=2, null=True, blank=True)
-    total_price = models.DecimalField(_("Ümumi məbləğ"), max_digits=10, decimal_places=2)
+    discount_value = models.DecimalField(_("Endirim dəyəri"), max_digits=15, decimal_places=2, null=True, blank=True)
+    total_discounted_price = models.DecimalField(_("Ümumi endirimli məbləğ"), max_digits=15, decimal_places=2, null=True, blank=True)
+    total_price = models.DecimalField(_("Ümumi məbləğ"), max_digits=15, decimal_places=2)
     currency = models.ForeignKey(Currency, on_delete=models.PROTECT, related_name='bookings', verbose_name=_("Valyuta"), null=True)
 
     # Meta information
@@ -59,6 +59,22 @@ class Booking(models.Model):
     
     def days_of_stay(self):
         return (self.check_out_date - self.check_in_date).days
+    
+    @property
+    def full_name(self):
+        return f"{self.first_name} {self.last_name}"
+    
+    @property
+    def nights(self):
+        return self.days_of_stay()
+    
+    @property
+    def check_in(self):
+        return self.check_in_date
+    
+    @property
+    def check_out(self):
+        return self.check_out_date
     
     def save(self, *args, **kwargs):
         # Track status changes for email notifications

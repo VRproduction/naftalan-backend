@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ subject }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin: 0;
+        }
+        .content {
+            padding: 30px 25px;
+        }
+        .content h2 {
+            color: #2c3e50;
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+        .content p {
+            margin: 12px 0;
+            color: #555;
+        }
+        .booking-details {
+            background-color: #f8f9fa;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+        }
+        .booking-details h3 {
+            margin: 0 0 15px 0;
+            color: #2c3e50;
+            font-size: 18px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+        .detail-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .detail-table tr {
+            border-bottom: 1px solid #e9ecef;
+        }
+        .detail-table tr:last-child {
+            border-bottom: none;
+        }
+        .detail-table td {
+            padding: 12px 8px;
+            vertical-align: top;
+        }
+        .detail-label {
+            font-weight: 600;
+            color: #495057;
+            width: 45%;
+        }
+        .detail-value {
+            color: #212529;
+            text-align: right;
+            width: 55%;
+        }
+        .button {
+            display: inline-block;
+            padding: 14px 32px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white !important;
+            text-decoration: none;
+            border-radius: 6px;
+            margin: 20px 0;
+            font-weight: 600;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+        .button:hover {
+            transform: translateY(-2px);
+        }
+        .footer {
+            background-color: #f8f9fa;
+            text-align: center;
+            padding: 25px 20px;
+            color: #6c757d;
+            font-size: 13px;
+            border-top: 1px solid #e9ecef;
+        }
+        .footer p {
+            margin: 5px 0;
+        }
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        .highlight {
+            background-color: #fff3cd;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #ffc107;
+            margin: 15px 0;
+        }
+        .success {
+            background-color: #d4edda;
+            border-left-color: #28a745;
+        }
+        .warning {
+            background-color: #f8d7da;
+            border-left-color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <h1>{{ site_name|default:"NAFTALAN-KURORT" }}</h1>
+        </div>
+        
+        <div class="content">
+            {% block content %}{% endblock %}
+        </div>
+        
+        <div class="footer">
+            <p><strong>{{ site_name|default:"NAFTALAN-KURORT" }}</strong></p>
+            <p><a href="{{ site_url|default:'http://localhost:8000' }}">{{ site_url|default:"localhost:8000" }}</a></p>
+            <p>Əlaqə: <a href="mailto:{{ support_email }}">{{ support_email|default:"info@naftalan-kurort.az" }}</a></p>
+            <p style="margin-top: 15px; color: #adb5bd; font-size: 11px;">
+                Bu email avtomatik olaraq göndərilib. Cavab verməyin.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
