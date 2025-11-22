@@ -48,8 +48,9 @@ class PackageOrderCreateSerializer(serializers.ModelSerializer):
         model = PackageOrder
         fields = [
             'package', 'first_name', 'last_name', 'email', 'phone',
-            'check_in', 'check_out', 'adults', 'children', 'notes'
+            'check_in', 'check_out', 'adults', 'children', 'notes', 'status'
         ]
+        read_only_fields = ['status']
 
     def validate(self, data):
         package = data['package']
@@ -76,5 +77,6 @@ class PackageOrderCreateSerializer(serializers.ModelSerializer):
         total_price = package.discounted_price * duration * (adults + children)
         data['total_price'] = total_price
         data['currency'] = package.currency
+        data['status'] = 'pending'  # Set initial status
 
         return data

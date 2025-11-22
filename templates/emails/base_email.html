@@ -142,15 +142,6 @@
         <div class="content">
             {% block content %}{% endblock %}
         </div>
-        
-        <div class="footer">
-            <p><strong>{{ site_name|default:"NAFTALAN-KURORT" }}</strong></p>
-            <p><a href="{{ site_url|default:'http://localhost:8000' }}">{{ site_url|default:"localhost:8000" }}</a></p>
-            <p>Əlaqə: <a href="mailto:{{ support_email }}">{{ support_email|default:"info@naftalan-kurort.az" }}</a></p>
-            <p style="margin-top: 15px; color: #adb5bd; font-size: 11px;">
-                Bu email avtomatik olaraq göndərilib. Cavab verməyin.
-            </p>
-        </div>
     </div>
 </body>
 </html>

@@ -1,0 +1,79 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+<h2>Hörmətli {{ order.first_name }} {{ order.last_name }},</h2>
+
+<div class="highlight success">
+    <p style="margin: 0; font-weight: 600; color: #155724;">✓ Paket sifarişiniz uğurla qəbul edildi!</p>
+</div>
+
+<p>Paket sifariş məlumatlarınız aşağıdakı kimidir:</p>
+
+<div class="booking-details">
+    <h3>Paket Məlumatları</h3>
+    
+    <table class="detail-table">
+        <tr>
+            <td class="detail-label">Paket adı</td>
+            <td class="detail-value"><strong>{{ order.package.name }}</strong></td>
+        </tr>
+        <tr>
+            <td class="detail-label">Sanatoriya</td>
+            <td class="detail-value">{{ order.package.sanatorium.name }}</td>
+        </tr>
+        <tr>
+            <td class="detail-label">Müddət</td>
+            <td class="detail-value">{{ order.package.duration }} gün</td>
+        </tr>
+        <tr>
+            <td class="detail-label">Gəliş tarixi</td>
+            <td class="detail-value">{{ order.check_in|date:"d.m.Y" }}</td>
+        </tr>
+        <tr>
+            <td class="detail-label">Gediş tarixi</td>
+            <td class="detail-value">{{ order.check_out|date:"d.m.Y" }}</td>
+        </tr>
+        <tr>
+            <td class="detail-label">Böyüklər</td>
+            <td class="detail-value">{{ order.adults }} nəfər</td>
+        </tr>
+        {% if order.children %}
+        <tr>
+            <td class="detail-label">Uşaqlar</td>
+            <td class="detail-value">{{ order.children }} nəfər</td>
+        </tr>
+        {% endif %}
+        <tr>
+            <td class="detail-label">Status</td>
+            <td class="detail-value">{{ order.get_status_display }}</td>
+        </tr>
+    </table>
+    
+    <h3 style="margin-top: 20px;">Qiymət Məlumatları</h3>
+    
+    <table class="detail-table">
+        <tr style="background-color: #e7f3ff; border-top: 2px solid #004085;">
+            <td class="detail-label" style="color: #004085; font-size: 18px; padding: 15px 8px; font-weight: 700;">Ümumi məbləğ</td>
+            <td class="detail-value" style="color: #004085; font-weight: 700; font-size: 18px; padding: 15px 8px;">{{ order.total_price }} {{ order.currency.code }}</td>
+        </tr>
+    </table>
+</div>
+
+{% if order.notes %}
+<div class="booking-details">
+    <h3>Qeydləriniz</h3>
+    <p style="margin: 0;">{{ order.notes }}</p>
+</div>
+{% endif %}
+
+<div class="highlight">
+    <p style="margin: 0;"><strong>Növbəti addım:</strong> Sifarişiniz tezliklə təsdiqlənəcək. Təsdiq olunduqdan sonra sizə bildiriş göndəriləcək.</p>
+</div>
+
+<p>Suallarınız olarsa, <a href="mailto:{{ support_email }}">{{ support_email }}</a> ünvanı ilə bizimlə əlaqə saxlaya bilərsiniz.</p>
+
+<p style="margin-top: 25px;">
+    <strong>Hörmətlə,</strong><br>
+    {{ site_name|default:"NAFTALAN-KURORT" }} komandası
+</p>
+{% endblock %}

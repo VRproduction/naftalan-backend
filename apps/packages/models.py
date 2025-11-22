@@ -173,6 +173,24 @@ class PackageOrder(models.Model):
                 'adults': _("Ümumi nəfər sayı paketin tutumundan çox ola bilməz"),
                 'children': _("Ümumi nəfər sayı paketin tutumundan çox ola bilməz")
             })
+    
+    def save(self, *args, **kwargs):
+        # Track status changes for email notifications
+        if self.pk:
+            old_instance = PackageOrder.objects.get(pk=self.pk)
+            old_status = old_instance.status
+            status_changed = old_status != self.status
+        else:
+            status_changed = True
+            old_status = None
+            
+        # Call the original save method
+        super().save(*args, **kwargs)
+        
+        # If status changed, send notifications
+        if status_changed:
+            from .tasks import send_package_order_email
+            send_package_order_email.delay(self.pk, old_status)
 
 
 

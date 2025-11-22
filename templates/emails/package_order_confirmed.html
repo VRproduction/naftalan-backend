@@ -1,0 +1,53 @@
+{% extends "emails/base_email.html" %}
+
+{% block content %}
+<h2>Hörmətli {{ order.first_name }} {{ order.last_name }},</h2>
+
+<div class="highlight success">
+    <p style="margin: 0; font-weight: 600; color: #155724;">✓ Paket sifarişiniz təsdiqləndi!</p>
+</div>
+
+<p>Paket sifarişiniz rəsmi olaraq təsdiqləndi və hazırlanır.</p>
+
+<div class="booking-details">
+    <h3>Təsdiqlənmiş Sifariş Məlumatları</h3>
+    
+    <table class="detail-table">
+        <tr>
+            <td class="detail-label">Paket adı</td>
+            <td class="detail-value"><strong>{{ order.package.name }}</strong></td>
+        </tr>
+        <tr>
+            <td class="detail-label">Sanatoriya</td>
+            <td class="detail-value">{{ order.package.sanatorium.name }}</td>
+        </tr>
+        <tr>
+            <td class="detail-label">Gəliş tarixi</td>
+            <td class="detail-value">{{ order.check_in|date:"d.m.Y" }}</td>
+        </tr>
+        <tr>
+            <td class="detail-label">Gediş tarixi</td>
+            <td class="detail-value">{{ order.check_out|date:"d.m.Y" }}</td>
+        </tr>
+        <tr>
+            <td class="detail-label">Nəfər sayı</td>
+            <td class="detail-value">{{ order.adults }} böyük{% if order.children %}, {{ order.children }} uşaq{% endif %}</td>
+        </tr>
+        <tr>
+            <td class="detail-label">Ümumi məbləğ</td>
+            <td class="detail-value"><strong>{{ order.total_price }} {{ order.currency.code }}</strong></td>
+        </tr>
+    </table>
+</div>
+
+<div class="highlight">
+    <p style="margin: 0;"><strong>Əhəmiyyətli:</strong> Gəliş tarixinə yaxınlaşdıqca sizinlə əlaqə saxlanılacaq və ətraflı məlumat veriləcək.</p>
+</div>
+
+<p>Suallarınız olarsa, <a href="mailto:{{ support_email }}">{{ support_email }}</a> ünvanı ilə bizimlə əlaqə saxlaya bilərsiniz.</p>
+
+<p style="margin-top: 25px;">
+    <strong>Hörmətlə,</strong><br>
+    {{ site_name|default:"NAFTALAN-KURORT" }} komandası
+</p>
+{% endblock %}
