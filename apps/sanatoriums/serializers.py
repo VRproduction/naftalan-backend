@@ -29,6 +29,8 @@ def get_season_from_request(request):
         try:
             check_in = datetime.strptime(check_in_str, '%Y-%m-%d').date()
             check_out = datetime.strptime(check_out_str, '%Y-%m-%d').date()
+            # Seçilen tarih aralığının tamamını kapsayan bir sezon bul
+            # Hem check_in hem de check_out sezon içinde olmalı
             season = Season.objects.filter(start_date__lte=check_in, end_date__gte=check_out).first()
             return season
         except Exception:
@@ -304,8 +306,16 @@ class SanatoriumSearchSerializer(TranslationMixin, serializers.ModelSerializer):
         request = self.context.get('request')
         season = get_season_from_request(request)
         
-        # Eğer parametreden season gelmemişse, standart fiyat var mı kontrol et
-        # Standart fiyat varsa göster, yoksa None döndür
+        # Eğer tarih parametresi hiç verilmemişse, mevcut sezonu kullan
+        # Ancak tarih verilmiş ama hiçbir sezona uymuyorsa, season=None olarak devam et
+        check_in_str = request.query_params.get('check_in') if request else None
+        check_out_str = request.query_params.get('check_out') if request else None
+        
+        if not season and not check_in_str and not check_out_str:
+            # Tarih parametresi hiç verilmemiş, mevcut sezonu kullan
+            from datetime import date
+            today = date.today()
+            season = _get_current_season(today)
        
         occupancy = self._get_occupancy()
         children_ages = self._get_children_ages()
@@ -398,16 +408,22 @@ class SanatoriumSearchSerializer(TranslationMixin, serializers.ModelSerializer):
             pass
         today = date.today()
         season = get_season_from_request(request)
-        if not season:
-            season = _get_current_season(today)
-        if not season:
-            from apps.sanatoriums.models import RoomPrice
-            standard_price = RoomPrice.objects.filter(is_standard=True).order_by('season').first()
-            if standard_price and standard_price.season:
-                season = standard_price.season
-        nights = None
+        
+        # Eğer tarih parametresi hiç verilmemişse, mevcut sezonu kullan
+        # Ancak tarih verilmiş ama hiçbir sezona uymuyorsa, season=None olarak devam et
         check_in_str = request.query_params.get('check_in')
         check_out_str = request.query_params.get('check_out')
+        
+        if not season and not check_in_str and not check_out_str:
+            # Tarih parametresi hiç verilmemiş, mevcut sezonu kullan
+            season = _get_current_season(today)
+            if not season:
+                from apps.sanatoriums.models import RoomPrice
+                standard_price = RoomPrice.objects.filter(is_standard=True).order_by('season').first()
+                if standard_price and standard_price.season:
+                    season = standard_price.season
+        
+        nights = None
         if check_in_str and check_out_str:
             try:
                 check_in = datetime.strptime(check_in_str, '%Y-%m-%d').date()
@@ -418,13 +434,26 @@ class SanatoriumSearchSerializer(TranslationMixin, serializers.ModelSerializer):
             except Exception:
                 nights = None
         matched = []
+        
+        # Eğer tarih verilmiş ama hiçbir sezona uymuyorsa, standart fiyatları kontrol et
+        # Standart fiyat yoksa boş liste döndür
+        if check_in_str and check_out_str and not season:
+            # Standart fiyat var mı kontrol et
+            has_standard_price = False
+            for room_type in obj.room_types.all():
+                if room_type.prices.filter(season__isnull=True, is_standard=True).exists():
+                    has_standard_price = True
+                    break
+            if not has_standard_price:
+                return matched
+        
         for room_type in obj.room_types.all():
             max_extra_beds = room_type.max_extra_beds if room_type.max_extra_beds is not None else float('inf')
             if children_ages and len(children_ages) > max_extra_beds:
                 continue
             # Fiyat arama mantığı
             if season:
-                prices = room_type.prices.filter(Q(season=season) | Q(season__isnull=True, is_standard=True))
+                prices = room_type.prices.filter(Q(season=season) | Q(season__isnull=True))
             else:
                 prices = room_type.prices.all()
             for with_treatment_value in [True, False]:
@@ -943,52 +972,8 @@ class SanatoriumSerializer(TranslationMixin, serializers.ModelSerializer):
         read_only_fields = ['slug', 'created_at', 'updated_at']
 
     def to_representation(self, instance):
-        """Filter room_types prices based on search parameters"""
+        """Return representation without filtering room_types"""
         representation = super().to_representation(instance)
-        request = self.context.get('request')
-        
-        # Eğer search parametreleri varsa, room_types içindeki prices'ı filtrele
-        if request and representation.get('room_types'):
-            occupancy = None
-            try:
-                occupancy = int(request.query_params.get('occupancy')) if request.query_params.get('occupancy') else None
-            except (ValueError, TypeError):
-                pass
-            
-            season = get_season_from_request(request)
-            
-            # Sadece parametreden season geldiğinde filtrele
-            # Filtresiz durumda (occupancy da yoksa) tüm fiyatları göster
-            if season or occupancy:
-                # Eğer season bulunamadıysa ve occupancy varsa, mevcut (current) sezona bak
-                if not season and occupancy:
-                    today = date.today()
-                    season = _get_current_season(today)
-                
-                # Season varsa, prices'ı filtrele
-                if season:
-                    for room_type in representation['room_types']:
-                        if room_type.get('prices'):
-                            filtered_prices = []
-                            for price in room_type['prices']:
-                                # Season filtresi
-                                if price.get('season'):
-                                    if price['season']['id'] != season.id:
-                                        continue
-                                
-                                # Occupancy filtresi - aranan occupancy'ye eşit veya büyük olanları göster
-                                if occupancy and price.get('occupancy'):
-                                    if price['occupancy'] < occupancy:
-                                        continue
-                                
-                                filtered_prices.append(price)
-                            
-                            room_type['prices'] = filtered_prices
-                # Season yoksa ve occupancy varsa, fiyatları gösterme
-                elif occupancy:
-                    for room_type in representation['room_types']:
-                        room_type['prices'] = []
-        
         return representation
 
     def get_min_price_details(self, obj):
@@ -1000,20 +985,6 @@ class SanatoriumSerializer(TranslationMixin, serializers.ModelSerializer):
     def get_matched_room_types(self, obj):
         request = self.context.get('request')
         if not request:
-            return []
-        
-        # Check if any search parameters exist
-        has_search_params = any([
-            request.query_params.get('occupancy'),
-            request.query_params.get('children_ages'),
-            request.query_params.get('check_in'),
-            request.query_params.get('check_out'),
-            request.query_params.get('min_price'),
-            request.query_params.get('max_price')
-        ])
-        
-        # If no search parameters, return empty list
-        if not has_search_params:
             return []
         
         occupancy = None
@@ -1040,17 +1011,22 @@ class SanatoriumSerializer(TranslationMixin, serializers.ModelSerializer):
             pass
         today = date.today()
         season = get_season_from_request(request)
-        if not season:
-            season = _get_current_season(today)
-        if not season:
-            from apps.sanatoriums.models import RoomPrice
-            standard_price = RoomPrice.objects.filter(is_standard=True).order_by('season').first()
-            if standard_price and standard_price.season:
-                season = standard_price.season
-      
-        nights = None
+        
+        # Eğer tarih parametresi hiç verilmemişse, mevcut sezonu kullan
+        # Ancak tarih verilmiş ama hiçbir sezona uymuyorsa, season=None olarak devam et
         check_in_str = request.query_params.get('check_in')
         check_out_str = request.query_params.get('check_out')
+        
+        if not season and not check_in_str and not check_out_str:
+            # Tarih parametresi hiç verilmemiş, mevcut sezonu kullan
+            season = _get_current_season(today)
+            if not season:
+                from apps.sanatoriums.models import RoomPrice
+                standard_price = RoomPrice.objects.filter(is_standard=True).order_by('season').first()
+                if standard_price and standard_price.season:
+                    season = standard_price.season
+      
+        nights = None
         if check_in_str and check_out_str:
             try:
                 check_in = datetime.strptime(check_in_str, '%Y-%m-%d').date()
@@ -1061,13 +1037,26 @@ class SanatoriumSerializer(TranslationMixin, serializers.ModelSerializer):
             except Exception:
                 nights = None
         matched = []
+        
+        # Eğer tarih verilmiş ama hiçbir sezona uymuyorsa, standart fiyatları kontrol et
+        # Standart fiyat yoksa boş liste döndür
+        if check_in_str and check_out_str and not season:
+            # Standart fiyat var mı kontrol et
+            has_standard_price = False
+            for room_type in obj.room_types.all():
+                if room_type.prices.filter(season__isnull=True, is_standard=True).exists():
+                    has_standard_price = True
+                    break
+            if not has_standard_price:
+                return matched
+        
         for room_type in obj.room_types.all():
             max_extra_beds = room_type.max_extra_beds if room_type.max_extra_beds is not None else float('inf')
             if children_ages and len(children_ages) > max_extra_beds:
                 continue
             # Fiyat arama mantığı
             if season:
-                prices = room_type.prices.filter(Q(season=season) | Q(season__isnull=True, is_standard=True))
+                prices = room_type.prices.filter(Q(season=season) | Q(season__isnull=True))
             else:
                 prices = room_type.prices.all()
             for with_treatment_value in [True, False]:
