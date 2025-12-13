@@ -1,44 +1,45 @@
 {% extends "emails/base_email.html" %}
+{% load i18n %}
 
 {% block content %}
-<h2>Hörmətli {{ booking.full_name }},</h2>
+<h2>{% blocktrans with name=booking.full_name %}Hörmətli {{ name }},{% endblocktrans %}</h2>
 
-<p style="color: #27ae60; font-weight: bold;">Rezervasiyanız tamamlandı!</p>
+<p style="color: #27ae60; font-weight: bold;">{% trans "Rezervasiyanız tamamlandı!" %}</p>
 
-<p>{{ booking.sanatorium.name }} sanatoriyasında qaldığınız üçün təşəkkür edirik.</p>
+<p>{% blocktrans with sanatorium=booking.sanatorium.name %}{{ sanatorium }} sanatoriyasında qaldığınız üçün təşəkkür edirik.{% endblocktrans %}</p>
 
 <div class="booking-details">
-    <h3>Tamamlanmış Rezervasiya</h3>
+    <h3>{% trans "Tamamlanmış Rezervasiya" %}</h3>
     
     <div class="detail-row">
-        <span class="detail-label">Rezervasiya nömrəsi:</span> {{ booking.booking_reference }}
+        <span class="detail-label">{% trans "Rezervasiya nömrəsi:" %}</span> {{ booking.booking_reference }}
     </div>
     
     <div class="detail-row">
-        <span class="detail-label">Sanatoriya:</span> {{ booking.sanatorium.name }}
+        <span class="detail-label">{% trans "Sanatoriya:" %}</span> {{ booking.sanatorium.name }}
     </div>
     
     <div class="detail-row">
-        <span class="detail-label">Qalma müddəti</span>
+        <span class="detail-label">{% trans "Qalma müddəti" %}</span>
         <span class="detail-value">{{ booking.check_in|date:"d.m.Y" }} - {{ booking.check_out|date:"d.m.Y" }}</span>
     </div>
     
     <div class="detail-row">
-        <span class="detail-label">Gecələr</span>
-        <span class="detail-value">{{ booking.nights }} gecə</span>
+        <span class="detail-label">{% trans "Gecələr" %}</span>
+        <span class="detail-value">{% blocktrans with nights=booking.nights %}{{ nights }} gecə{% endblocktrans %}</span>
     </div>
 </div>
 
-<h3>Rəyinizi paylaşın</h3>
-<p>Təcrübənizi digər qonaqlarla paylaşın və xidmətlərimizi yaxşılaşdırmağa kömək edin.</p>
+<h3>{% trans "Rəyinizi paylaşın" %}</h3>
+<p>{% trans "Təcrübənizi digər qonaqlarla paylaşın və xidmətlərimizi yaxşılaşdırmağa kömək edin." %}</p>
 
 {% if booking_url %}
 <div style="text-align: center;">
-    <a href="{{ booking_url }}" class="button">Rəy yazın</a>
+    <a href="{{ booking_url }}" class="button">{% trans "Rəy yazın" %}</a>
 </div>
 {% endif %}
 
-<p>Gələcəkdə yenidən xidmətlərimizdən istifadə etməyinizi səbirsizliklə gözləyirik!</p>
+<p>{% trans "Gələcəkdə yenidən xidmətlərimizdən istifadə etməyinizi səbirsizliklə gözləyirik!" %}</p>
 
-<p>Hörmətlə,<br>{{ site_name }} komandası</p>
+<p>{% trans "Hörmətlə," %}<br>{% blocktrans with name=site_name %}{{ name }} komandası{% endblocktrans %}</p>
 {% endblock %}

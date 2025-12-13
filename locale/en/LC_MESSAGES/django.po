@@ -815,395 +815,415 @@ msgstr ""
 msgid "Əlaqə e-poçtları"
 msgstr ""
 
-#: apps/core/models.py:287
-msgid "Əsas telefon"
-msgstr ""
 
 #: apps/core/models.py:309
 msgid "Əlaqə telefonu"
-msgstr ""
+msgstr "Contact phone"
 
 #: apps/core/models.py:310
 msgid "Əlaqə telefonları"
-msgstr ""
+msgstr "Contact phones"
 
 #: apps/packages/models.py:15
 msgid "Faiz"
-msgstr ""
+msgstr "Percentage"
 
 #: apps/packages/models.py:16
 msgid "Məbləğ"
-msgstr ""
+msgstr "Amount"
 
 #: apps/packages/models.py:19
 msgid "Paket adı"
-msgstr ""
+msgstr "Package name"
 
 #: apps/packages/models.py:20 apps/sanatoriums/models.py:52
 msgid "Slug"
-msgstr ""
+msgstr "Slug"
 
 #: apps/packages/models.py:21 apps/sanatoriums/models.py:91
 #: apps/sanatoriums/models.py:97
 msgid "Sanatoriya"
-msgstr ""
+msgstr "Sanatorium"
 
 #: apps/packages/models.py:24
 msgid "Müddət (gün)"
-msgstr ""
+msgstr "Duration (days)"
 
 #: apps/packages/models.py:26
 msgid "Endirim növü"
-msgstr ""
+msgstr "Discount type"
 
 #: apps/packages/models.py:32
 msgid "Endirim dəyəri"
-msgstr ""
-
-#: apps/packages/models.py:35
-msgid "Faiz üçün 0-100 arası, məbləğ üçün 0 və ya daha böyük dəyər daxil edin"
-msgstr ""
+msgstr "Discount value"
 
 #: apps/packages/models.py:37 apps/sanatoriums/models.py:61
 msgid "Aktivdir"
-msgstr ""
+msgstr "Active"
 
 #: apps/packages/models.py:38
 msgid "Seçilmiş"
-msgstr ""
+msgstr "Featured"
 
 #: apps/packages/models.py:42
 msgid "Orijinal qiymət"
-msgstr ""
+msgstr "Original price"
 
 #: apps/packages/models.py:47 apps/sanatoriums/models.py:177
 msgid "Nəfər sayı"
-msgstr ""
-
-#: apps/packages/models.py:49 apps/sanatoriums/models.py:62
-msgid "Ana səhifədə görünsün?"
-msgstr ""
-
-#: apps/packages/models.py:73
-msgid "Faiz 100-dən böyük ola bilməz"
-msgstr ""
-
-#: apps/packages/models.py:78
-msgid "Endirimli qiymət orijinal qiymətdən böyük ola bilməz"
-msgstr ""
+msgstr "Number of guests"
 
 #: apps/packages/models.py:98 apps/packages/models.py:105
 #: apps/packages/models.py:134
 msgid "Paket"
-msgstr ""
+msgstr "Package"
 
 #: apps/packages/models.py:99
 msgid "Paketlər"
-msgstr ""
-
-#: apps/packages/models.py:104 apps/sanatoriums/models.py:146
-#: apps/sanatoriums/models.py:159
-msgid "Təsvir"
-msgstr ""
-
-#: apps/packages/models.py:112
-msgid "Paketə daxil olan"
-msgstr ""
-
-#: apps/packages/models.py:113
-msgid "Paketə daxil olanlar"
-msgstr ""
+msgstr "Packages"
 
 #: apps/packages/models.py:128
 msgid "Gözləyir"
-msgstr ""
+msgstr "Pending"
 
 #: apps/packages/models.py:139
 msgid "Gəliş tarixi"
-msgstr ""
+msgstr "Check-in date"
 
 #: apps/packages/models.py:140
 msgid "Gediş tarixi"
-msgstr ""
+msgstr "Check-out date"
 
 #: apps/packages/models.py:141
 msgid "Böyüklər"
-msgstr ""
+msgstr "Adults"
 
 #: apps/packages/models.py:142
 msgid "Uşaqlar"
-msgstr ""
+msgstr "Children"
 
 #: apps/packages/models.py:143
 msgid "Qeydlər"
-msgstr ""
+msgstr "Notes"
 
 #: apps/packages/models.py:150
 msgid "Ümumi qiymət"
-msgstr ""
+msgstr "Total price"
 
 #: apps/packages/models.py:160
 msgid "Paket sifarişi"
-msgstr ""
+msgstr "Package order"
 
 #: apps/packages/models.py:161
 msgid "Paket sifarişləri"
-msgstr ""
-
-#: apps/packages/models.py:168 apps/packages/serializers.py:71
-msgid "Gediş tarixi gəliş tarixindən sonra olmalıdır"
-msgstr ""
-
-#: apps/packages/models.py:173 apps/packages/models.py:174
-#: apps/packages/serializers.py:64 apps/packages/serializers.py:65
-msgid "Ümumi nəfər sayı paketin tutumundan çox ola bilməz"
-msgstr ""
-
-#: apps/sanatoriums/models.py:18
-msgid "Ölkə"
-msgstr ""
-
-#: apps/sanatoriums/models.py:24 apps/sanatoriums/models.py:25
-msgid "Şəhərlər"
-msgstr ""
-
-#: apps/sanatoriums/models.py:29
-msgid "Mövsüm adı"
-msgstr ""
-
-#: apps/sanatoriums/models.py:30
-msgid "Başlanğıc tarixi"
-msgstr ""
-
-#: apps/sanatoriums/models.py:31
-msgid "Bitmə tarixi"
-msgstr ""
-
-#: apps/sanatoriums/models.py:38
-msgid "Mövsümlər"
-msgstr ""
-
-#: apps/sanatoriums/models.py:48
-msgid "Naftalan"
-msgstr ""
-
-#: apps/sanatoriums/models.py:49
-msgid "Digər şəhərlər"
-msgstr ""
-
-#: apps/sanatoriums/models.py:53
-msgid "Yerləşmə növü"
-msgstr ""
-
-#: apps/sanatoriums/models.py:54
-msgid "Yerləşmə"
-msgstr ""
-
-#: apps/sanatoriums/models.py:55 apps/sanatoriums/models.py:274
-#: apps/sanatoriums/models.py:277 apps/sanatoriums/models.py:281
-#: apps/sanatoriums/models.py:284 apps/sanatoriums/models.py:297
-#: apps/sanatoriums/models.py:300 apps/sanatoriums/models.py:304
-#: apps/sanatoriums/models.py:307
-msgid "Haqqında"
-msgstr ""
-
-#: apps/sanatoriums/models.py:56
-msgid "Qısa təsvir"
-msgstr ""
-
-#: apps/sanatoriums/models.py:57
-msgid "Müalicə imkanları"
-msgstr ""
-
-#: apps/sanatoriums/models.py:58 apps/sanatoriums/models.py:258
-msgid "Reytinq"
-msgstr ""
-
-#: apps/sanatoriums/models.py:60
-msgid "Xəritə iframe"
-msgstr ""
-
-#: apps/sanatoriums/models.py:92
-msgid "Sanatoriyalar"
-msgstr ""
-
-#: apps/sanatoriums/models.py:98 apps/sanatoriums/models.py:235
-#: apps/sanatoriums/models.py:278 apps/sanatoriums/models.py:301
-msgid "Şəkil"
-msgstr ""
-
-#: apps/sanatoriums/models.py:99
-msgid "Əsas şəkil"
-msgstr ""
-
-#: apps/sanatoriums/models.py:107
-msgid "Sanatoriya Şəkli"
-msgstr ""
-
-#: apps/sanatoriums/models.py:108
-msgid "Sanatoriya Şəkilləri"
-msgstr ""
-
-#: apps/sanatoriums/models.py:121
-msgid "İkon"
-msgstr ""
-
-#: apps/sanatoriums/models.py:121
-msgid "İkon adı (İnterfeys üçün)"
-msgstr ""
-
-#: apps/sanatoriums/models.py:127
-msgid "Xidmətlər və imkanlar"
-msgstr ""
-
-#: apps/sanatoriums/models.py:128 apps/sanatoriums/models.py:133
-msgid "Xidmət"
-msgstr ""
-
-#: apps/sanatoriums/models.py:139
-msgid "Sanatorium Obyektləri"
-msgstr ""
-
-#: apps/sanatoriums/models.py:140
-msgid "Sanatorium Obyekti"
-msgstr ""
-
-#: apps/sanatoriums/models.py:153
-msgid "Müalicə növləri"
-msgstr ""
-
-#: apps/sanatoriums/models.py:160
-msgid "Minimum tutum"
-msgstr ""
-
-#: apps/sanatoriums/models.py:161
-msgid "Maksimum tutum"
-msgstr ""
-
-#: apps/sanatoriums/models.py:162
-msgid "Maksimum əlavə çarpayı"
-msgstr ""
-
-#: apps/sanatoriums/models.py:163
-msgid "Otaq ölçüsü (m²)"
-msgstr ""
-
-#: apps/sanatoriums/models.py:169
-msgid "Otaq Növü"
-msgstr ""
-
-#: apps/sanatoriums/models.py:170
-msgid "Otaq Növləri"
-msgstr ""
-
-#: apps/sanatoriums/models.py:176 apps/sanatoriums/models.py:214
-msgid "Standart qiymət"
-msgstr ""
-
-#: apps/sanatoriums/models.py:176 apps/sanatoriums/models.py:214
-msgid ""
-"Seçildiyi təqdirdə, mövsüm olmadığı hallarda bu qiymət istifadə olunacaq"
-msgstr ""
-
-#: apps/sanatoriums/models.py:181 apps/sanatoriums/models.py:219
-msgid "Qiymət"
-msgstr ""
-
-#: apps/sanatoriums/models.py:185 apps/sanatoriums/models.py:223
-msgid "müalicə ilə"
-msgstr ""
-
-#: apps/sanatoriums/models.py:185 apps/sanatoriums/models.py:223
-msgid "müalicəsiz"
-msgstr ""
-
-#: apps/sanatoriums/models.py:186 apps/sanatoriums/models.py:224
-msgid "Standart"
-msgstr ""
-
-#: apps/sanatoriums/models.py:190
-msgid "Otaq qiyməti"
-msgstr ""
-
-#: apps/sanatoriums/models.py:191
-msgid "Otaq qiymətləri"
-msgstr ""
-
-#: apps/sanatoriums/models.py:197
-msgid "Minimum yaş"
-msgstr ""
-
-#: apps/sanatoriums/models.py:198
-msgid "Maksimum yaş"
-msgstr ""
-
-#: apps/sanatoriums/models.py:204 apps/sanatoriums/models.py:212
-msgid "Yaş qrupu"
-msgstr ""
-
-#: apps/sanatoriums/models.py:205
-msgid "Yaş qrupları"
-msgstr ""
-
-#: apps/sanatoriums/models.py:229
-msgid "Əlavə çarpayı qiymətləri"
-msgstr ""
-
-#: apps/sanatoriums/models.py:243
-msgid "Otaq Şəkli"
-msgstr ""
-
-#: apps/sanatoriums/models.py:244
-msgid "Otaq Şəkilləri"
-msgstr ""
-
-#: apps/sanatoriums/models.py:259
-msgid "Məzmun"
-msgstr ""
-
-#: apps/sanatoriums/models.py:261
-msgid "Dərc olunub"
-msgstr ""
-
-#: apps/sanatoriums/models.py:268
-msgid "Rəy"
-msgstr ""
-
-#: apps/sanatoriums/models.py:269
-msgid "Rəylər"
-msgstr ""
-
-#: apps/sanatoriums/models.py:273 apps/sanatoriums/models.py:276
-#: apps/sanatoriums/models.py:280 apps/sanatoriums/models.py:283
-#: apps/sanatoriums/models.py:296 apps/sanatoriums/models.py:299
-#: apps/sanatoriums/models.py:303 apps/sanatoriums/models.py:306
-msgid "Başlıq"
-msgstr ""
-
-#: apps/sanatoriums/models.py:291
-msgid "Naftalan Sanatoriyaları"
-msgstr ""
-
-#: apps/sanatoriums/models.py:292
-msgid "Naftalan Sanatoriyaları səhifəsi"
-msgstr ""
-
-#: apps/sanatoriums/models.py:314
-msgid "Digər şəhərlərdəki sanatoriyalar"
-msgstr ""
-
-#: apps/sanatoriums/models.py:315
-msgid "Digər şəhərlərdəki sanatoriyalar səhifəsi"
-msgstr ""
+msgstr "Package orders"
 
 #: config/settings/base.py:140
 msgid "Azerbaijani"
-msgstr ""
+msgstr "Azerbaijani"
 
 #: config/settings/base.py:141
 msgid "Russian"
-msgstr ""
+msgstr "Russian"
 
 #: config/settings/base.py:142
 msgid "English"
-msgstr ""
+msgstr "English"
+
+#: templates/emails
+msgid "Hörmətli {{ first_name }} {{ last_name }},"
+msgstr "Dear {{ first_name }} {{ last_name }},"
+
+msgid "Paket sifarişiniz uğurla qəbul edildi!"
+msgstr "Your package order has been successfully received!"
+
+msgid "Paket sifariş məlumatlarınız aşağıdakı kimidir:"
+msgstr "Your package order details are as follows:"
+
+msgid "Paket Məlumatları"
+msgstr "Package Information"
+
+msgid "Müddət"
+msgstr "Duration"
+
+msgid "{{ duration }} gün"
+msgstr "{{ duration }} days"
+
+msgid "{{ adults }} nəfər"
+msgstr "{{ adults }} person(s)"
+
+msgid "{{ children }} nəfər"
+msgstr "{{ children }} person(s)"
+
+msgid "Qiymət Məlumatları"
+msgstr "Price Information"
+
+msgid "Endirim"
+msgstr "Discount"
+
+msgid "Yekun məbləğ"
+msgstr "Total amount"
+
+msgid "Qeydləriniz"
+msgstr "Your notes"
+
+msgid "Növbəti addım:"
+msgstr "Next step:"
+
+msgid "Sifarişiniz tezliklə təsdiqlənəcək. Təsdiq olunduqdan sonra sizinlə əlaqə saxlanacaq."
+msgstr "Your order will be confirmed soon. You will be contacted after confirmation."
+
+msgid "Hörmətlə,"
+msgstr "Best regards,"
+
+msgid "{{ name }} komandası"
+msgstr "{{ name }} team"
+
+msgid "Paket sifarişiniz təsdiqləndi!"
+msgstr "Your package order has been confirmed!"
+
+msgid "Paket sifarişiniz rəsmi olaraq təsdiqləndi və hazırlanır."
+msgstr "Your package order has been officially confirmed and is being prepared."
+
+msgid "Təsdiqlənmiş Sifariş Məlumatları"
+msgstr "Confirmed Order Information"
+
+msgid "{{ adults }} böyük"
+msgstr "{{ adults }} adult(s)"
+
+msgid "{{ children }} uşaq"
+msgstr "{{ children }} child(ren)"
+
+msgid "Əhəmiyyətli:"
+msgstr "Important:"
+
+msgid "Gəliş tarixinə yaxınlaşdıqca sizinlə əlaqə saxlanılacaq və ətraflı məlumat veriləcək."
+msgstr "You will be contacted as the check-in date approaches with detailed information."
+
+msgid "Paket sifarişiniz ləğv edildi"
+msgstr "Your package order has been cancelled"
+
+msgid "Təəssüf ki, paket sifarişiniz ləğv edilmişdir."
+msgstr "Unfortunately, your package order has been cancelled."
+
+msgid "Ləğv Edilmiş Sifariş Məlumatları"
+msgstr "Cancelled Order Information"
+
+msgid "Paket sifarişiniz tamamlandı!"
+msgstr "Your package order has been completed!"
+
+msgid "Paket sifarişiniz uğurla tamamlandı. Bizimlə qaldığınız üçün təşəkkür edirik!"
+msgstr "Your package order has been successfully completed. Thank you for staying with us!"
+
+msgid "Tamamlanmış Sifariş Məlumatları"
+msgstr "Completed Order Information"
+
+msgid "Təcrübənizi bizimlə bölüşmək istəyirsinizsə, çox şad olarıq. Rəyiniz bizim üçün çox dəyərlidir!"
+msgstr "We would be delighted if you share your experience with us. Your feedback is very valuable to us!"
+
+msgid "Gələcəkdə yenidən xidmətinizdə olmağı ümid edirik."
+msgstr "We hope to serve you again in the future."
+
+msgid "Hörmətli {{ name }},"
+msgstr "Dear {{ name }},"
+
+msgid "Rezervasiyanız uğurla qəbul edildi!"
+msgstr "Your reservation has been successfully received!"
+
+msgid "Rezervasiya məlumatlarınız aşağıdakı kimidir:"
+msgstr "Your reservation details are as follows:"
+
+msgid "Rezervasiya Məlumatları"
+msgstr "Reservation Information"
+
+msgid "Otaq"
+msgstr "Room"
+
+msgid "Gecələr"
+msgstr "Nights"
+
+msgid "{{ nights }} gecə"
+msgstr "{{ nights }} night(s)"
+
+msgid "Yekun endirimli məbləğ"
+msgstr "Final discounted amount"
+
+msgid "Rezervasiyanız tezliklə təsdiqlənəcək. Təsdiq olunduqdan sonra sizinlə əlaqə saxlanacaq."
+msgstr "Your reservation will be confirmed soon. You will be contacted after confirmation."
+
+msgid "Rezervasiyanız təsdiqləndi!"
+msgstr "Your reservation has been confirmed!"
+
+msgid "Rezervasiyanız uğurla təsdiqləndi və sizin üçün hazırlanır."
+msgstr "Your reservation has been successfully confirmed and is being prepared for you."
+
+msgid "Təsdiqlənmiş Rezervasiya"
+msgstr "Confirmed Reservation"
+
+msgid "Gəliş Təlimatları:"
+msgstr "Arrival Instructions:"
+
+msgid "Giriş vaxtı: 14:00"
+msgstr "Check-in time: 14:00"
+
+msgid "Çıxış vaxtı: 12:00"
+msgstr "Check-out time: 12:00"
+
+msgid "Şəxsiyyət vəsiqənizi götürməyi unutmayın"
+msgstr "Don't forget to bring your ID"
+
+msgid "Rezervasiya nömrənizi qeyd edin: <strong>{{ ref }}</strong>"
+msgstr "Note your reservation number: <strong>{{ ref }}</strong>"
+
+msgid "Rezervasiya detallarına bax"
+msgstr "View reservation details"
+
+msgid "Yaxşı istirahət arzulayırıq!"
+msgstr "We wish you a pleasant stay!"
+
+msgid "Rezervasiyanız ləğv edildi."
+msgstr "Your reservation has been cancelled."
+
+msgid "Ləğv Edilmiş Rezervasiya"
+msgstr "Cancelled Reservation"
+
+msgid "Rezervasiya nömrəsi:"
+msgstr "Reservation number:"
+
+msgid "Sanatoriya:"
+msgstr "Sanatorium:"
+
+msgid "Ləğv səbəbi:"
+msgstr "Cancellation reason:"
+
+msgid "Əgər bu ləğvetmə səhv olaraq baş veribsə və ya suallarınız varsa, zəhmət olmasa bizimlə əlaqə saxlayın."
+msgstr "If this cancellation was made in error or you have any questions, please contact us."
+
+msgid "Gələcəkdə yenidən xidmətlərimizdən istifadə etməyinizi gözləyirik."
+msgstr "We look forward to serving you again in the future."
+
+msgid "Rezervasiyanız tamamlandı!"
+msgstr "Your reservation has been completed!"
+
+msgid "{{ sanatorium }} sanatoriyasında qaldığınız üçün təşəkkür edirik."
+msgstr "Thank you for staying at {{ sanatorium }} sanatorium."
+
+msgid "Tamamlanmış Rezervasiya"
+msgstr "Completed Reservation"
+
+msgid "Qalma müddəti"
+msgstr "Stay period"
+
+msgid "Rəyinizi paylaşın"
+msgstr "Share your feedback"
+
+msgid "Təcrübənizi digər qonaqlarla paylaşın və xidmətlərimizi yaxşılaşdırmağa kömək edin."
+msgstr "Share your experience with other guests and help us improve our services."
+
+msgid "Rəy yazın"
+msgstr "Write a review"
+
+msgid "Gələcəkdə yenidən xidmətlərimizdən istifadə etməyinizi səbirsizliklə gözləyirik!"
+msgstr "We look forward to serving you again in the future!"
+
+msgid "Yeni Rezervasiya Alındı"
+msgstr "New Reservation Received"
+
+msgid "Sistemdə yeni rezervasiya yaradıldı və təsdiq gözləyir."
+msgstr "A new reservation has been created in the system and is awaiting confirmation."
+
+msgid "Müştəri"
+msgstr "Customer"
+
+msgid "Email"
+msgstr "Email"
+
+msgid "Giriş"
+msgstr "Check-in"
+
+msgid "Çıxış"
+msgstr "Check-out"
+
+msgid "Müalicə"
+msgstr "Treatment"
+
+msgid "Bəli"
+msgstr "Yes"
+
+msgid "Xeyr"
+msgstr "No"
+
+msgid "Xüsusi istəklər:"
+msgstr "Special requests:"
+
+msgid "Admin paneldə bax"
+msgstr "View in admin panel"
+
+msgid "Qeyd:"
+msgstr "Note:"
+
+msgid "Rezervasiyanı tezliklə təsdiqləyin və müştəri ilə əlaqə saxlayın."
+msgstr "Please confirm the reservation soon and contact the customer."
+
+msgid "{{ name }} Sistem"
+msgstr "{{ name }} System"
+
+msgid "Yeni Paket Sifarişi"
+msgstr "New Package Order"
+
+msgid "Yeni paket sifarişi alındı və təsdiq gözləyir."
+msgstr "A new package order has been received and is awaiting confirmation."
+
+msgid "Müştəri Məlumatları"
+msgstr "Customer Information"
+
+msgid "Ad Soyad"
+msgstr "Full Name"
+
+msgid "Müştəri Qeydləri"
+msgstr "Customer Notes"
+
+msgid "Admin Paneldə Bax"
+msgstr "View in Admin Panel"
+
+msgid "Avtomatik Bildiriş Sistemi"
+msgstr "Automatic Notification System"
+
+msgid "Paket sifarişiniz qəbul edildi - %(package)s"
+msgstr "Your package order has been received - %(package)s"
+
+msgid "Paket sifarişiniz təsdiqləndi - %(package)s"
+msgstr "Your package order has been confirmed - %(package)s"
+
+msgid "Paket sifarişiniz ləğv edildi - %(package)s"
+msgstr "Your package order has been cancelled - %(package)s"
+
+msgid "Paket sifarişiniz tamamlandı - %(package)s"
+msgstr "Your package order has been completed - %(package)s"
+
+msgid "Yeni paket sifarişi - %(name)s"
+msgstr "New package order - %(name)s"
+
+msgid "Rezervasiya qəbul edildi - %(ref)s"
+msgstr "Reservation received - %(ref)s"
+
+msgid "Rezervasiyanız təsdiqləndi - %(ref)s"
+msgstr "Your reservation has been confirmed - %(ref)s"
+
+msgid "Rezervasiyanız ləğv edildi - %(ref)s"
+msgstr "Your reservation has been cancelled - %(ref)s"
+
+msgid "Ödəniş tələb olunur - %(ref)s"
+msgstr "Payment required - %(ref)s"
+
+msgid "Rezervasiyanız tamamlandı - %(ref)s"
+msgstr "Your reservation has been completed - %(ref)s"
+
+msgid "Yeni rezervasiya - %(ref)s"
+msgstr "New reservation - %(ref)s"
+
+msgid "Əgər bu ləğvetmə səhv olaraq baş veribsə və ya əlavə məlumat almaq istəyirsinizsə, zəhmət olmasa bizimlə əlaqə saxlayın."
+msgstr "If this cancellation was made in error or you need more information, please contact us."
+
+msgid "Suallarınız olarsa, <a href=\"mailto:{{ email }}\">{{ email }}</a> ünvanı ilə bizimlə əlaqə saxlaya bilərsiniz."
+msgstr "If you have any questions, you can contact us at <a href=\"mailto:{{ email }}\">{{ email }}</a>."

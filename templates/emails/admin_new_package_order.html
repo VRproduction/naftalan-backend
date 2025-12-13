@@ -1,74 +1,75 @@
 {% extends "emails/base_email.html" %}
+{% load i18n %}
 
 {% block content %}
-<h2>Yeni Paket Sifarişi</h2>
+<h2>{% trans "Yeni Paket Sifarişi" %}</h2>
 
 <div class="highlight">
-    <p style="margin: 0; font-weight: 600;">🔔 Yeni paket sifarişi alındı və təsdiq gözləyir.</p>
+    <p style="margin: 0; font-weight: 600;">🔔 {% trans "Yeni paket sifarişi alındı və təsdiq gözləyir." %}</p>
 </div>
 
 <div class="booking-details">
-    <h3>Müştəri Məlumatları</h3>
+    <h3>{% trans "Müştəri Məlumatları" %}</h3>
     
     <table class="detail-table">
         <tr>
-            <td class="detail-label">Ad Soyad</td>
+            <td class="detail-label">{% trans "Ad Soyad" %}</td>
             <td class="detail-value"><strong>{{ order.first_name }} {{ order.last_name }}</strong></td>
         </tr>
         <tr>
-            <td class="detail-label">E-poçt</td>
+            <td class="detail-label">{% trans "E-poçt" %}</td>
             <td class="detail-value"><a href="mailto:{{ order.email }}">{{ order.email }}</a></td>
         </tr>
         <tr>
-            <td class="detail-label">Telefon</td>
+            <td class="detail-label">{% trans "Telefon" %}</td>
             <td class="detail-value"><a href="tel:{{ order.phone }}">{{ order.phone }}</a></td>
         </tr>
     </table>
     
-    <h3 style="margin-top: 20px;">Paket Məlumatları</h3>
+    <h3 style="margin-top: 20px;">{% trans "Paket Məlumatları" %}</h3>
     
     <table class="detail-table">
         <tr>
-            <td class="detail-label">Paket adı</td>
+            <td class="detail-label">{% trans "Paket adı" %}</td>
             <td class="detail-value"><strong>{{ order.package.name }}</strong></td>
         </tr>
         <tr>
-            <td class="detail-label">Sanatoriya</td>
+            <td class="detail-label">{% trans "Sanatoriya" %}</td>
             <td class="detail-value">{{ order.package.sanatorium.name }}</td>
         </tr>
         <tr>
-            <td class="detail-label">Müddət</td>
-            <td class="detail-value">{{ order.package.duration }} gün</td>
+            <td class="detail-label">{% trans "Müddət" %}</td>
+            <td class="detail-value">{% blocktrans with duration=order.package.duration %}{{ duration }} gün{% endblocktrans %}</td>
         </tr>
         <tr>
-            <td class="detail-label">Gəliş tarixi</td>
+            <td class="detail-label">{% trans "Gəliş tarixi" %}</td>
             <td class="detail-value">{{ order.check_in|date:"d.m.Y" }}</td>
         </tr>
         <tr>
-            <td class="detail-label">Gediş tarixi</td>
+            <td class="detail-label">{% trans "Gediş tarixi" %}</td>
             <td class="detail-value">{{ order.check_out|date:"d.m.Y" }}</td>
         </tr>
         <tr>
-            <td class="detail-label">Böyüklər</td>
-            <td class="detail-value">{{ order.adults }} nəfər</td>
+            <td class="detail-label">{% trans "Böyüklər" %}</td>
+            <td class="detail-value">{% blocktrans with adults=order.adults %}{{ adults }} nəfər{% endblocktrans %}</td>
         </tr>
         {% if order.children %}
         <tr>
-            <td class="detail-label">Uşaqlar</td>
-            <td class="detail-value">{{ order.children }} nəfər</td>
+            <td class="detail-label">{% trans "Uşaqlar" %}</td>
+            <td class="detail-value">{% blocktrans with children=order.children %}{{ children }} nəfər{% endblocktrans %}</td>
         </tr>
         {% endif %}
         <tr>
-            <td class="detail-label">Status</td>
+            <td class="detail-label">{% trans "Status" %}</td>
             <td class="detail-value">{{ order.get_status_display }}</td>
         </tr>
         <tr>
-            <td class="detail-label">Orijinal qiymət</td>
+            <td class="detail-label">{% trans "Orijinal qiymət" %}</td>
             <td class="detail-value">{{ order.package.original_price }} {{ order.currency.code }}</td>
         </tr>
         {% if order.package.discount_value %}
         <tr>
-            <td class="detail-label">Endirim</td>
+            <td class="detail-label">{% trans "Endirim" %}</td>
             <td class="detail-value" style="color: #28a745;">
                 {% if order.package.discount_type == 'percentage' %}
                     {{ order.package.discount_value }}%
@@ -79,7 +80,7 @@
         </tr>
         {% endif %}
         <tr style="background-color: #e7f3ff;">
-            <td class="detail-label" style="font-weight: 700;">Yekun məbləğ</td>
+            <td class="detail-label" style="font-weight: 700;">{% trans "Yekun məbləğ" %}</td>
             <td class="detail-value" style="font-weight: 700;">{{ order.total_price }} {{ order.currency.code }}</td>
         </tr>
     </table>
@@ -87,19 +88,19 @@
 
 {% if order.notes %}
 <div class="booking-details">
-    <h3>Müştəri Qeydləri</h3>
+    <h3>{% trans "Müştəri Qeydləri" %}</h3>
     <p style="margin: 0;">{{ order.notes }}</p>
 </div>
 {% endif %}
 
 {% if admin_url %}
 <div style="text-align: center; margin: 30px 0;">
-    <a href="{{ admin_url }}" class="button">Admin Paneldə Bax</a>
+    <a href="{{ admin_url }}" class="button">{% trans "Admin Paneldə Bax" %}</a>
 </div>
 {% endif %}
 
 <p style="margin-top: 25px;">
-    <strong>{{ site_name|default:"NAFTALAN-KURORT" }}</strong><br>
-    Avtomatik Bildiriş Sistemi
+    <strong>{% blocktrans with name=site_name %}{{ name }}{% endblocktrans %}</strong><br>
+    {% trans "Avtomatik Bildiriş Sistemi" %}
 </p>
 {% endblock %}

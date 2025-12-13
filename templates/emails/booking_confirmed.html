@@ -1,79 +1,80 @@
 {% extends "emails/base_email.html" %}
+{% load i18n %}
 
 {% block content %}
-<h2>Hörmətli {{ booking.full_name }},</h2>
+<h2>{% blocktrans with name=booking.full_name %}Hörmətli {{ name }},{% endblocktrans %}</h2>
 
-<p style="color: #27ae60; font-weight: bold; font-size: 18px;">✓ Rezervasiyanız təsdiqləndi!</p>
+<p style="color: #27ae60; font-weight: bold; font-size: 18px;">✓ {% trans "Rezervasiyanız təsdiqləndi!" %}</p>
 
-<p>Rezervasiyanız uğurla təsdiqləndi və sizin üçün hazırlanır.</p>
+<p>{% trans "Rezervasiyanız uğurla təsdiqləndi və sizin üçün hazırlanır." %}</p>
 
 <div class="booking-details">
-    <h3>Təsdiqlənmiş Rezervasiya</h3>
+    <h3>{% trans "Təsdiqlənmiş Rezervasiya" %}</h3>
     
     <table class="detail-table">
         <tr>
-            <td class="detail-label">Rezervasiya nömrəsi</td>
+            <td class="detail-label">{% trans "Rezervasiya nömrəsi" %}</td>
             <td class="detail-value"><strong>{{ booking.booking_reference }}</strong></td>
         </tr>
         <tr>
-            <td class="detail-label">Sanatoriya</td>
+            <td class="detail-label">{% trans "Sanatoriya" %}</td>
             <td class="detail-value">{{ booking.sanatorium.name }}</td>
         </tr>
         <tr>
-            <td class="detail-label">Ünvan</td>
+            <td class="detail-label">{% trans "Ünvan" %}</td>
             <td class="detail-value">{{ booking.sanatorium.address }}</td>
         </tr>
         <tr>
-            <td class="detail-label">Otaq</td>
+            <td class="detail-label">{% trans "Otaq" %}</td>
             <td class="detail-value">{{ booking.room_type.name }}</td>
         </tr>
         <tr>
-            <td class="detail-label">Giriş tarixi</td>
+            <td class="detail-label">{% trans "Giriş tarixi" %}</td>
             <td class="detail-value">{{ booking.check_in|date:"d.m.Y" }}</td>
         </tr>
         <tr>
-            <td class="detail-label">Çıxış tarixi</td>
+            <td class="detail-label">{% trans "Çıxış tarixi" %}</td>
             <td class="detail-value">{{ booking.check_out|date:"d.m.Y" }}</td>
         </tr>
         <tr>
-            <td class="detail-label">Gecələr</td>
-            <td class="detail-value">{{ booking.nights }} gecə</td>
+            <td class="detail-label">{% trans "Gecələr" %}</td>
+            <td class="detail-value">{% blocktrans with nights=booking.nights %}{{ nights }} gecə{% endblocktrans %}</td>
         </tr>
         <tr>
-            <td class="detail-label">Böyüklər</td>
-            <td class="detail-value">{{ booking.adults }} nəfər</td>
+            <td class="detail-label">{% trans "Böyüklər" %}</td>
+            <td class="detail-value">{% blocktrans with adults=booking.adults %}{{ adults }} nəfər{% endblocktrans %}</td>
         </tr>
         {% if booking.children %}
         <tr>
-            <td class="detail-label">Uşaqlar</td>
-            <td class="detail-value">{{ booking.children }} nəfər</td>
+            <td class="detail-label">{% trans "Uşaqlar" %}</td>
+            <td class="detail-value">{% blocktrans with children=booking.children %}{{ children }} nəfər{% endblocktrans %}</td>
         </tr>
         {% endif %}
         <tr style="background-color: #e7f3ff;">
-            <td class="detail-label" style="color: #004085; font-size: 16px; padding: 15px 8px;">Ümumi məbləğ</td>
+            <td class="detail-label" style="color: #004085; font-size: 16px; padding: 15px 8px;">{% trans "Yekun məbləğ" %}</td>
             <td class="detail-value" style="color: #004085; font-weight: 700; font-size: 16px; padding: 15px 8px;">{{ booking.total_price }} {{ booking.currency.code }}</td>
         </tr>
     </table>
 </div>
 
-<h3>Gəliş Təlimatları:</h3>
+<h3>{% trans "Gəliş Təlimatları:" %}</h3>
 <ul style="margin-left: 20px;">
-    <li>Giriş vaxtı: 14:00</li>
-    <li>Çıxış vaxtı: 12:00</li>
-    <li>Şəxsiyyət vəsiqənizi götürməyi unutmayın</li>
-    <li>Rezervasiya nömrənizi qeyd edin: <strong>{{ booking.booking_reference }}</strong></li>
+    <li>{% trans "Giriş vaxtı: 14:00" %}</li>
+    <li>{% trans "Çıxış vaxtı: 12:00" %}</li>
+    <li>{% trans "Şəxsiyyət vəsiqənizi götürməyi unutmayın" %}</li>
+    <li>{% blocktrans with ref=booking.booking_reference %}Rezervasiya nömrənizi qeyd edin: <strong>{{ ref }}</strong>{% endblocktrans %}</li>
 </ul>
 
 {% if booking_url %}
 <div style="text-align: center;">
-    <a href="{{ booking_url }}" class="button">Rezervasiya detallarına bax</a>
+    <a href="{{ booking_url }}" class="button">{% trans "Rezervasiya detallarına bax" %}</a>
 </div>
 {% endif %}
 
-<p>Yaxşı istirahət arzulayırıq!</p>
+<p>{% trans "Yaxşı istirahət arzulayırıq!" %}</p>
 
 <p style="margin-top: 25px;">
-    <strong>Hörmətlə,</strong><br>
-    {{ site_name|default:"NAFTALAN-KURORT" }} komandası
+    <strong>{% trans "Hörmətlə," %}</strong><br>
+    {% blocktrans with name=site_name %}{{ name }} komandası{% endblocktrans %}
 </p>
 {% endblock %}

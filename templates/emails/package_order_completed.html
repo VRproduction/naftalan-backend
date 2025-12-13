@@ -1,45 +1,46 @@
 {% extends "emails/base_email.html" %}
+{% load i18n %}
 
 {% block content %}
-<h2>Hörmətli {{ order.first_name }} {{ order.last_name }},</h2>
+<h2>{% blocktrans with first_name=order.first_name last_name=order.last_name %}Hörmətli {{ first_name }} {{ last_name }},{% endblocktrans %}</h2>
 
 <div class="highlight success">
-    <p style="margin: 0; font-weight: 600; color: #155724;">✓ Paket sifarişiniz tamamlandı!</p>
+    <p style="margin: 0; font-weight: 600; color: #155724;">✓ {% trans "Paket sifarişiniz tamamlandı!" %}</p>
 </div>
 
-<p>Paket sifarişiniz uğurla tamamlandı. Bizimlə qaldığınız üçün təşəkkür edirik!</p>
+<p>{% trans "Paket sifarişiniz uğurla tamamlandı. Bizimlə qaldığınız üçün təşəkkür edirik!" %}</p>
 
 <div class="booking-details">
-    <h3>Tamamlanmış Sifariş Məlumatları</h3>
+    <h3>{% trans "Tamamlanmış Sifariş Məlumatları" %}</h3>
     
     <table class="detail-table">
         <tr>
-            <td class="detail-label">Paket adı</td>
+            <td class="detail-label">{% trans "Paket adı" %}</td>
             <td class="detail-value">{{ order.package.name }}</td>
         </tr>
         <tr>
-            <td class="detail-label">Sanatoriya</td>
+            <td class="detail-label">{% trans "Sanatoriya" %}</td>
             <td class="detail-value">{{ order.package.sanatorium.name }}</td>
         </tr>
         <tr>
-            <td class="detail-label">Gəliş tarixi</td>
+            <td class="detail-label">{% trans "Gəliş tarixi" %}</td>
             <td class="detail-value">{{ order.check_in|date:"d.m.Y" }}</td>
         </tr>
         <tr>
-            <td class="detail-label">Gediş tarixi</td>
+            <td class="detail-label">{% trans "Gediş tarixi" %}</td>
             <td class="detail-value">{{ order.check_out|date:"d.m.Y" }}</td>
         </tr>
     </table>
 </div>
 
-<p>Təcrübənizi bizimlə bölüşmək istəyirsinizsə, çox şad olarıq. Rəyiniz bizim üçün çox dəyərlidir!</p>
+<p>{% trans "Təcrübənizi bizimlə bölüşmək istəyirsinizsə, çox şad olarıq. Rəyiniz bizim üçün çox dəyərlidir!" %}</p>
 
-<p>Gələcəkdə yenidən xidmətinizdə olmağı ümid edirik.</p>
+<p>{% trans "Gələcəkdə yenidən xidmətinizdə olmağı ümid edirik." %}</p>
 
-<p>Suallarınız olarsa, <a href="mailto:{{ support_email }}">{{ support_email }}</a> ünvanı ilə bizimlə əlaqə saxlaya bilərsiniz.</p>
+<p>{% blocktrans with email=support_email %}Suallarınız olarsa, <a href="mailto:{{ email }}">{{ email }}</a> ünvanı ilə bizimlə əlaqə saxlaya bilərsiniz.{% endblocktrans %}</p>
 
 <p style="margin-top: 25px;">
-    <strong>Hörmətlə,</strong><br>
-    {{ site_name|default:"NAFTALAN-KURORT" }} komandası
+    <strong>{% trans "Hörmətlə," %}</strong><br>
+    {% blocktrans with name=site_name %}{{ name }} komandası{% endblocktrans %}
 </p>
 {% endblock %}

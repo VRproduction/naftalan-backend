@@ -3,6 +3,7 @@ from django.conf import settings
 from django.core.mail import send_mail, EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
+from django.utils.translation import gettext as _, override as translation_override
 from django.urls import reverse
 from celery import shared_task
 from django.db import transaction
@@ -10,6 +11,26 @@ from django.db import transaction
 from .models import Booking, BookingStatus
 
 logger = logging.getLogger(__name__)
+
+
+def get_translated_subject(status, booking_reference, language='az'):
+    """Get translated email subject based on status"""
+    subjects = {
+        BookingStatus.NEW: _("Rezervasiya qəbul edildi - %(ref)s"),
+        BookingStatus.CONFIRMED: _("Rezervasiyanız təsdiqləndi - %(ref)s"),
+        BookingStatus.CANCELLED: _("Rezervasiyanız ləğv edildi - %(ref)s"),
+        BookingStatus.WAITING_PAYMENT: _("Ödəniş tələb olunur - %(ref)s"),
+        BookingStatus.COMPLETED: _("Rezervasiyanız tamamlandı - %(ref)s"),
+    }
+    with translation_override(language):
+        return subjects.get(status, '') % {'ref': booking_reference}
+
+
+def get_admin_subject(booking_reference, language='az'):
+    """Get translated admin email subject"""
+    with translation_override(language):
+        return _("Yeni rezervasiya - %(ref)s") % {'ref': booking_reference}
+
 
 @shared_task(bind=True, max_retries=3)
 def send_booking_status_email(self, booking_id, old_status=None):
@@ -25,6 +46,9 @@ def send_booking_status_email(self, booking_id, old_status=None):
                 logger.info(f"Booking {booking_id} status hasn't changed since task was queued")
                 return True
         
+        # Get language from booking or use default
+        language = getattr(booking, 'language', settings.LANGUAGE_CODE)
+        
         # Determine recipients based on status
         admin_emails = [email for name, email in settings.ADMINS]
         
@@ -33,13 +57,14 @@ def send_booking_status_email(self, booking_id, old_status=None):
             # New booking - send confirmation to customer and notification to admin
             send_customer_email(
                 booking=booking, 
-                subject=f"Rezervasiya qəbul edildi - {booking.booking_reference}",
+                subject=get_translated_subject(BookingStatus.NEW, booking.booking_reference, language),
                 template='emails/booking_confirmation.html',
+                language=language,
             )
             
             send_admin_email(
                 booking=booking, 
-                subject=f"Yeni rezervasiya - {booking.booking_reference}",
+                subject=get_admin_subject(booking.booking_reference),
                 template='emails/admin_new_booking.html',
             )
             
@@ -47,32 +72,36 @@ def send_booking_status_email(self, booking_id, old_status=None):
             # Booking confirmed - send confirmation to customer
             send_customer_email(
                 booking=booking, 
-                subject=f"Rezervasiyanız təsdiqləndi - {booking.booking_reference}",
+                subject=get_translated_subject(BookingStatus.CONFIRMED, booking.booking_reference, language),
                 template='emails/booking_confirmed.html',
+                language=language,
             )
             
         elif booking.status == BookingStatus.CANCELLED:
             # Booking cancelled - notify customer
             send_customer_email(
                 booking=booking, 
-                subject=f"Rezervasiyanız ləğv edildi - {booking.booking_reference}",
+                subject=get_translated_subject(BookingStatus.CANCELLED, booking.booking_reference, language),
                 template='emails/booking_cancelled.html',
+                language=language,
             )
             
         elif booking.status == BookingStatus.WAITING_PAYMENT:
             # Payment pending - send payment instructions to customer
             send_customer_email(
                 booking=booking, 
-                subject=f"Ödəniş tələb olunur - {booking.booking_reference}",
+                subject=get_translated_subject(BookingStatus.WAITING_PAYMENT, booking.booking_reference, language),
                 template='emails/payment_instructions.html',
+                language=language,
             )
             
         elif booking.status == BookingStatus.COMPLETED:
             # Booking completed - thank you email to customer
             send_customer_email(
                 booking=booking, 
-                subject=f"Rezervasiyanız tamamlandı - {booking.booking_reference}",
+                subject=get_translated_subject(BookingStatus.COMPLETED, booking.booking_reference, language),
                 template='emails/booking_completed.html',
+                language=language,
             )
         
         return True
@@ -85,7 +114,8 @@ def send_booking_status_email(self, booking_id, old_status=None):
         # Retry the task with exponential backoff
         self.retry(exc=exc, countdown=2 ** self.request.retries)
 
-def send_customer_email(booking, subject, template):
+
+def send_customer_email(booking, subject, template, language='az'):
     """Helper function to send email to the customer"""
     if not booking.email:
         logger.error(f"No email address for booking {booking.booking_reference}")
@@ -104,10 +134,13 @@ def send_customer_email(booking, subject, template):
         'support_email': settings.DEFAULT_FROM_EMAIL,
         'site_name': getattr(settings, 'SITE_NAME', 'NAFTALAN-KURORT'),
         'site_url': getattr(settings, 'SITE_URL', 'http://localhost:8000'),
+        'LANGUAGE_CODE': language,
     }
     
-    html_message = render_to_string(template, context)
-    plain_message = strip_tags(html_message)
+    # Render template with the correct language
+    with translation_override(language):
+        html_message = render_to_string(template, context)
+        plain_message = strip_tags(html_message)
     
     try:
         msg = EmailMultiAlternatives(
@@ -124,7 +157,8 @@ def send_customer_email(booking, subject, template):
         logger.error(f"Failed to send customer email for booking {booking.booking_reference}: {str(e)}")
         return False
 
-def send_admin_email(booking, subject, template):
+
+def send_admin_email(booking, subject, template, language='az'):
     """Helper function to send email to admin(s)"""
     admin_emails = [email for name, email in settings.ADMINS]
     if not admin_emails:
@@ -142,10 +176,13 @@ def send_admin_email(booking, subject, template):
         'admin_url': admin_url,
         'site_name': getattr(settings, 'SITE_NAME', 'NAFTALAN-KURORT'),
         'site_url': getattr(settings, 'SITE_URL', 'http://localhost:8000'),
+        'LANGUAGE_CODE': language,
     }
     
-    html_message = render_to_string(template, context)
-    plain_message = strip_tags(html_message)
+    # Render template with the correct language
+    with translation_override(language):
+        html_message = render_to_string(template, context)
+        plain_message = strip_tags(html_message)
     
     try:
         msg = EmailMultiAlternatives(
@@ -160,4 +197,4 @@ def send_admin_email(booking, subject, template):
         return True
     except Exception as e:
         logger.error(f"Failed to send admin email for booking {booking.booking_reference}: {str(e)}")
-        return False 
+        return False
