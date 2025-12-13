@@ -52,8 +52,24 @@
     <h3 style="margin-top: 20px;">Qiymət Məlumatları</h3>
     
     <table class="detail-table">
+        <tr>
+            <td class="detail-label">Orijinal qiymət</td>
+            <td class="detail-value">{{ order.package.original_price }} {{ order.currency.code }}</td>
+        </tr>
+        {% if order.package.discount_value %}
+        <tr>
+            <td class="detail-label">Endirim</td>
+            <td class="detail-value" style="color: #28a745;">
+                {% if order.package.discount_type == 'percentage' %}
+                    {{ order.package.discount_value }}%
+                {% else %}
+                    {{ order.package.discount_value }} {{ order.currency.code }}
+                {% endif %}
+            </td>
+        </tr>
+        {% endif %}
         <tr style="background-color: #e7f3ff; border-top: 2px solid #004085;">
-            <td class="detail-label" style="color: #004085; font-size: 18px; padding: 15px 8px; font-weight: 700;">Ümumi məbləğ</td>
+            <td class="detail-label" style="color: #004085; font-size: 18px; padding: 15px 8px; font-weight: 700;">Yekun məbləğ</td>
             <td class="detail-value" style="color: #004085; font-weight: 700; font-size: 18px; padding: 15px 8px;">{{ order.total_price }} {{ order.currency.code }}</td>
         </tr>
     </table>

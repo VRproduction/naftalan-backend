@@ -72,10 +72,9 @@ class PackageOrderCreateSerializer(serializers.ModelSerializer):
                 'check_out': _("Gediş tarixi gəliş tarixindən sonra olmalıdır")
             })
 
-        # Calculate total price
-        duration = (check_out - check_in).days
-        total_price = package.discounted_price * duration * (adults + children)
-        data['total_price'] = total_price
+        # Use package's discounted price directly (not multiplied by days)
+        # Package price is the total price for the entire package duration
+        data['total_price'] = package.discounted_price
         data['currency'] = package.currency
         data['status'] = 'pending'  # Set initial status
 
