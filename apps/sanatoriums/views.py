@@ -392,8 +392,16 @@ def get_season_from_request(request):
             check_in = datetime.strptime(check_in_str, '%Y-%m-%d').date()
             check_out = datetime.strptime(check_out_str, '%Y-%m-%d').date()
             # Sezonun check_in ve check_out aralığını kapsaması gerekir
-            season = Season.objects.filter(start_date__lte=check_in, end_date__gte=check_out).first()
-            return season
+            # Qiymətləri olan mövsümü prioritet olaraq seç
+            seasons = Season.objects.filter(start_date__lte=check_in, end_date__gte=check_out).order_by('start_date')
+            
+            # Əvvəlcə qiymətləri olan mövsümü tap
+            for season in seasons:
+                if RoomPrice.objects.filter(season=season).exists():
+                    return season
+            
+            # Qiymətləri olan mövsüm tapılmadısa, ilk mövsümü qaytar
+            return seasons.first() if seasons.exists() else None
         except Exception:
             return None
     return None

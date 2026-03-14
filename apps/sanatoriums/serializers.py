@@ -23,6 +23,7 @@ from apps.core.models import Currency
 
 
 def get_season_from_request(request):
+    from apps.sanatoriums.models import RoomPrice
     check_in_str = request.query_params.get('check_in') if request else None
     check_out_str = request.query_params.get('check_out') if request else None
     if check_in_str and check_out_str:
@@ -31,8 +32,16 @@ def get_season_from_request(request):
             check_out = datetime.strptime(check_out_str, '%Y-%m-%d').date()
             # Seçilen tarih aralığının tamamını kapsayan bir sezon bul
             # Hem check_in hem de check_out sezon içinde olmalı
-            season = Season.objects.filter(start_date__lte=check_in, end_date__gte=check_out).first()
-            return season
+            # Qiymətləri olan mövsümü prioritet olaraq seç
+            seasons = Season.objects.filter(start_date__lte=check_in, end_date__gte=check_out).order_by('start_date')
+            
+            # Əvvəlcə qiymətləri olan mövsümü tap
+            for season in seasons:
+                if RoomPrice.objects.filter(season=season).exists():
+                    return season
+            
+            # Qiymətləri olan mövsüm tapılmadısa, ilk mövsümü qaytar
+            return seasons.first() if seasons.exists() else None
         except Exception:
             return None
     return None
